@@ -24,15 +24,16 @@ module.exports = (appInfo) => {
    */
   config.windowsOption = {
     title: '北极熊',
-    width: 980,
+    width: 1200,
     height: 650,
-    minWidth: 400,
+    minWidth: 800,
     minHeight: 300,
     webPreferences: {
+      webviewTag:true,
       webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
-      //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
+      // preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
     },
     frame: true,
     show: false,

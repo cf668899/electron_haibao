@@ -2,6 +2,7 @@
 
 const { Controller } = require('ee-core');
 const Log = require('ee-core/log');
+const Services = require('ee-core/services');
 // const Electron = require('ee-core/electron');
 // const { BrowserView } = require('electron')
 
@@ -27,6 +28,7 @@ class LoginController extends Controller {
      */
     async login(args) {
         Log.info('args:', args);
+        // Services.get("viewManager").test('sss')
         // const view = new BrowserView()
         // Electron.mainWindow.setBrowserView(view)
         // const size = Electron.mainWindow.getContentSize()

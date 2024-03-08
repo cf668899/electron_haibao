@@ -62,9 +62,6 @@ export default {
     };
   },
   methods: {
-    test() {
-      //
-    },
     handlerLogin(){
       console.log("登陆")
       ipc.invoke('controller.login.login', {name:"zhangsan"}).then(res => {
