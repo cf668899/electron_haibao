@@ -43,10 +43,10 @@ service.interceptors.response.use(
 				duration: 3 * 1000
 			})
 			return Promise.reject(res.message)
-		} else if (res.code == 400) {
+		} else if (res.code !== 200) {
 			// 显示提示
 			ElMessage({
-				message: res.message,
+				message: res.msg,
 				type: 'error',
 				duration: 5 * 1000
 			})
