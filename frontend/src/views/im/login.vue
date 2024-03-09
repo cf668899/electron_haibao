@@ -50,7 +50,7 @@
 </template>
 <script>
 const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {};
-
+import {login} from "@/api/admin"
 export default {
   data() {
     return {
@@ -62,8 +62,9 @@ export default {
     };
   },
   methods: {
-    handlerLogin(){
+    async handlerLogin(){
       console.log("登陆")
+      // const res = await login();
       ipc.invoke('controller.login.login', {name:"zhangsan"}).then(res => {
         console.log(res)
         this.$router.push({name:"home"})

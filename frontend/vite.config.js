@@ -43,6 +43,19 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
+    server: {
+      proxy: {
+        // 代理路径
+        '/api': {
+          // 目标地址
+          target: 'https://magicbox.santannew.top',
+          // 是否改变请求的源地址，这里设置为 true，表示强制使用绝对路径
+          changeOrigin: true,
+          // 路径重写规则，这里将 /api 开头的请求路径替换为空字符串，即去掉 /api 前缀
+          rewrite: (path) => path.replace(/^\/api/, '/api')
+        }
+      }
+    },
   }
 })
 
