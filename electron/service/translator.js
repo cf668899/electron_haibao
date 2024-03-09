@@ -7,7 +7,7 @@ const HttpClient = require('ee-core/httpclient');
  * 示例服务（service层为单例）
  * @class
  */
-class TranslatorDeeplService extends Service {
+class TranslatorService extends Service {
 
   constructor(ctx) {
     super(ctx);
@@ -33,7 +33,13 @@ class TranslatorDeeplService extends Service {
     return result
   }
 
+
+  // google 翻译未实现
+  async google(data){
+    return []
+  }
+
 }
 
-TranslatorDeeplService.toString = () => '[class TranslatorDeeplService]';
-module.exports = TranslatorDeeplService;
+TranslatorService.toString = () => '[class TranslatorService]';
+module.exports = TranslatorService;

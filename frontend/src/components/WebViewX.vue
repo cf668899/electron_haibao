@@ -84,7 +84,7 @@ export default {
                 });
                 // <div style="color:green;padding: 10px 50px;word-wrap: break-word" id="translate-box">asdijaidhseiuhfusesdauhsduashfiushdshjfbdsjhbdjhbvjhxbcdhvbxjhbvjhdbfhdsfhdjkshfjsh</div>
                 setTimeout(() => {
-                    view.send('translate', '开启翻译');
+                    view.send('translateOpen', '开启翻译');
                 }, 2000);
                 // setInterval(()=>{
                 //   view.executeJavaScript(`

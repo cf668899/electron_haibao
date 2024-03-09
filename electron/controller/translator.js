@@ -19,7 +19,12 @@ class TranslatorController extends Controller {
      * @param event - ipc通信时才有值。详情见：控制器文档
      */
     async deepl(data){
-        let res = await Services.get("translatorDeepl").deepl(data)
+        let res = await Services.get("translator").deepl(data)
+        return res
+    }
+
+    async google(data){
+        let res = await Services.get("translator").google(data)
         return res
     }
 }
