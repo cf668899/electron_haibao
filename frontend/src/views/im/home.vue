@@ -2,24 +2,30 @@
   <div class="common-layout">
     <el-container>
       <el-aside
-        style="width: 200px; height: 100%; background-color: rgb(253, 253, 253)"
+        style="height: 100%; background-color: rgb(253, 253, 253)"
+        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'"
       >
         <div class="menu-box">
           <div class="menus">
             <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
               <!-- wwhatsapp -->
-              <el-sub-menu :index="appType" v-for="appType in appTypes">
+              <el-sub-menu
+                :index="appItem.name"
+                v-for="(appItem, index) in appTypes"
+                :key="index"
+              >
                 <template #title>
-                  <el-icon>
-                    <ChatDotRound />
-                  </el-icon>
-                  <span @click="toAppManager(appType)">{{ appType }}</span>
+                  <img :src="appItem.image" class="iconImage" />
+                  <span @click="toAppManager(appItem.name)">{{
+                    appItem.name
+                  }}</span>
                 </template>
                 <el-menu-item
                   v-show="item.isActive"
+                  :key="item.id"
                   :class="item.id == id ? 'active-bg' : ''"
                   @click="toApp(item)"
-                  v-for="(item, index) in applist[appType]"
+                  v-for="(item, index) in appList[appItem.name]"
                   :index="item.id"
                 >
                   <template #title>
@@ -32,33 +38,53 @@
 
                     <div class="userinfo">
                       <!-- <div>{{ }}</div> -->
-                      <el-badge :value="item.messageNum" :hidden="item.messageNum?false:true" >
+                      <el-badge
+                        :value="item.messageNum"
+                        :hidden="item.messageNum ? false : true"
+                      >
                         <div class="username">
                           {{
-                            item.name
-                              ? item.name
+                            appItem.name
+                              ? appItem.name
                               : item.record
-                                ? item.record
-                                : appType +
-                                  " " +
-                                  (applist[appType].length - index)
+                              ? item.record
+                              : appItem.name +
+                                " " +
+                                (appList[appItem.name].length - index)
                           }}
                         </div>
-                    </el-badge>
-
+                      </el-badge>
                     </div>
                   </template>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item index="more" @click="moreSetting()" style="border-top: 1px solid #409eff;" >
-                  <el-icon><setting /></el-icon>
-                  <span>更多操作</span>
+              <el-menu-item
+                index="more"
+                @click="moreSetting()"
+                style="border-top: 1px solid #409eff"
+              >
+                <el-icon><setting /></el-icon>
+                <span>更多操作</span>
               </el-menu-item>
             </el-menu>
           </div>
           <div class="operator-box">
             <div class="logout">
-              <el-button type="warning" style="width: 80%;">退出</el-button>
+              <el-button
+                type="warning"
+                class="quiteButton"
+                style="width: 80%"
+                @click="loginOut"
+                >退出</el-button
+              >
+              <div>
+                <el-icon
+                  @click="arrowLeft"
+                  :class="isReduceLeft ? 'arrowLeftTransform' : ''"
+                >
+                  <ArrowLeft />
+                </el-icon>
+              </div>
             </div>
           </div>
         </div>
@@ -67,7 +93,7 @@
         <AppList
           v-show="pageType == 'manager'"
           :app-type="appType"
-          :list="applist[appType] ? applist[appType] : []"
+          :list="appList[appType] ? appList[appType] : []"
           @addApp="addApp"
           @startApp="startApp"
           @closeApp="closeApp"
@@ -78,10 +104,11 @@
         <WebViewX
           v-show="pageType == 'app' && item.isShow"
           :data="item"
-          v-for="item in apps"
+          v-for="(item, index) in apps"
           @changeRecord="changeRecord"
           @online="online"
           @changeMessageNum="changeMessageNum"
+          :key="index"
         ></WebViewX>
       </el-main>
     </el-container>
@@ -90,7 +117,10 @@
 <script>
 import AppList from "@/components/AppList.vue";
 import WebViewX from "@/components/WebViewX.vue";
-const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
+import WhatsappIcon from "@/assets/whatsapp.png";
+import TelegramIcon from "@/assets/Telegram.png";
+const { ipcRenderer: ipc } =
+  (window.require && window.require("electron")) || window.electron || {};
 export default {
   components: {
     AppList,
@@ -98,15 +128,26 @@ export default {
   },
   data() {
     return {
+      isReduceLeft: false,
       test: "",
       id: "",
-      applist: {
+      appList: {
         Whatsapp: [],
+        Telegram: [],
       },
       appType: "Whatsapp",
       pageType: "manager",
       apps: [],
-      appTypes: ["Whatsapp", "Telegram"],
+      appTypes: [
+        {
+          name: "Whatsapp",
+          image: WhatsappIcon,
+        },
+        {
+          name: "Telegram",
+          image: TelegramIcon,
+        },
+      ],
       srcMap: {
         Whatsapp: "https://web.whatsapp.com/",
         Telegram: "https://web.telegram.org/",
@@ -117,7 +158,10 @@ export default {
     this.listApp();
   },
   methods: {
-    moreSetting(){
+    arrowLeft() {
+      this.isReduceLeft = !this.isReduceLeft;
+    },
+    moreSetting() {
       this.pageType = "setting";
       this.appType = type;
     },
@@ -142,40 +186,42 @@ export default {
       ipc.invoke("controller.app.add", data).then((res) => {
         // 查询数据
         // this.listApp();
-        if(res.id){
-          this.applist[data.type].unshift(res)
+        if (res.id) {
+          this.appList[data.type].unshift(res);
         }
       });
     },
     startApp(data) {
       // 保存preload
-      ipc.invoke("controller.app.savePreload", JSON.parse(JSON.stringify(data))).then(res=>{
-        console.log(res)
-      })
+      ipc
+        .invoke("controller.app.savePreload", JSON.parse(JSON.stringify(data)))
+        .then((res) => {
+          console.log(res);
+        });
       this.id = data.id;
-      let app = null
+      let app = null;
 
       for (let item of this.apps) {
         item.isShow = false;
-        if(item.id == data.id){
+        if (item.id == data.id) {
           app = item;
-          item.isShow = true
-          item.isActive = true
+          item.isShow = true;
+          item.isActive = true;
         }
       }
 
-      if(!app){
-        data.isShow = true
-        data.isActive = true
+      if (!app) {
+        data.isShow = true;
+        data.isActive = true;
         this.apps.push(data);
       }
-      
-      let list = this.applist[data.type];
+
+      let list = this.appList[data.type];
       for (let item of list) {
         if (data.id == item.id) {
-          item.isActive = true
+          item.isActive = true;
           item.isShow = true;
-          app = item
+          app = item;
           continue;
         }
       }
@@ -197,19 +243,19 @@ export default {
     closeApp(data) {
       for (let item of this.apps) {
         if (item.id == data.id) {
-          item.isActive = false
-          item.online = false
-        }else{
-          item.isShow = false
+          item.isActive = false;
+          item.online = false;
+        } else {
+          item.isShow = false;
         }
       }
 
-      let list = this.applist[data.type];
+      let list = this.appList[data.type];
       for (let item of list) {
         if (data.id == item.id) {
           item.isActive = false;
           item.isShow = false;
-          item.online = false
+          item.online = false;
         }
       }
     },
@@ -217,7 +263,7 @@ export default {
       ipc
         .invoke("controller.app.del", JSON.parse(JSON.stringify(data)))
         .then((res) => {
-          let list = this.applist[data.type];
+          let list = this.appList[data.type];
           let newList = [];
           for (let item of list) {
             if (data.id == item.id) {
@@ -227,51 +273,50 @@ export default {
             newList.push(item);
           }
 
-          this.applist[data.type] = newList;
+          this.appList[data.type] = newList;
         });
     },
-    changeRecord(data){
-      ipc.invoke("controller.app.changeRecord", data).then(res=>{
+    changeRecord(data) {
+      ipc.invoke("controller.app.changeRecord", data).then((res) => {
         for (let item of this.apps) {
           if (data.id == item.id) {
-            item.record = data.record
-            item.online= true
+            item.record = data.record;
+            item.online = true;
           }
         }
 
-        let list = this.applist[data.type];
+        let list = this.appList[data.type];
         for (let item of list) {
-            if (data.id == item.id) {
-              item.record = data.record;
-              item.online= true
-            }
-        }
-
-      })
-    },
-    online(data){
-        for (let item of this.apps) {
           if (data.id == item.id) {
-            item.online = true
+            item.record = data.record;
+            item.online = true;
           }
         }
-
-        let list = this.applist[data.type];
-        for (let item of list) {
-            if (data.id == item.id) {
-              item.online = true
-            }
-        }
-
-        // this.$forceUpdate()
+      });
     },
-    changeMessageNum(data){
-      let list = this.applist[data.type];
-        for (let item of list) {
-            if (data.id == item.id) {
-              item.messageNum = data.data
-            }
+    online(data) {
+      for (let item of this.apps) {
+        if (data.id == item.id) {
+          item.online = true;
         }
+      }
+
+      let list = this.appList[data.type];
+      for (let item of list) {
+        if (data.id == item.id) {
+          item.online = true;
+        }
+      }
+
+      // this.$forceUpdate()
+    },
+    changeMessageNum(data) {
+      let list = this.appList[data.type];
+      for (let item of list) {
+        if (data.id == item.id) {
+          item.messageNum = data.data;
+        }
+      }
     },
     listApp() {
       ipc.invoke("controller.app.list").then((data) => {
@@ -287,8 +332,11 @@ export default {
             groupedBy[item.type] = [item];
           }
         }
-        this.applist = groupedBy;
+        this.appList = groupedBy;
       });
+    },
+    loginOut() {
+      this.$router.back();
     },
   },
 };
@@ -311,6 +359,11 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.menus {
+  flex: 1;
 }
 
 .userinfo {
@@ -318,7 +371,6 @@ export default {
   flex-direction: column;
   font-size: 12px;
 }
-
 
 .username {
   width: 90px;
@@ -341,13 +393,10 @@ export default {
 .active-bg {
   background-color: aliceblue;
 }
-.operator-box{
+.operator-box {
   width: 100%;
-  position: absolute;
-  bottom: 0;
   z-index: 1000;
   background-color: aliceblue;
-  height: 100px;
 }
 
 .token-box {
@@ -359,12 +408,45 @@ export default {
   text-overflow: ellipsis; /* 溢出部分显示省略号 */
 }
 
-.logout{
+.logout {
   background-color: #ffff;
-  height: 100px;
   width: 100%;
-  line-height: 100px;
-  position: absolute;
-  bottom: 0;
+  padding-bottom: 10px;
+}
+.quiteButton {
+  margin-bottom: 10px;
+}
+
+::v-deep(.el-menu) {
+  border-right: none !important;
+}
+.boxLeftReduce {
+  transition: width 0.5s; /* 过渡动画效果 */
+  width: 85px;
+  border-right: solid 1px var(--el-menu-border-color) !important;
+  overflow-x: hidden;
+}
+.boxLeftNoReduce {
+  transition: width 0.5s; /* 过渡动画效果 */
+  width: 200px;
+  border-right: solid 1px var(--el-menu-border-color) !important;
+  overflow-x: hidden;
+}
+::v-deep(.boxLeftReduce .el-sub-menu__title span) {
+  display: none;
+}
+
+::v-deep(.boxLeftReduce .el-menu-item span) {
+  display: none;
+}
+::v-deep(.boxLeftReduce .el-sub-menu .el-sub-menu__icon-arrow) {
+  display: none;
+}
+.arrowLeftTransform {
+  transform: rotate(180deg);
+}
+.iconImage{
+  width: 40px;
+  margin-right: 10px;
 }
 </style>

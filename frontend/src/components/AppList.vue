@@ -104,6 +104,9 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
+  padding-top: 5px;
+  padding-left: 15px;
+  padding-bottom: 5px;
 }
 .el-header {
   padding: 0;
@@ -121,6 +124,7 @@ export default {
   color: #409eff;
   margin-left: 50px;
   border-bottom: #409eff 2px solid;
+  cursor: pointer;
 }
 .online-box {
   width: 5px;
