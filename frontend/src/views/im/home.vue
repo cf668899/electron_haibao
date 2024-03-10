@@ -187,7 +187,11 @@ export default {
         // 查询数据
         // this.listApp();
         if (res.id) {
-          this.appList[data.type].unshift(res);
+          if(this.appList[data.type]){
+            this.appList[data.type].unshift(res);
+          }else{
+            this.appList[data.type]= [res]
+          }
         }
       });
     },

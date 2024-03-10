@@ -4,7 +4,7 @@
       <el-col :span="12">
         <div class="grid-content ep-bg-purple-left">
           <div class="image-body">
-            <el-image style="width: 150px; height: 150px" src="src/assets/login_logo.png"
+            <el-image style="width: 150px; height: 150px" :src="loginLogoIcon"
               fit="contain" />
           </div>
 
@@ -25,7 +25,6 @@
                 <div class="daili">
                   <el-icon size="20"><Aim /></el-icon>
                 </div>
-                <!-- <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" /> -->
               </el-col>
               <el-col :span="12">
                 <div class="text-right" >
@@ -42,7 +41,7 @@
       </el-col>
       <el-col :span="12">
         <div class="grid-content ep-bg-purple-right">
-          <el-image src="src/assets/beijin.png" fit="fit"></el-image>
+          <el-image :src="beijinIcon" fit="fit"></el-image>
         </div>
       </el-col>
     </el-row>
@@ -51,9 +50,13 @@
 <script>
 const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {};
 import {login} from "@/api/admin"
+import loginLogo from "@/assets/login_logo.png";
+import beijin from "@/assets/beijin.png";
 export default {
   data() {
     return {
+      loginLogoIcon:loginLogo,
+      beijinIcon:beijin,
       test: "",
       config:{
         token:"",

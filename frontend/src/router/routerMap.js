@@ -17,7 +17,7 @@ const constantRouterMap = [
     ]
   },
   {
-    path: '/',
+    path: '/home',
     name: 'Home',
     redirect: { name: 'home' },
     children: [
@@ -29,7 +29,7 @@ const constantRouterMap = [
     ]
   },
   {
-    path: '/',
+    path: '/example',
     name: 'Example',
     redirect: { name: 'ExampleHelloIndex' },
     children: [
