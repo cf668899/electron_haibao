@@ -60,7 +60,7 @@
               </el-sub-menu>
               <el-menu-item
                 index="more"
-                @click="moreSetting()"
+                @click="moreSetting('setting')"
                 style="border-top: 1px solid #409eff"
               >
                 <el-icon><setting /></el-icon>
@@ -110,6 +110,7 @@
           @changeMessageNum="changeMessageNum"
           :key="index"
         ></WebViewX>
+        <MoreSetting v-show="pageType == 'setting'"></MoreSetting>
       </el-main>
     </el-container>
   </div>
@@ -119,12 +120,14 @@ import AppList from "@/components/AppList.vue";
 import WebViewX from "@/components/WebViewX.vue";
 import WhatsappIcon from "@/assets/whatsapp.png";
 import TelegramIcon from "@/assets/Telegram.png";
+import MoreSetting from "@/components/MoreSetting.vue"
 const { ipcRenderer: ipc } =
   (window.require && window.require("electron")) || window.electron || {};
 export default {
   components: {
     AppList,
     WebViewX,
+    MoreSetting,
   },
   data() {
     return {
@@ -161,7 +164,7 @@ export default {
     arrowLeft() {
       this.isReduceLeft = !this.isReduceLeft;
     },
-    moreSetting() {
+    moreSetting(type) {
       this.pageType = "setting";
       this.appType = type;
     },
