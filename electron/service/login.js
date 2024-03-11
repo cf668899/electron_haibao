@@ -26,6 +26,11 @@ class LoginService extends Service {
     let data = store.get('loginData')
     return data;
   }
+  clearLoginData(){
+    const store = new Store();
+    let data = store.delete('loginData')
+    return data;
+  }
 }
 
 LoginService.toString = () => '[class LoginService]';

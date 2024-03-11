@@ -378,6 +378,7 @@ export default {
       });
     },
     loginOut() {
+      ipc.invoke("controller.login.clearLoginData")
       this.$router.back();
     },
   },

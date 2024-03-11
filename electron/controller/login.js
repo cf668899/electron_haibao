@@ -41,6 +41,9 @@ class LoginController extends Controller {
     async getLoginData(){
         return Services.get("login").getLoginData();
     }
+    clearLoginData(){
+        return Services.get("login").clearLoginData();
+    }
 }
 
 LoginController.toString = () => '[class LoginController]';
