@@ -11,6 +11,7 @@
               default-active="Whatsapp"
               class="el-menu-vertical-demo"
               @open="selectMenu"
+              @close="selectMenu"
             >
               <!-- wwhatsapp -->
               <el-sub-menu
