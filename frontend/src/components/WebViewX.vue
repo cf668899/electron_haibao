@@ -1,16 +1,67 @@
 <template>
-      <webview
-        v-if="data.isActive"
-        :ref="data.id"
-        :id="data.id"
-        style="height: 100%"
-        :src="srcMap[data.type]"
-        :partition="'persist:' + data.id"
-        nodeintegration
-        :preload="preload"
-        useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      >
+  <el-container v-if="data.isActive">
+    <el-main>
+      <webview :ref="data.id" :id="data.id" style="height: 100%" :src="srcMap[data.type]"
+        :partition="'persist:' + data.id" nodeintegration :preload="preload"
+        useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36">
       </webview>
+    </el-main>
+    <el-aside class="webview-aside" width="250px">
+      <el-tabs tab-position="right" style="height: 100%" v-model="tabValue" :before-leave="beforeLeave">
+        <el-tab-pane label="伸缩"  name="伸缩">
+          <template #label>
+            <span>
+              <el-icon>
+                <Expand />
+              </el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="设置"  name="设置">
+          <template #label>
+            <span>
+              <el-icon>
+                <Setting />
+              </el-icon>
+            </span>
+          </template>
+          <QuickReply :data="data" @reply="reply"></QuickReply>
+        </el-tab-pane>
+        <el-tab-pane label="翻译"  name="翻译">
+          <template #label>
+            <span>
+              <el-icon>
+                <Help />
+              </el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="代理" name="代理">
+          <template #label>
+            <span>
+              <el-icon>
+                <Aim />
+              </el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="用户" name="用户">
+          <template #label>
+            <span>
+              <el-icon><User /></el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="刷新" name="刷新">
+          <template #label>
+            <span @click="reload">
+              <el-icon><RefreshRight /></el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
+    </el-aside>
+  </el-container>
 </template>
 
 <script>
@@ -19,87 +70,97 @@ const { ipcRenderer: ipc } = (window.require && window.require("electron")) || w
 const path = require('path');
 const Ps = require('ee-core/ps');
 export default {
-    name: "webviewx",
-    props: ["data"],
-    emits: ['changeRecord', 'online', 'changeMessageNum'],
-    components: { QuickReply },
-    data() {
-        return {
-            preload: "file://" + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
-            srcMap: {
-                Whatsapp: "https://web.whatsapp.com",
-                Telegram: "https://web.telegram.org",
-            },
-            view:null
-        };
+  name: "webviewx",
+  props: ["data"],
+  emits: ['changeRecord', 'online', 'changeMessageNum'],
+  components: { QuickReply },
+  data() {
+    return {
+      tabValue:"翻译",
+      preload: "file://" + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
+      srcMap: {
+        Whatsapp: "https://web.whatsapp.com",
+        Telegram: "https://web.telegram.org",
+      },
+      view: null,
+      translateInfo:{
+        channel: 'deepl',
+        message: {
+          open: true,
+          source:"EN",
+          target:"ZH"
+        },
+        inputContent:{
+          open: true,
+          source:"ZH",
+          target:"EN"
+        }
+      }
+    };
+  },
+  created() {
+    this.init();
+  },
+  methods: {
+    beforeLeave(activeName, oldActiveName){
+      if(activeName == '伸缩' || activeName=='刷新'){
+        return false
+      }
+
+      return true
     },
-    created() {
-        this.init();
+    reload(){
+      this.view?.reload()
     },
-    methods: {
-        reply(data, text){
-          console.log("回复：", text)
-          if(data.type = "Telegram"){
-            this.tgReplay(text)
+    reply(data, text) {
+      this.view?.send('quickReply', text);
+    },
+    init() {
+      this.$nextTick(() => {
+        let view = this.$refs[this.data.id];
+        this.inject(view);
+      });
+    },
+    inject(view) {
+      this.injectHandler(view);
+    },
+    injectHandler(view) {
+      view.addEventListener("dom-ready", () => {
+        this.view = view
+        view.openDevTools();
+        view.addEventListener('ipc-message', (event) => {
+          console.log(event);
+          let eventData = JSON.parse(event.channel);
+          if (eventData.type == 'changeRecord') {
+            // 修改记录值
+            this.$emit("changeRecord", { id: this.data.id, "record": eventData.data, type: this.data.type });
           }
-        },
-        tgReplay(text){
-          this.view?.executeJavaScript(`
-            var inputReply = document.getElementsByClassName('input-message-input')
-            if(inputReply.length){
-              inputReply[0].textContent ='${text}'
-              inputReply[0].dispatchEvent(new Event('input'));
-              document.getElementsByClassName('btn-send')[0].click()
-            }
-          `)
-        },
-        init() {
-            this.$nextTick(() => {
-                let view = this.$refs[this.data.id];
-                this.inject(view);
-            });
-        },
-        inject(view) {
-            if (this.data.type == "Telegram") {
-                this.injectTg(view);
-            }
-        },
-        injectTg(view) {
-            view.addEventListener("dom-ready", () => {
-                this.view = view
-                view.openDevTools();
-                view.addEventListener('ipc-message', (event) => {
-                    console.log(event);
-                    let eventData = JSON.parse(event.channel);
-                    if (eventData.type == 'changeRecord') {
-                        // 修改记录值
-                        this.$emit("changeRecord", { id: this.data.id, "record": eventData.data, type: this.data.type });
-                    }
-                    if (eventData.type == 'online') {
-                        this.$emit('online', { id: this.data.id, type: this.data.type });
-                    }
-                    if (eventData.type == 'changeMessageNum') {
-                        this.$emit('changeMessageNum', { id: this.data.id, type: this.data.type, data: eventData.data });
-                    }
-                });
-                // <div style="color:green;padding: 10px 50px;word-wrap: break-word" id="translate-box">asdijaidhseiuhfusesdauhsduashfiushdshjfbdsjhbdjhbvjhxbcdhvbxjhbvjhdbfhdsfhdjkshfjsh</div>
-                setTimeout(() => {
-                    view.send('translateOpen', '开启翻译');
-                }, 2000);
-                // setInterval(()=>{
-                //   view.executeJavaScript(`
-                //   `)
-                // }, 500)
-            });
-        },
+          if (eventData.type == 'online') {
+            this.$emit('online', { id: this.data.id, type: this.data.type });
+          }
+          if (eventData.type == 'changeMessageNum') {
+            this.$emit('changeMessageNum', { id: this.data.id, type: this.data.type, data: eventData.data });
+          }
+        });
+
+        // 定时设置
+        setTimeout(() => {
+          this.translateChange()
+        }, 2000);
+      });
+    },
+    translateChange(){
+      this.view?.send('translateInfoChange', JSON.stringify(this.translateInfo));
     }
+  }
 };
 </script>
 <style scoped>
-.el-main{
+.el-main {
   padding: 0;
 }
-.vebview-aside{
+
+.vebview-aside {
   max-width: 250px;
 }
 </style>
