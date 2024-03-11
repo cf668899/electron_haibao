@@ -4,8 +4,11 @@
       <el-col :span="12">
         <div class="grid-content ep-bg-purple-left">
           <div class="image-body">
-            <el-image style="width: 150px; height: 150px" :src="loginLogoIcon"
-              fit="contain" />
+            <el-image
+              style="width: 150px; height: 150px"
+              :src="loginLogoIcon"
+              fit="contain"
+            />
           </div>
 
           <div class="title-body">
@@ -18,7 +21,12 @@
 
           <div class="token-body">
             <div><el-text size="small">邀请码</el-text></div>
-            <el-input v-model="config.token" class="w-50 m-2" size="large" placeholder="请输入邀请码" />
+            <el-input
+              v-model="config.token"
+              class="w-50 m-2"
+              size="large"
+              placeholder="请输入邀请码"
+            />
 
             <el-row>
               <el-col :span="12">
@@ -27,15 +35,24 @@
                 </div>
               </el-col>
               <el-col :span="12">
-                <div class="text-right" >
-                  <el-checkbox v-model="config.isSaveLogin" label="保持登陆" size="large" />
+                <div class="text-right">
+                  <el-checkbox
+                    v-model="config.isSaveLogin"
+                    label="保持登陆"
+                    size="large"
+                  />
                 </div>
               </el-col>
             </el-row>
           </div>
 
           <div class="login-btn">
-            <el-button type="primary" style="width: 100%; height: 40px;" @click="handlerLogin" >登陆</el-button>
+            <el-button
+              type="primary"
+              style="width: 100%; height: 40px"
+              @click="handlerLogin"
+              >登陆</el-button
+            >
           </div>
         </div>
       </el-col>
@@ -48,31 +65,43 @@
   </div>
 </template>
 <script>
-const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {};
-import {login} from "@/api/admin"
+const { ipcRenderer: ipc } =
+  (window.require && window.require("electron")) || window.electron || {};
+import { login } from "@/api/admin";
 import loginLogo from "@/assets/login_logo.png";
 import beijin from "@/assets/beijin.png";
+import { ElMessage } from "element-plus";
 export default {
   data() {
     return {
-      loginLogoIcon:loginLogo,
-      beijinIcon:beijin,
+      loginLogoIcon: loginLogo,
+      beijinIcon: beijin,
       test: "",
-      config:{
-        token:"",
-        isSaveLogin:false
-      }
+      config: {
+        token: "",
+        isSaveLogin: false,
+      }, 
     };
   },
+  created() {
+    ipc.invoke("controller.login.getLoginData", {}).then((res) => {
+      if (res && res.isSaveLogin) {
+        this.config = res
+      }
+    }); 
+  },
   methods: {
-    async handlerLogin(){
-      console.log("登陆")
+    async handlerLogin() {
+      if (!this.config.token) {
+        ElMessage.error("邀请码不能为空!");
+        return;
+      }
+      console.log("登陆");
       // const res = await login();
-      ipc.invoke('controller.login.login', {name:"zhangsan"}).then(res => {
-        console.log(res)
-        this.$router.push({name:"home"})
-      })
-    }
+      ipc.invoke("controller.login.login", { ...this.config }).then((res) => {
+        this.$router.push({ name: "home" });
+      });
+    },
   },
 };
 </script>
@@ -128,6 +157,5 @@ export default {
 }
 .login-btn {
   width: 100%;
-  
 }
 </style>

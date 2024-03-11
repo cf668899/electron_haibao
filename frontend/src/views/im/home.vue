@@ -7,16 +7,25 @@
       >
         <div class="menu-box">
           <div class="menus">
-            <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
+            <el-menu
+              default-active="Whatsapp"
+              class="el-menu-vertical-demo"
+              @open="selectMenu"
+            >
               <!-- wwhatsapp -->
               <el-sub-menu
                 :index="appItem.name"
                 v-for="(appItem, index) in appTypes"
                 :key="index"
+                :class="clickMenu == appItem.name ? 'is-active' : ''"
               >
                 <template #title>
-                  <img :src="appItem.image" class="iconImage" />
-                  <span @click="toAppManager(appItem.name)">{{
+                  <img
+                    @click="toAppManager(appItem.name)"
+                    :src="appItem.image"
+                    class="iconImage"
+                  />
+                  <span class="menuTitle" @click="toAppManager(appItem.name)">{{
                     appItem.name
                   }}</span>
                 </template>
@@ -70,17 +79,31 @@
           </div>
           <div class="operator-box">
             <div class="logout">
-              <el-button
+              <div class="ysBoxF" v-if="!isReduceLeft" @click="loginOut">
+                <div class="ysBox">
+                  <img class="ys" src="@/assets/yaos.png" />
+                  <div class="ysBoxCenter">
+                    <div class="ysBoxCenterTop">邀请码</div>
+                    <div class="ysToken">{{ token }}</div>
+                  </div>
+                  <el-icon size="20"><SwitchButton /></el-icon>
+                </div>
+              </div>
+              <!-- <el-button
                 type="warning"
                 class="quiteButton"
                 style="width: 80%"
-                @click="loginOut"
+        
                 >退出</el-button
-              >
+              > -->
               <div>
                 <el-icon
                   @click="arrowLeft"
-                  :class="isReduceLeft ? 'arrowLeftTransform' : ''"
+                  :class="
+                    isReduceLeft
+                      ? 'arrowLeftTransformCommon arrowLeftTransform'
+                      : 'arrowLeftTransformCommon'
+                  "
                 >
                   <ArrowLeft />
                 </el-icon>
@@ -120,7 +143,7 @@ import AppList from "@/components/AppList.vue";
 import WebViewX from "@/components/WebViewX.vue";
 import WhatsappIcon from "@/assets/whatsapp.png";
 import TelegramIcon from "@/assets/Telegram.png";
-import MoreSetting from "@/components/MoreSetting.vue"
+import MoreSetting from "@/components/MoreSetting.vue";
 const { ipcRenderer: ipc } =
   (window.require && window.require("electron")) || window.electron || {};
 export default {
@@ -155,12 +178,23 @@ export default {
         Whatsapp: "https://web.whatsapp.com/",
         Telegram: "https://web.telegram.org/",
       },
+      clickMenu: "",
+      token: "",
     };
   },
   created() {
+    this.clickMenu = this.appTypes[0].name;
     this.listApp();
+    ipc.invoke("controller.login.getLoginData", {}).then((res) => {
+      if (res && res.token) {
+        this.token = res.token;
+      }
+    });
   },
   methods: {
+    selectMenu(value) {
+      this.clickMenu = value;
+    },
     arrowLeft() {
       this.isReduceLeft = !this.isReduceLeft;
     },
@@ -190,10 +224,10 @@ export default {
         // 查询数据
         // this.listApp();
         if (res.id) {
-          if(this.appList[data.type]){
+          if (this.appList[data.type]) {
             this.appList[data.type].unshift(res);
-          }else{
-            this.appList[data.type]= [res]
+          } else {
+            this.appList[data.type] = [res];
           }
         }
       });
@@ -452,8 +486,59 @@ export default {
 .arrowLeftTransform {
   transform: rotate(180deg);
 }
-.iconImage{
+.iconImage {
   width: 40px;
   margin-right: 10px;
+}
+.is-active .menuTitle {
+  color: #409eff;
+}
+::v-deep(.el-sub-menu) {
+  user-select: none;
+}
+.ysBoxF {
+  display: flex;
+  justify-content: center;
+}
+.ysBox {
+  max-width: 80%;
+  display: flex;
+  padding: 8px 10px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  background-color: rgb(240, 240, 240);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.ysBoxS {
+  display: flex;
+  padding: 8px 10px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  background-color: rgb(240, 240, 240);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.ys {
+  width: 30px;
+  height: 30px;
+}
+.ysBoxCenter {
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: left;
+}
+.ysToken {
+  min-width: 70px;
+  word-wrap: break-word;
+  max-width: 80px;
+}
+.arrowLeftTransformCommon {
+  padding: 5px;
+  cursor: pointer;
 }
 </style>

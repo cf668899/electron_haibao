@@ -2,7 +2,7 @@
   <el-container class="common-layout">
     <el-header>
       <div class="header-box">
-        <div style="font-size: 15px">会话列表</div>
+        <div style="font-size: 15px;margin-left:15px;">会话列表</div>
         <div style="padding-left: 20px">
           <el-tag type="success" effect="dark">{{
             "会话:" + list.length + "/5"
@@ -105,7 +105,6 @@ export default {
   display: flex;
   align-items: center;
   padding-top: 5px;
-  padding-left: 15px;
   padding-bottom: 5px;
 }
 .el-header {

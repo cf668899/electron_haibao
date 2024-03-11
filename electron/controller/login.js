@@ -28,6 +28,7 @@ class LoginController extends Controller {
      */
     async login(args) {
         Log.info('args:', args);
+        Services.get("login").setLoginData(args);
         // Services.get("viewManager").test('sss')
         // const view = new BrowserView()
         // Electron.mainWindow.setBrowserView(view)
@@ -35,7 +36,10 @@ class LoginController extends Controller {
         // view.setBounds({ x: 500, y: 0, width: 1200, height: size[1] })
         // view.webContents.loadURL('https://www.baidu.com')
         // 创建窗口
-        return 'hello electron-egg test';
+        return args;
+    }
+    async getLoginData(){
+        return Services.get("login").getLoginData();
     }
 }
 
