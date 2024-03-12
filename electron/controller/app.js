@@ -22,26 +22,40 @@ class AppController extends Controller {
      * @param event - ipc通信时才有值。详情见：控制器文档
      */
     async add(data){
-        return Services.get("viewManager").add(data)
+        return Services.get("app").add(data)
     }
 
     async list(){
-        return Services.get("viewManager").list()
+        return Services.get("app").list()
     }
 
     async del(data){
-        return Services.get("viewManager").del(data)
+        return Services.get("app").del(data)
     }
 
     async start(data){
-        return Services.get("viewManager").start(data)
+        return Services.get("app").start(data)
     }
 
     async close(data) {
-        return Services.get("viewManager").close(data)
+        return Services.get("app").close(data)
     }
     async changeRecord(data) {
-        Services.get("viewManager").changeRecord(data)
+        Services.get("app").changeRecord(data)
+    }
+
+    async changeUserName(data) {
+        Services.get("app").changeUserName(data)  
+    }
+
+    async changeTranslate(data) {
+        Services.get("app").changeTranslate(data)  
+    }
+
+
+    //修改好友信息
+    async changeFriendInfo(data){
+        Services.get("app").changeFriendInfo(data)  
     }
 
     async savePreload(data){

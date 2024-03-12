@@ -6,7 +6,7 @@
         useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36">
       </webview>
     </el-main>
-    <el-aside class="webview-aside" width="250px">
+    <el-aside class="webview-aside" width="350px">
       <el-tabs tab-position="right" style="height: 100%" v-model="tabValue" :before-leave="beforeLeave">
         <el-tab-pane label="伸缩"  name="伸缩">
           <template #label>
@@ -17,12 +17,10 @@
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane label="设置"  name="设置">
+        <el-tab-pane label="快捷回复"  name="快捷回复">
           <template #label>
             <span>
-              <el-icon>
-                <Setting />
-              </el-icon>
+              <el-icon><Position /></el-icon>
             </span>
           </template>
           <QuickReply :data="data" @reply="reply"></QuickReply>
@@ -30,20 +28,10 @@
         <el-tab-pane label="翻译"  name="翻译">
           <template #label>
             <span>
-              <el-icon>
-                <Help />
-              </el-icon>
+              <el-icon><Connection /></el-icon>
             </span>
           </template>
-        </el-tab-pane>
-        <el-tab-pane label="代理" name="代理">
-          <template #label>
-            <span>
-              <el-icon>
-                <Aim />
-              </el-icon>
-            </span>
-          </template>
+          <TranslateSetting :data="translateInfo" @change="translateSettingChange" ></TranslateSetting>
         </el-tab-pane>
         <el-tab-pane label="用户" name="用户">
           <template #label>
@@ -51,6 +39,7 @@
               <el-icon><User /></el-icon>
             </span>
           </template>
+          <UserInfo :data="data" @changeFriendInfo="changeFriendInfo" ></UserInfo>
         </el-tab-pane>
         <el-tab-pane label="刷新" name="刷新">
           <template #label>
@@ -65,15 +54,17 @@
 </template>
 
 <script>
-import QuickReply from './QuickReply.vue';
+import QuickReply from './chat/QuickReply.vue';
+import TranslateSetting from './chat/TranslateSetting.vue';
+import UserInfo from './chat/UserInfo.vue'
 const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 const path = require('path');
 const Ps = require('ee-core/ps');
 export default {
   name: "webviewx",
   props: ["data"],
-  emits: ['changeRecord', 'online', 'changeMessageNum'],
-  components: { QuickReply },
+  emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName'],
+  components: { QuickReply, TranslateSetting, UserInfo },
   data() {
     return {
       tabValue:"翻译",
@@ -87,13 +78,13 @@ export default {
         channel: 'deepl',
         message: {
           open: true,
-          source:"EN",
-          target:"ZH"
+          source:"en-US",
+          target:"zh"
         },
         inputContent:{
           open: true,
-          source:"ZH",
-          target:"EN"
+          source:"zh",
+          target:"en-US"
         }
       }
     };
@@ -116,6 +107,9 @@ export default {
       this.view?.send('quickReply', text);
     },
     init() {
+      if(this.data.translateInfo){
+        this.translateInfo = this.data.translateInfo
+      }
       this.$nextTick(() => {
         let view = this.$refs[this.data.id];
         this.inject(view);
@@ -141,6 +135,11 @@ export default {
           if (eventData.type == 'changeMessageNum') {
             this.$emit('changeMessageNum', { id: this.data.id, type: this.data.type, data: eventData.data });
           }
+
+          if (eventData.type == 'changeUserName') {
+            this.$emit('changeUserName', { id: this.data.id, type: this.data.type, name:eventData.data.title, data: eventData.data });
+          }
+
         });
 
         // 定时设置
@@ -149,8 +148,26 @@ export default {
         }, 2000);
       });
     },
+    translateSettingChange(data){
+      this.translateInfo = data
+      // 修改app翻译信息
+      ipc.invoke("controller.app.changeTranslate", JSON.parse(JSON.stringify({
+        id: this.data.id,
+        translateInfo: data
+      }))).then(res=>{
+        this.translateChange()
+      })
+    },
     translateChange(){
       this.view?.send('translateInfoChange', JSON.stringify(this.translateInfo));
+    },
+    changeFriendInfo(data){
+      console.log('保存联系人', data)
+      let app = {
+        id: this.data.id,
+        friendInfo: data 
+      }
+      this.view?.send('changeFriendInfo', JSON.stringify(app));
     }
   }
 };

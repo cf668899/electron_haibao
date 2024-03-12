@@ -3,19 +3,11 @@ let Tg = function () {
 
     let inputTag = false;
     let oldRecord = '';
-    let oldInputText = '' // 上次输入框的值
+    let userTag = false;
     let oldMessageNum = 0
     let electron = require('electron')
     window.electron = electron
     let online = false;
-    let translate = {
-        type: 'deepl',
-        open: false,
-        target: 'ZH',
-        source: 'EN',
-        openInput: true
-    }
-
     let translateInfo = {
         channel: 'deepl',
         message: {
@@ -31,6 +23,10 @@ let Tg = function () {
     }
 
     let translatorMap = {
+
+    }
+
+    let friendInfoMap = {
 
     }
 
@@ -82,9 +78,38 @@ let Tg = function () {
         quickReply(data)
     })
 
+    //修改好友信息
+    window.electron.ipcRenderer.on('changeFriendInfo', (event, data)=>{
+        console.log('修改好友信息', data)
+        let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable group selected has-ripple')
+        if (selectBtns.length < 1){
+            return
+        }
+        let app = JSON.parse(data)
+        let id = selectBtns[0].getElementsByClassName('ListItem-button')[0].getAttribute('href')
+        selectBtns[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
+        app.friendInfo.id = id
+        document.getElementsByClassName('ChatInfo')[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
+        friendInfoMap[id] = app.friendInfo
+        // 发送到后台服务保存
+        window.electron.ipcRenderer.invoke("controller.app.changeFriendInfo", app)
+
+    })
+
+    // 处理输入消息和聊天框备注
     setInterval(async () => {
+        // 处理
+        let chats = document.getElementsByClassName('ChatInfo')
+        if (chats.length){
+            let id = chats[0].getElementsByClassName('Avatar')[0].getAttribute('data-peer-id')
+            let friendInfo = friendInfoMap['#'+id]
+            if(friendInfo){
+                chats[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
+            }
+        }
+
         // 添加输入框样式
-        if (!inputTag && translate.openInput) {
+        if (!inputTag && translateInfo.inputContent.open) {
             let inputBoxs = document.getElementsByClassName('chat-input-main')
             if (inputBoxs.length > 0) {
                 inputBoxs[0].style.backgroundColor = '#dee2e1';
@@ -96,11 +121,6 @@ let Tg = function () {
             let inputBox = document.getElementById('editable-message-text')
             if (inputBox) {
                 // 插入翻译
-                let newTranslate = {
-                    target: translateInfo.inputContent.target,
-                    source: translateInfo.inputContent.source,
-                }
-
                 let rest = {
                     status: 500
                 }
@@ -119,7 +139,7 @@ let Tg = function () {
                             }
                         }
                     } else {
-                        rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translateInfo.channel, { 'translate': newTranslate, 'texts': [content] })
+                        rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translateInfo.channel, { 'translate': translateInfo.inputContent, 'texts': [content] })
                     }
                 }
 
@@ -175,7 +195,6 @@ let Tg = function () {
         let record = ''
         let recordNames = document.getElementsByClassName('fullName')
         if (recordNames.length) {
-            online = true
             record = recordNames[0].textContent;
             if (oldRecord != record) {
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
@@ -194,12 +213,30 @@ let Tg = function () {
                     'type': "online",
                     'data': online
                 }))
+            } else {
+                if(!userTag){
+                // 将用户名推送到后端
+                    let global = localStorage.getItem('tt-global-state')
+                    if (global) {
+                        let jsonGlobal = JSON.parse(global)
+                        let userId = jsonGlobal.currentUserId
+                        let user = jsonGlobal.chats?.byId[userId]
+                        console.log(user)
+                        window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                            'type': "changeUserName",
+                            'data': user
+                        }))
+
+                        userTag = true
+                    }
+                }
             }
         }
 
     }, 800)
 
-    setInterval(async() => {
+    // 处理聊天消息
+    setInterval(async () => {
         if (translateInfo.message.open) {
             // 监听消息内容
             let contents = document.getElementsByClassName('content-inner');
@@ -244,7 +281,7 @@ let Tg = function () {
 
             if (texts.length) {
                 //发送ipc消息获取翻译内容
-                let rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translate.type, { 'translate': translate, 'texts': texts })
+                let rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translateInfo.channel, { 'translate': translateInfo.message, 'texts': texts })
                 if (rest.status == 200 && rest.data && rest.data.translations.length) {
                     console.log('translatorTests:', texts, rest.data.translations)
                     for (let i = 0; i < rest.data.translations.length; i++) {
@@ -260,5 +297,4 @@ let Tg = function () {
         }
 
     }, 800)
-
 }

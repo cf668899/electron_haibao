@@ -92,7 +92,7 @@ export default {
       this.$emit('addApp', {
         name:'',
         type: this.appType,
-        isActive: false
+        isActive: false,
       })
     }
   },

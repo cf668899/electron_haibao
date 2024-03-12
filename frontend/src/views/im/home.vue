@@ -54,11 +54,11 @@
                       >
                         <div class="username">
                           {{
-                            appItem.name
-                              ? appItem.name
+                            item.name
+                              ? item.name
                               : item.record
                               ? item.record
-                              : appItem.name +
+                              : item.name +
                                 " " +
                                 (appList[appItem.name].length - index)
                           }}
@@ -132,6 +132,7 @@
           @changeRecord="changeRecord"
           @online="online"
           @changeMessageNum="changeMessageNum"
+          @changeUserName="changeUserName"
           :key="index"
         ></WebViewX>
         <MoreSetting v-show="pageType == 'setting'"></MoreSetting>
@@ -334,6 +335,28 @@ export default {
             item.online = true;
           }
         }
+
+        this.$forceUpdate()
+      });
+    },
+    changeUserName(data){
+      ipc.invoke("controller.app.changeUserName", data).then((res) => {
+        console.log("更新用户名", data)
+        for (let item of this.apps) {
+          if (data.id == item.id) {
+            item.name = data.name;
+            item.online = true;
+          }
+        }
+
+        let list = this.appList[data.type];
+        for (let item of list) {
+          if (data.id == item.id) {
+            item.name = data.name;
+            item.online = true;
+          }
+        }
+
       });
     },
     online(data) {

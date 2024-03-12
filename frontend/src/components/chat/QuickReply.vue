@@ -19,7 +19,6 @@
 <script>
 const { clipboard } = require('electron')
 export default {
-  name: "applist",
   props: ["data"],
   emits: ["reply",],
   data() {

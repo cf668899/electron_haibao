@@ -12,7 +12,7 @@ const { session } = require('electron')
  * 示例服务（service层为单例）
  * @class
  */
-class ViewManagerService extends Service {
+class AppService extends Service {
 
   constructor(ctx) {
     super(ctx);
@@ -39,6 +39,42 @@ class ViewManagerService extends Service {
       .assign({record: data.record})
       .write()
       return data
+  }
+
+  changeUserName(data){
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({name: data.name})
+    .write()
+    return data
+  }
+
+  changeTranslate(data){
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({translateInfo: data.translateInfo})
+    .write()
+    return data
+  }
+
+  changeFriendInfo(data) {
+    console.log(data)
+
+    let app = this.conn.db.get("apps")
+    .find({id: data.id})
+    .value()
+
+    let friendInfoMap = {}
+    if(app.friendInfo){
+      friendInfoMap = app.friendInfo
+    }
+    friendInfoMap[data.friendInfo.id] = data.friendInfo
+
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({friendInfo: friendInfoMap})
+    .write()
+    return data
   }
 
   add(data){
@@ -74,5 +110,5 @@ class ViewManagerService extends Service {
     }
 }
 
-ViewManagerService.toString = () => '[class ViewManagerService]';
-module.exports = ViewManagerService;
+AppService.toString = () => '[class AppService]';
+module.exports = AppService;
