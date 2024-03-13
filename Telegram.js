@@ -60,7 +60,7 @@
                 inputReply.dispatchEvent(event);
                 setTimeout(() => {
                     document.getElementsByClassName('main-button')[0].click()
-                }, 300)
+                }, 500)
             }
         }
     
@@ -70,9 +70,40 @@
             translateInfo = JSON.parse(data)
         })
     
+        // 好友信息
+        window.electron.ipcRenderer.on('friendInfoChange', (event, data)=>{
+            console.log(event, data)
+            friendInfoMap = JSON.parse(data)
+    
+            let friendInfoInterval = setInterval(()=>{
+                // 判断是否有好友
+                let items = document.getElementsByClassName('ListItem-button')
+    
+                if(items.length){
+                    for(let item of items){
+                        let href = item.getAttribute('href')
+                        if(!href){
+                            continue
+                        }
+    
+                        let friend = friendInfoMap[href]
+                        if (!friend){
+                            continue
+                        }
+    
+                        console.log("修改昵称：", item.getElementsByClassName('fullName')[0].textContent, '----', friend.nickName)
+                        // TODO 修改名称
+                        item.getElementsByClassName('fullName')[0].textContent = friend.nickName
+                    }
+                    clearInterval(friendInfoInterval)
+                }
+    
+            }, 1000)
+    
+        })
+    
         //监听快捷回复消息
         window.electron.ipcRenderer.on('quickReply', (event, data) => {
-            console.log("快捷回复", data)
             quickReply(data)
         })
     
@@ -94,6 +125,8 @@
     
         })
     
+    
+        let oldFriendId = ''
         // 处理输入消息和聊天框备注
         setInterval(async () => {
             // 处理
@@ -104,6 +137,16 @@
                 if(friendInfo){
                     chats[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
                 }
+    
+                if (id != oldFriendId){
+                    // 通知
+                    window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                        'type': "changeFriendInfo",
+                        'data': friendInfo?friendInfo:{}
+                    }))
+                }
+    
+                oldFriendId = id
             }
     
             // 添加输入框样式

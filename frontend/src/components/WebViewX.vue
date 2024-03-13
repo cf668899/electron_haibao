@@ -47,7 +47,7 @@
               <el-icon><User /></el-icon>
             </span>
           </template>
-          <UserInfo :data="data" @changeFriendInfo="changeFriendInfo" ></UserInfo>
+          <UserInfo ref="userInfo" :data="data" @changeFriendInfo="changeFriendInfo" ></UserInfo>
         </el-tab-pane>
         <el-tab-pane label="刷新" name="刷新">
           <template #label>
@@ -96,7 +96,7 @@ export default {
           target:"en-US"
         }
       },
-      proxyInfo:{ 
+      proxyInfo:{
         message: {
           openproxy: false,
           proxy:"",
@@ -105,7 +105,7 @@ export default {
           openpwd:false,
           username:"",
           pwd:"",
-        } 
+        }
       }
     };
   },
@@ -133,7 +133,7 @@ export default {
       if(this.data.proxyInfo){
         this.proxyInfo = this.data.proxyInfo
       }
-      
+
       this.$nextTick(() => {
         let view = this.$refs[this.data.id];
         this.inject(view);
@@ -147,7 +147,6 @@ export default {
         this.view = view
         view.openDevTools();
         view.addEventListener('ipc-message', (event) => {
-          console.log(event);
           let eventData = JSON.parse(event.channel);
           if (eventData.type == 'changeRecord') {
             // 修改记录值
@@ -164,12 +163,17 @@ export default {
             this.$emit('changeUserName', { id: this.data.id, type: this.data.type, name:eventData.data.title, data: eventData.data });
           }
 
+          if(eventData.type == 'changeFriendInfo') {
+            this.$refs.userInfo.openChange(eventData.data)
+          }
+
         });
 
         // 定时设置
         setTimeout(() => {
           this.translateChange()
-        }, 2000);
+          this.initFriend()
+        }, 1000);
       });
     },
     translateSettingChange(data){
@@ -205,6 +209,12 @@ export default {
         friendInfo: data 
       }
       this.view?.send('changeFriendInfo', JSON.stringify(app));
+      this.data.friendInfo[data.id] = data
+    },
+    initFriend(){
+      if(this.data.friendInfo){
+        this.view?.send('friendInfoChange', JSON.stringify(this.data.friendInfo));
+      }
     }
   }
 };
