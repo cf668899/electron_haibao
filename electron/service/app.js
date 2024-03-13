@@ -56,7 +56,13 @@ class AppService extends Service {
     .write()
     return data
   }
-
+  changeProxyInfo(data){
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({proxyInfo: data.proxyInfo})
+    .write()
+    return data
+  }
   changeFriendInfo(data) {
     console.log(data)
 

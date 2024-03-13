@@ -51,8 +51,10 @@ class AppController extends Controller {
     async changeTranslate(data) {
         Services.get("app").changeTranslate(data)  
     }
-
-
+    //代理
+    async changeProxyInfo(data) {
+        Services.get("app").changeProxyInfo(data)  
+    }
     //修改好友信息
     async changeFriendInfo(data){
         Services.get("app").changeFriendInfo(data)  

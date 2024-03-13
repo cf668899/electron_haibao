@@ -33,6 +33,14 @@
           </template>
           <TranslateSetting :data="translateInfo" @change="translateSettingChange" ></TranslateSetting>
         </el-tab-pane>
+        <el-tab-pane label="代理"  name="代理">
+          <template #label>
+            <span>
+              <el-icon><Orange /></el-icon>
+            </span>
+          </template>
+          <ProxySetting :data="proxyInfo" @change="proxySettingChange" ></ProxySetting>
+        </el-tab-pane>
         <el-tab-pane label="用户" name="用户">
           <template #label>
             <span>
@@ -56,6 +64,7 @@
 <script>
 import QuickReply from './chat/QuickReply.vue';
 import TranslateSetting from './chat/TranslateSetting.vue';
+import ProxySetting from './chat/ProxySetting.vue';
 import UserInfo from './chat/UserInfo.vue'
 const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 const path = require('path');
@@ -64,7 +73,7 @@ export default {
   name: "webviewx",
   props: ["data"],
   emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName'],
-  components: { QuickReply, TranslateSetting, UserInfo },
+  components: { QuickReply, TranslateSetting, ProxySetting,  UserInfo },
   data() {
     return {
       tabValue:"翻译",
@@ -86,6 +95,17 @@ export default {
           source:"zh",
           target:"en-US"
         }
+      },
+      proxyInfo:{ 
+        message: {
+          openproxy: false,
+          proxy:"",
+          address:"",
+          port:"",
+          openpwd:false,
+          username:"",
+          pwd:"",
+        } 
       }
     };
   },
@@ -110,6 +130,10 @@ export default {
       if(this.data.translateInfo){
         this.translateInfo = this.data.translateInfo
       }
+      if(this.data.proxyInfo){
+        this.proxyInfo = this.data.proxyInfo
+      }
+      
       this.$nextTick(() => {
         let view = this.$refs[this.data.id];
         this.inject(view);
@@ -160,6 +184,19 @@ export default {
     },
     translateChange(){
       this.view?.send('translateInfoChange', JSON.stringify(this.translateInfo));
+    },
+    proxySettingChange(data){
+      this.proxyInfo = data
+      // 修改app代理信息
+      ipc.invoke("controller.app.changeProxyInfo", JSON.parse(JSON.stringify({
+        id: this.data.id,
+        proxyInfo: data
+      }))).then(res=>{
+        this.proxyeChange()
+      })
+    },
+    proxyeChange(){
+      this.view?.send('proxySettingChange', JSON.stringify(this.proxyInfo));
     },
     changeFriendInfo(data){
       console.log('保存联系人', data)
