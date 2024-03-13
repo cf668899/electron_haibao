@@ -78,6 +78,9 @@
     methods: {
         changeFriendInfo(){
             this.$emit('changeFriendInfo', this.contactUserInfo)
+        },
+        openChange(data){
+            this.contactUserInfo = data
         }
     },
   };
