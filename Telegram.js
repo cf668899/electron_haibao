@@ -60,7 +60,7 @@
                 inputReply.dispatchEvent(event);
                 setTimeout(() => {
                     document.getElementsByClassName('main-button')[0].click()
-                }, 300)
+                }, 500)
             }
         }
     
