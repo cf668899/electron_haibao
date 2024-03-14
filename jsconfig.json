@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "jsx": "react", // 没错 还是照抄 vue里边也写这个
+        "baseUrl": "./",
+        "paths": {
+            "components/*": ["src/components/*"],
+            "assets/*": ["src/assets/*"],
+            "/@/*": ["src/*"]  // 注意 vite这边是/@/而不是 @/
+        }
+    },
+    "exclude": ["node_modules", "dist"],
+    "include": ["src/**/*"]
+}
