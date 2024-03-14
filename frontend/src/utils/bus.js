@@ -1,4 +1,4 @@
-import Vue from 'vue'
-export default new Vue({
-  name: 'bus',
-})
+import { createApp } from 'vue';
+
+const app = createApp({});
+export const bus = app;

@@ -1,4 +1,4 @@
-import bus from '@/utils/bus'
+import {bus} from '@/utils/bus'
 
 let connectPromise
 const retryLimit = 20
@@ -62,7 +62,7 @@ export default {
           ws.addEventListener('open', () => {
             retryCount = 0
             commit('setState', ws.readyState)
-            bus.$emit('ws-opened')
+            bus.config.globalProperties.$emit('ws-opened')
             // 发送心跳检测
             timer = setInterval(() => {
               ws.send(JSON.stringify({ heartBeat: 0 }))
@@ -89,11 +89,11 @@ export default {
               try {
                 const data = JSON.parse(e.data)
                 console.log('收到消息data==', data)
-                bus.$emit('ws-message', data)
+                bus.config.globalProperties.$emit('ws-message', data)
 
                 // 对应页面收到ws消息
                 // mounted() {
-                //   bus.$on('ws-message', data => {
+                //   bus.config.globalProperties.$on('ws-message', data => {
                 //   }
                 // }
                 //页面获取状态
