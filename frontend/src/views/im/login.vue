@@ -78,7 +78,7 @@ export default {
       beijinIcon: beijin,
       test: "",
       config: {
-        token: "",
+        token: "SAC0PZBYXS7U",
         isSaveLogin: false,
       }, 
     };
@@ -96,8 +96,11 @@ export default {
         ElMessage.error("邀请码不能为空!");
         return;
       }
-      console.log("登陆");
-      // const res = await login();
+      const machineId = await ipc.invoke("controller.app.getMachineId", {})
+      await login({
+        inviteCode: this.config.token,
+        deviceId: machineId
+      });
       ipc.invoke("controller.login.login", { ...this.config }).then((res) => {
         this.$router.push({ name: "home" });
       });

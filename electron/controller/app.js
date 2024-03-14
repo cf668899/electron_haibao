@@ -63,6 +63,10 @@ class AppController extends Controller {
     async savePreload(data){
         return Services.get("preload").savePreload(data)
     }
+
+    getMachineId(){
+        return Services.get("app").getMachineId()
+    }
 }
 
 AppController.toString = () => '[class AppController]';

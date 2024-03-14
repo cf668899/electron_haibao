@@ -7,6 +7,7 @@ const moment = require('moment');
 const Electron = require('ee-core/electron');
 const { BrowserView } = require('electron')
 const { session } = require('electron')
+const Utils = require('ee-core/utils');
 
 /**
  * 示例服务（service层为单例）
@@ -113,6 +114,10 @@ class AppService extends Service {
       }
 
       return this.conn.db.set("apps", newList).write()
+    }
+
+    getMachineId(){
+      return Utils.machineIdSync(true)
     }
 }
 

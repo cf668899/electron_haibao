@@ -46,16 +46,16 @@ service.interceptors.response.use(
 		} else if (res.code !== 200) {
 			// 显示提示
 			ElMessage({
-				message: res.msg,
+				message: res.message,
 				type: 'error',
 				duration: 5 * 1000
 			})
+			return Promise.reject(res.message)
 		} else {
 			return res.data
 		}
 	},
 	error => {
-		loading.hide(error.config)
 		errorLog(new Error(` ${error.response.data.message} !: ${error.config.url}`))
 		return Promise.reject(error)
 	}
