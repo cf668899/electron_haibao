@@ -27,9 +27,7 @@
             <el-option :label="item.name" :value="item.loca" v-for="item in languages" :key="item.loca" />
           </el-select>
         </el-form-item>
-    </el-form>
-
-
+      </el-form>
     </div>
   </template>
   
@@ -57,20 +55,14 @@
     text-align: left;
     padding: 15px 15px;
     width: 100%;
+    height: 100%;
   }
-  
-  .tab-box-title {
-    font-size: 15px;
-    font-weight: 900;
-  }
+
 
   .form-item{
     width: 200px;
   }
 
-  .form-item2 {
-    width: 180px;
-  }
 
   </style>
   
