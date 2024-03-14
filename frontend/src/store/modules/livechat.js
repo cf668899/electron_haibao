@@ -96,6 +96,14 @@ export default {
                 //   bus.$on('ws-message', data => {
                 //   }
                 // }
+                //页面获取状态
+                // computed: {
+                //   ...mapState({
+                //     ws: state => state.livechat.ws,
+                //   }),
+                //页面调用方法
+                // methods: {
+                //   ...mapActions(['initWSConnect']),
               } catch (e) {
                 console.error(e)
               }
