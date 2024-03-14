@@ -2,6 +2,7 @@
 
 const { Service } = require('ee-core');
 const HttpClient = require('ee-core/httpclient');
+const {Translate} = require('@google-cloud/translate').v2;
 
 /**
  * 示例服务（service层为单例）
@@ -36,8 +37,16 @@ class TranslatorService extends Service {
 
   // google 翻译未实现
   async google(data){
-    return []
+    const translate = new Translate();
+    let [translations] = await translate.translate(data.texts, data.translate.target);
+    translations = Array.isArray(translations) ? translations : [translations];
+    console.log('Translations:' + translations);
+    translations.forEach((translation, i) => {
+      console.log(`${data.texts[i]} => (${data.translate.target}) ${translation}`);
+    });
+    return translations
   }
+
 
 }
 

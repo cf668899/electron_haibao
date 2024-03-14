@@ -54,6 +54,7 @@
     "nodemon": "^2.0.16"
   },
   "dependencies": {
+    "@google-cloud/translate": "^8.1.0",
     "axios": "^1.6.7",
     "dayjs": "^1.10.7",
     "ee-core": "^2.8.1",
