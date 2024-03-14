@@ -1,8 +1,8 @@
 import request from '@/request/index'
-export function login(params) {
+export function login(data) {
 	return request({
-		url: '/api/integration/user/login',
+		url: '/api/invite/invite/getByInviteCode',
 		method: 'post',
-		params
+		data
 	})
 }
