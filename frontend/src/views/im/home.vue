@@ -74,7 +74,7 @@
                 style="border-top: 1px solid #409eff"
               >
                 <el-icon><setting /></el-icon>
-                <span>更多操作</span>
+                <span>更多设置</span>
               </el-menu-item>
             </el-menu>
           </div>

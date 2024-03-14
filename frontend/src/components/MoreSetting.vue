@@ -8,7 +8,7 @@
             <span>翻译设置</span>
           </span>
         </template>
-        翻译设置
+        <TranslateSetting :data="translateInfo" @changeTranslateSetting="translateSettingChange" ></TranslateSetting>
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
@@ -51,12 +51,26 @@
 </template>
 
 <script>
+import TranslateSetting from './setting/TranslateSetting.vue'
 export default {
   name: "moreSetting",
+  components: {TranslateSetting},
   data() {
     return {
       test: "",
+      translateInfo:{
+        autoTranslate:true,
+        channel: 'deepl',
+        source:"0",
+        target:"en-US",
+        receive:"zh"
+      },
     };
+  },
+  methods: {
+    translateSettingChange(item) {
+      //todo 设置完翻译的配置之后，要进行保存，到聊天界面上面去取对应的设置配置信息。
+    }
   },
 };
 </script>

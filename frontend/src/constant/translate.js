@@ -4,7 +4,7 @@
 let languages = [
     {
         "name":"检测语言",
-        "loca":" ",
+        "loca":"0",
     },
     {
         "name": "阿拉伯语",
