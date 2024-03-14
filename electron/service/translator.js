@@ -37,7 +37,10 @@ class TranslatorService extends Service {
 
   // google 翻译未实现
   async google(data){
-    const translate = new Translate();
+    //todo 待调试
+    let googleKey = 'xxx'
+    let projectId = 'xxx'
+    const translate = new Translate({ projectId, key: googleKey })
     let [translations] = await translate.translate(data.texts, data.translate.target);
     translations = Array.isArray(translations) ? translations : [translations];
     console.log('Translations:' + translations);
