@@ -58,7 +58,7 @@
                               ? item.name
                               : item.record
                               ? item.record
-                              : item.name +
+                              : appItem.name +
                                 " " +
                                 (appList[appItem.name].length - index)
                           }}

@@ -167,6 +167,10 @@ export default {
             this.$refs.userInfo.openChange(eventData.data)
           }
 
+          if(eventData.type == 'runJs'){
+            this.view?.executeJavaScript(eventData.data)
+          }
+
         });
 
         // 定时设置

@@ -49,28 +49,54 @@
         }
     
         let quickReply = function (text) {
-            let inputBoxs = footers[0].getElementsByClassName('lexical-rich-text-input')
+            let inputBoxs = document.getElementsByClassName('lexical-rich-text-input')
             if (inputBoxs.length == 0) {
-                return
-            }
-            let spans = inputBoxs[0].getElementsByTagName('span')
-            if (spans.length < 1) {
+                console.log('未找到输入框')
                 return
             }
     
-            let inputReply = inputBoxs[0]
+            let inputReply = inputBoxs[1]
             if (inputReply) {
-                inputReply.textContent = text
-                let event = document.createEvent('Event');
-                event.initEvent("input", true, true); //如果是select选择框把"input"改成"change"
-                event.eventType = 'message'
+                let lastValue = inputReply.value;
+                inputReply.value = text;
+                let event = new Event("input", { bubbles: true });
+                //  React15
+                event.simulated = true;
+                //  React16 内部定义了descriptor拦截value，此处重置状态
+                let tracker = inputReply._valueTracker;
+                if (tracker) {
+                  tracker.setValue(lastValue);
+                }
                 inputReply.dispatchEvent(event);
-                setTimeout(() => {
-                    let btns = document.getElementsByTagName('footer')[0].getElementsByTagName('button')
-                    btns[btns.length -1].click()
-                }, 500)
+    
+                // setTimeout(() => {
+                //     let btns = document.getElementsByTagName('footer')[0].getElementsByTagName('button')
+                //     btns[btns.length -1].click()
+                // }, 500)
             }
         }
+    
+    
+            function readSpecPropName(ele){
+                for (const key in ele) {
+                    if (key && key.startsWith('__reactFiber')) {
+                        return key;
+                    }
+                }
+                return null;
+            }
+    
+                /**
+             * 查找特定对象
+             * @param arr 
+             */
+            function findMainObj(arr) {
+                    for (const item of arr) {
+                        if (!!item && item.key === 'main') {
+                            return item;
+                        }
+                    }
+            }
     
         // 监听消息
         window.electron.ipcRenderer.on('translateInfoChange', (event, data) => {
@@ -262,33 +288,6 @@
             //     }
             // }
     
-            // if (document.getElementById('telegram-search-input')) {
-            //     if (online == false) {
-            //         online = true
-            //         window.electron.ipcRenderer.sendToHost(JSON.stringify({
-            //             'type': "online",
-            //             'data': online
-            //         }))
-            //     } else {
-            //         if (!userTag) {
-            //             // 将用户名推送到后端
-            //             let global = localStorage.getItem('tt-global-state')
-            //             if (global) {
-            //                 let jsonGlobal = JSON.parse(global)
-            //                 let userId = jsonGlobal.currentUserId
-            //                 let user = jsonGlobal.chats?.byId[userId]
-            //                 console.log(user)
-            //                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
-            //                     'type': "changeUserName",
-            //                     'data': user
-            //                 }))
-    
-            //                 userTag = true
-            //             }
-            //         }
-            //     }
-            // }
-    
         }, 800)
     
         // 处理聊天消息
@@ -378,4 +377,91 @@
             }
     
         }, 800)
+    
+        let onlineInterval = setInterval(async ()=>{
+            if (document.getElementsByClassName('lexical-rich-text-input').length) {
+                if (online == false) {
+                    online = true
+                    window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                        'type': "online",
+                        'data': online
+                    }))
+    
+                   function runJs(){
+    
+                        function readSpecPropName(ele){
+                            for (const key in ele) {
+                                if (key && key.startsWith('__reactFiber')) {
+                                    return key;
+                                }
+                            }
+                                return null;
+                        }
+                        function findMainObj(arr) {
+                            for (const item of arr) {
+                                if (!!item && item.key === 'main') {
+                                    return item;
+                                }
+                            }
+                        }
+    
+                        const userId = localStorage.getItem('last-wid-md').replaceAll('"','').split(":")[0];//(window as any).browserx_store.User.getMeUser().user;
+                        while(true){
+                            let flagEle = document.getElementById('wa-popovers-bucket');
+                            console.log(flagEle)
+                            let propName = readSpecPropName(flagEle);
+                            console.log(propName)
+                            if(propName){
+                                let props = flagEle[propName].return.alternate.sibling.alternate.memoizedProps
+                                let propValue = findMainObj(props);
+                                console.log(propName)
+                                userName = propValue.props.children.props.conn.__x_pushname;
+                                if(!userName){
+                                    continue
+                                }
+                                let divName = document.createElement('div')
+                                divName.textContent = JSON.stringify({
+                                    userId,
+                                    title:userName
+                                })
+                                console.log('userName', userName)
+                                divName.setAttribute('id', 'userName')
+                                divName.style.display = 'none'
+                                document.getElementsByTagName('body')[0].appendChild(divName)
+                                break
+                            }
+                        }
+    
+                   }
+    
+                   window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                    'type': "runJs",
+                    'data': runJs.toString() + ';runJs()'
+                    }))
+    
+                } else {
+                    if (!userTag) {
+                        userName = ''
+                        // 将用户名推送到后端
+                        let userNameDiv =  document.getElementById('userName')
+                        if(!userNameDiv){
+                            return
+                        }
+    
+                        user = userNameDiv.textContent
+                        console.log('用户：', user)
+                        if(user){
+                            window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                                'type': 'changeUserName',
+                                'data': JSON.parse(user)
+                            }))
+    
+                            userTag = true
+                        }
+                    }
+    
+                    clearInterval(onlineInterval)
+                }
+            }
+        }, 1500)
         
