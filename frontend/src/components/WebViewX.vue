@@ -213,7 +213,7 @@ export default {
         friendInfo: data 
       }
       this.view?.send('changeFriendInfo', JSON.stringify(app));
-      this.data.friendInfo[data.id] = data
+      // this.data.friendInfo[data.id] = data
     },
     initFriend(){
       if(this.data.friendInfo){

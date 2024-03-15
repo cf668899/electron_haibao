@@ -65,7 +65,7 @@
                 //  React16 内部定义了descriptor拦截value，此处重置状态
                 let tracker = inputReply._valueTracker;
                 if (tracker) {
-                  tracker.setValue(lastValue);
+                    tracker.setValue(lastValue);
                 }
                 inputReply.dispatchEvent(event);
     
@@ -77,32 +77,45 @@
         }
     
     
-            function readSpecPropName(ele){
-                for (const key in ele) {
-                    if (key && key.startsWith('__reactFiber')) {
-                        return key;
-                    }
+        function readSpecPropName(ele) {
+            for (const key in ele) {
+                if (key && key.startsWith('__reactFiber')) {
+                    return key;
                 }
-                return null;
             }
+            return null;
+        }
     
-                /**
-             * 查找特定对象
-             * @param arr 
-             */
-            function findMainObj(arr) {
-                    for (const item of arr) {
-                        if (!!item && item.key === 'main') {
-                            return item;
-                        }
-                    }
+        /**
+     * 查找特定对象
+     * @param arr 
+     */
+        function findMainObj(arr) {
+            for (const item of arr) {
+                if (!!item && item.key === 'main') {
+                    return item;
+                }
             }
+        }
     
         // 监听消息
         window.electron.ipcRenderer.on('translateInfoChange', (event, data) => {
             console.log(event, data)
             translateInfo = JSON.parse(data)
         })
+    
+        //监听快捷回复消息
+        window.electron.ipcRenderer.on('quickReply', (event, data) => {
+            quickReply(data)
+        })
+    
+        function changeUserName(id, userName) {
+            console.log("修改用户名：", id, userName)
+            let user = document.getElementById(id)
+            if (user) {
+                user.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent = userName
+            }
+        }
     
         // 好友信息
         window.electron.ipcRenderer.on('friendInfoChange', (event, data) => {
@@ -111,77 +124,70 @@
     
             let friendInfoInterval = setInterval(() => {
                 // 判断是否有好友
-                let items = document.getElementsByClassName('ListItem-button')
-    
-                if (items.length) {
-                    for (let item of items) {
-                        let href = item.getAttribute('href')
-                        if (!href) {
-                            continue
-                        }
-    
-                        let friend = friendInfoMap[href]
-                        if (!friend) {
-                            continue
-                        }
-    
-                        console.log("修改昵称：", item.getElementsByClassName('fullName')[0].textContent, '----', friend.nickName)
-                        // TODO 修改名称
-                        item.getElementsByClassName('fullName')[0].textContent = friend.nickName
-                    }
-                    clearInterval(friendInfoInterval)
+                let userList = document.getElementById('pane-side')
+                if (!userList) {
+                    return
                 }
     
+                setTimeout(()=>{
+                    for (let k of Object.keys(friendInfoMap)) {
+                        changeUserName(k, friendInfoMap[k].nickName)
+                    }
+                }, 1000)
+    
+                clearInterval(friendInfoInterval)
             }, 1000)
     
-        })
-    
-        //监听快捷回复消息
-        window.electron.ipcRenderer.on('quickReply', (event, data) => {
-            quickReply(data)
         })
     
         //修改好友信息
         window.electron.ipcRenderer.on('changeFriendInfo', (event, data) => {
             console.log('修改好友信息', data)
-            let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable group selected has-ripple')
-            if (selectBtns.length < 1) {
+            let currentFriendIdDiv = document.getElementById('currentFriendId')
+            if (!currentFriendIdDiv) {
                 return
             }
             let app = JSON.parse(data)
-            let id = selectBtns[0].getElementsByClassName('ListItem-button')[0].getAttribute('href')
-            selectBtns[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
+            let id = currentFriendIdDiv.textContent
+            // TODO 修改用户名
+            changeUserName(id, app.friendInfo.nickName)
+    
             app.friendInfo.id = id
-            document.getElementsByClassName('ChatInfo')[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
             friendInfoMap[id] = app.friendInfo
             // 发送到后台服务保存
             window.electron.ipcRenderer.invoke("controller.app.changeFriendInfo", app)
-    
         })
     
     
         let oldFriendId = ''
         // 处理输入消息和聊天框备注
         setInterval(async () => {
+            // TODO 监听用户更新变化
+            let currentFriendIdDiv = document.getElementById('currentFriendId')
             // 处理
-            // let chats = document.getElementsByClassName('ChatInfo')
-            // if (chats.length){
-            //     let id = chats[0].getElementsByClassName('Avatar')[0].getAttribute('data-peer-id')
-            //     let friendInfo = friendInfoMap['#'+id]
-            //     if(friendInfo){
-            //         chats[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
-            //     }
+            if (currentFriendIdDiv) {
+                let id = currentFriendIdDiv.textContent
+                let friendInfo = friendInfoMap[id]
     
-            //     if (id != oldFriendId){
-            //         // 通知
-            //         window.electron.ipcRenderer.sendToHost(JSON.stringify({
-            //             'type': "changeFriendInfo",
-            //             'data': friendInfo?friendInfo:{}
-            //         }))
-            //     }
+                if (id != oldFriendId) {
+                    // 通知
+                    window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                        'type': "changeFriendInfo",
+                        'data': friendInfo ? friendInfo : {}
+                    }))
     
-            //     oldFriendId = id
-            // }
+                    if(friendInfo){
+                        // 修改聊天窗的名称
+                        let main = document.getElementById('main')
+                        if(main){
+                            let header = main.getElementsByTagName('header')[0]
+                            header.childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent = friendInfo.nickName
+                        }
+                    }
+                }
+    
+                oldFriendId = id
+            }
     
             // 监听消息数
             let side = document.getElementById('pane-side')
@@ -378,8 +384,8 @@
     
         }, 800)
     
-        let onlineInterval = setInterval(async ()=>{
-            if (document.getElementsByClassName('lexical-rich-text-input').length) {
+        let onlineInterval = setInterval(async () => {
+            if (document.getElementById('pane-side')) {
                 if (online == false) {
                     online = true
                     window.electron.ipcRenderer.sendToHost(JSON.stringify({
@@ -387,15 +393,15 @@
                         'data': online
                     }))
     
-                   function runJs(){
+                    function runJs() {
     
-                        function readSpecPropName(ele){
+                        function readSpecPropName(ele) {
                             for (const key in ele) {
                                 if (key && key.startsWith('__reactFiber')) {
                                     return key;
                                 }
                             }
-                                return null;
+                            return null;
                         }
                         function findMainObj(arr) {
                             for (const item of arr) {
@@ -405,24 +411,24 @@
                             }
                         }
     
-                        const userId = localStorage.getItem('last-wid-md').replaceAll('"','').split(":")[0];//(window as any).browserx_store.User.getMeUser().user;
-                        while(true){
+                        const userId = localStorage.getItem('last-wid-md').replaceAll('"', '').split(":")[0];//(window as any).browserx_store.User.getMeUser().user;
+                        while (true) {
                             let flagEle = document.getElementById('wa-popovers-bucket');
                             console.log(flagEle)
                             let propName = readSpecPropName(flagEle);
                             console.log(propName)
-                            if(propName){
+                            if (propName) {
                                 let props = flagEle[propName].return.alternate.sibling.alternate.memoizedProps
                                 let propValue = findMainObj(props);
                                 console.log(propName)
                                 userName = propValue.props.children.props.conn.__x_pushname;
-                                if(!userName){
+                                if (!userName) {
                                     continue
                                 }
                                 let divName = document.createElement('div')
                                 divName.textContent = JSON.stringify({
                                     userId,
-                                    title:userName
+                                    title: userName
                                 })
                                 console.log('userName', userName)
                                 divName.setAttribute('id', 'userName')
@@ -432,25 +438,90 @@
                             }
                         }
     
-                   }
+                    }
     
-                   window.electron.ipcRenderer.sendToHost(JSON.stringify({
-                    'type': "runJs",
-                    'data': runJs.toString() + ';runJs()'
+                    window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                        'type': "runJs",
+                        'data': runJs.toString() + ';runJs()'
                     }))
     
+                    // 好友切换
+                    function friendInterval() {
+                        function readSpecPropName(ele) {
+                            for (const key in ele) {
+                                if (key && key.startsWith('__reactFiber')) {
+                                    return key;
+                                }
+                            }
+                            return null;
+                        }
+    
+                        function changeUserId(){
+                            let chat = document.getElementById('pane-side')
+                            let selectUser = []
+                            let chatPropName = readSpecPropName(chat)
+                            let currentFriendId = null
+                            if (chatPropName) {
+                                let selectList = chat[chatPropName].child.stateNode.props.selection.list
+                                console.log(selectList)
+                                for (let user of selectList) {
+                                    selectUser.push({
+                                        nickName: user.__x_formattedTitle,
+                                        id: user.__x_id.user
+                                    })
+    
+                                    if (user['__x_active']) {
+                                        currentFriendId = user.__x_id.user
+                                    }
+                                }
+                            }
+    
+                            if (currentFriendId) {
+                                let currentFriendIdDiv = document.getElementById('currentFriendId')
+                                if (currentFriendIdDiv) {
+                                    currentFriendIdDiv.textContent = currentFriendId
+                                } else {
+                                    let divName = document.createElement('div')
+                                    divName.textContent = currentFriendId
+                                    divName.setAttribute('id', 'currentFriendId')
+                                    divName.style.display = 'none'
+                                    document.getElementsByTagName('body')[0].appendChild(divName)
+                                }
+                            }
+    
+                            let selects = chat.childNodes[0].childNodes[0].childNodes[0].childNodes
+                            for (let i = 0; i < selects.length; i++) {
+                                selects[i].setAttribute('id', selectUser[i].id)
+                            }
+                        }
+    
+                        changeUserId()
+    
+                        let chat = document.getElementById('pane-side')
+                        if (chat) {
+                            chat.onclick = function () {
+                                console.log("点击事件")
+                                changeUserId()
+                            }
+                        }
+                    }
+    
+                    window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                        'type': "runJs",
+                        'data': friendInterval.toString() + ';friendInterval()'
+                    }))
                 } else {
                     if (!userTag) {
                         userName = ''
                         // 将用户名推送到后端
-                        let userNameDiv =  document.getElementById('userName')
-                        if(!userNameDiv){
+                        let userNameDiv = document.getElementById('userName')
+                        if (!userNameDiv) {
                             return
                         }
     
                         user = userNameDiv.textContent
                         console.log('用户：', user)
-                        if(user){
+                        if (user) {
                             window.electron.ipcRenderer.sendToHost(JSON.stringify({
                                 'type': 'changeUserName',
                                 'data': JSON.parse(user)
@@ -463,5 +534,5 @@
                     clearInterval(onlineInterval)
                 }
             }
-        }, 1500)
+        }, 500)
         
