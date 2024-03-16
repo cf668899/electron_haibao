@@ -167,6 +167,10 @@ export default {
             this.$refs.userInfo.openChange(eventData.data)
           }
 
+          if(eventData.type == 'runJs'){
+            this.view?.executeJavaScript(eventData.data)
+          }
+
         });
 
         // 定时设置
@@ -209,7 +213,7 @@ export default {
         friendInfo: data 
       }
       this.view?.send('changeFriendInfo', JSON.stringify(app));
-      this.data.friendInfo[data.id] = data
+      // this.data.friendInfo[data.id] = data
     },
     initFriend(){
       if(this.data.friendInfo){

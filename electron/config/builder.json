@@ -1,5 +1,5 @@
 {
-  "productName": "ee",
+  "productName": "巨石出海",
   "appId": "com.electron.ee",
   "copyright": "© 2023 哆啦好梦 Technology Co., Ltd.",
   "directories": {
@@ -26,7 +26,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "北极熊"
+    "shortcutName": "巨石出海"
   },
   "mac": {
     "icon": "build/icons/icon.icns",

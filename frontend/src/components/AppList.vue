@@ -1,6 +1,6 @@
 <template>
   <el-container class="common-layout">
-    <el-header>
+    <el-header style="padding-bottom:5px;height:35px;">
       <div class="header-box">
         <div style="font-size: 15px;margin-left:15px;">会话列表</div>
         <div style="padding-left: 20px">
