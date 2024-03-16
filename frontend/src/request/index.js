@@ -2,7 +2,6 @@ import axios from 'axios'
 import {
 	ElMessage
 } from 'element-plus'
-var requesturl = 'zzjserver/controlAction.do?method=ApplyAction';
 
 // 记录和显示错误
 function errorLog(err) {
@@ -17,7 +16,6 @@ function errorLog(err) {
 
 // 创建一个 axios 实例
 const service = axios.create({
-	url: requesturl,
 	timeout: 20000 // 请求超时时间
 })
 
