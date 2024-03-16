@@ -145,7 +145,7 @@ export default {
     injectHandler(view) {
       view.addEventListener("dom-ready", () => {
         this.view = view
-        view.openDevTools();
+        // view.openDevTools();
         view.addEventListener('ipc-message', (event) => {
           let eventData = JSON.parse(event.channel);
           if (eventData.type == 'changeRecord') {
