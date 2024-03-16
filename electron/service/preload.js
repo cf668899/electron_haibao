@@ -80,53 +80,23 @@ class PreloadService extends Service {
         }
     
         let quickReply = function (text) {
-            let inputBoxs = document.getElementsByClassName('lexical-rich-text-input')
-            if (inputBoxs.length == 0) {
-                console.log('未找到输入框')
+            let inputs = document.getElementsByClassName('lexical-rich-text-input')
+            if(inputs.length < 2){
                 return
             }
     
-            let inputReply = inputBoxs[1]
-            if (inputReply) {
-                let lastValue = inputReply.value;
-                inputReply.value = text;
-                let event = new Event("input", { bubbles: true });
-                //  React15
-                event.simulated = true;
-                //  React16 内部定义了descriptor拦截value，此处重置状态
-                let tracker = inputReply._valueTracker;
-                if (tracker) {
-                    tracker.setValue(lastValue);
-                }
-                inputReply.dispatchEvent(event);
-    
-                // setTimeout(() => {
-                //     let btns = document.getElementsByTagName('footer')[0].getElementsByTagName('button')
-                //     btns[btns.length -1].click()
-                // }, 500)
+            //先删除原本的文本
+            let span = inputs[1].childNodes[0].childNodes[0].getElementsByTagName('span')
+            if(span.length){
+                span[0].childNodes[0].textContent=''
             }
-        }
-    
-    
-        function readSpecPropName(ele) {
-            for (const key in ele) {
-                if (key && key.startsWith('__reactFiber')) {
-                    return key;
-                }
-            }
-            return null;
-        }
-    
-        /**
-     * 查找特定对象
-     * @param arr 
-     */
-        function findMainObj(arr) {
-            for (const item of arr) {
-                if (!!item && item.key === 'main') {
-                    return item;
-                }
-            }
+            setTimeout(()=>{
+                inputs[1].focus()
+                window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                    'type': "insertText",
+                    'data': text
+                }))
+            }, 200)
         }
     
         // 监听消息
@@ -160,7 +130,7 @@ class PreloadService extends Service {
                     return
                 }
     
-                setTimeout(()=>{
+                setTimeout(() => {
                     for (let k of Object.keys(friendInfoMap)) {
                         changeUserName(k, friendInfoMap[k].nickName)
                     }
@@ -207,10 +177,15 @@ class PreloadService extends Service {
                         'data': friendInfo ? friendInfo : {}
                     }))
     
-                    if(friendInfo){
+                    if (friendInfo) {
+                        window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                            'type': "changeRecord",
+                            'data': friendInfo.nickName
+                        }))
+    
                         // 修改聊天窗的名称
                         let main = document.getElementById('main')
-                        if(main){
+                        if (main) {
                             let header = main.getElementsByTagName('header')[0]
                             header.childNodes[1].childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent = friendInfo.nickName
                         }
@@ -310,20 +285,6 @@ class PreloadService extends Service {
             } else {
                 document.getElementById('translate-box')?.remove()
             }
-    
-            // let record = ''
-            // let recordNames = document.getElementsByClassName('fullName')
-            // if (recordNames.length) {
-            //     record = recordNames[0].textContent;
-            //     if (oldRecord != record) {
-            //         window.electron.ipcRenderer.sendToHost(JSON.stringify({
-            //             'type': "changeRecord",
-            //             'data': record
-            //         }))
-    
-            //         oldRecord = record;
-            //     }
-            // }
     
         }, 800)
     
@@ -487,7 +448,7 @@ class PreloadService extends Service {
                             return null;
                         }
     
-                        function changeUserId(){
+                        function changeUserId() {
                             let chat = document.getElementById('pane-side')
                             let selectUser = []
                             let chatPropName = readSpecPropName(chat)

@@ -168,7 +168,13 @@ export default {
           }
 
           if(eventData.type == 'runJs'){
-            this.view?.executeJavaScript(eventData.data)
+            this.view?.executeJavaScript(eventData.data, true)
+          }
+
+          if(eventData.type == 'insertText'){
+            console.log("输入文本！！")
+            this.view?.delete()
+            this.view?.insertText(eventData.data)
           }
 
         });
