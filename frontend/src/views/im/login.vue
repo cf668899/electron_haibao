@@ -58,7 +58,7 @@
       </el-col>
       <el-col :span="12">
         <div class="grid-content ep-bg-purple-right">
-          <el-image :src="beijinIcon" fit="fit"></el-image>
+          <el-image :src="beijinIcon" style="height:100%;display:flex;"></el-image>
         </div>
       </el-col>
     </el-row>
