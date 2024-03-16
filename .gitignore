@@ -10,3 +10,4 @@ public/electron/
 pnpm-lock.yaml
 public/
 frontend/node_modules
+public/dist
