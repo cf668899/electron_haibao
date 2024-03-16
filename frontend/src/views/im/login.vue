@@ -13,7 +13,7 @@
 
           <div class="title-body">
             <div class="title">Login to you account</div>
-            <p>
+            <p style="font-size:12px;color:rgb(173,173,173)">
               login now to access the latest insights experience for your social
               media
             </p>
@@ -31,7 +31,7 @@
             <el-row>
               <el-col :span="12">
                 <div class="daili">
-                  <el-icon size="20"><Aim /></el-icon>
+                  <img src="@/assets/int.png" class="iconImage" />
                 </div>
               </el-col>
               <el-col :span="12">
@@ -109,6 +109,10 @@ export default {
 };
 </script>
 <style scoped>
+.iconImage{
+  width: 20px;
+  height: 20px;
+}
 .body {
   height: 100%;
 }

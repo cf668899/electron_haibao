@@ -23,7 +23,7 @@ module.exports = (appInfo) => {
    * 主窗口
    */
   config.windowsOption = {
-    title: '北极熊',
+    title: '巨石出海',
     width: 1200,
     height: 650,
     minWidth: 800,
@@ -151,7 +151,7 @@ module.exports = (appInfo) => {
     },
     tray: {
       enable: true,
-      title: '北极熊',
+      title: '巨石出海',
       icon: '/public/images/tray.png'
     },
     security: {

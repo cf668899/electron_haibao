@@ -18,15 +18,12 @@
                 :index="appItem.name"
                 v-for="(appItem, index) in appTypes"
                 :key="index"
-                :class="clickMenu == appItem.name ? 'is-active' : ''"
+                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
+                @click="toAppManager(appItem.name)"
               >
                 <template #title>
-                  <img
-                    @click="toAppManager(appItem.name)"
-                    :src="appItem.image"
-                    class="iconImage"
-                  />
-                  <span class="menuTitle" @click="toAppManager(appItem.name)">{{
+                  <img :src="appItem.image" class="iconImage" />
+                  <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{
                     appItem.name
                   }}</span>
                 </template>
@@ -57,10 +54,10 @@
                             item.name
                               ? item.name
                               : item.record
-                              ? item.record
-                              : appItem.name +
-                                " " +
-                                (appList[appItem.name].length - index)
+                                ? item.record
+                                : appItem.name +
+                                  ' ' +
+                                  (appList[appItem.name].length - index)
                           }}
                         </div>
                       </el-badge>
@@ -68,14 +65,20 @@
                   </template>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item
-                index="more"
+              <el-sub-menu
+                index="setting"
                 @click="moreSetting('setting')"
-                style="border-top: 1px solid #409eff"
+                style="border-top: 1px solid rgb(232, 232, 232)"
+                key="setting"
+                class="itemNoMuch"
               >
-                <el-icon><setting /></el-icon>
-                <span>更多设置</span>
-              </el-menu-item>
+                <template #title>
+                  <img src="@/assets/moreSetting.png" class="iconImage" />
+                  <span :class="clickMenu == 'setting' ? 'menuTitle' : ''"
+                    >更多设置</span
+                  >
+                </template>
+              </el-sub-menu>
             </el-menu>
           </div>
           <div class="operator-box">
@@ -115,7 +118,7 @@
       </el-aside>
       <el-main>
         <AppList
-          v-show="pageType == 'manager'"
+          v-show="pageType === 'manager'"
           :app-type="appType"
           :list="appList[appType] ? appList[appType] : []"
           @addApp="addApp"
@@ -126,7 +129,7 @@
         >
         </AppList>
         <WebViewX
-          v-show="pageType == 'app' && item.isShow"
+          v-show="pageType === 'app' && item.isShow"
           :data="item"
           v-for="(item, index) in apps"
           @changeRecord="changeRecord"
@@ -141,13 +144,13 @@
   </div>
 </template>
 <script>
-import AppList from "@/components/AppList.vue";
-import WebViewX from "@/components/WebViewX.vue";
-import WhatsappIcon from "@/assets/whatsapp.png";
-import TelegramIcon from "@/assets/Telegram.png";
-import MoreSetting from "@/components/MoreSetting.vue";
+import AppList from '@/components/AppList.vue'
+import WebViewX from '@/components/WebViewX.vue'
+import WhatsappIcon from '@/assets/whatsapp.png'
+import TelegramIcon from '@/assets/Telegram.png'
+import MoreSetting from '@/components/MoreSetting.vue'
 const { ipcRenderer: ipc } =
-  (window.require && window.require("electron")) || window.electron || {};
+  (window.require && window.require('electron')) || window.electron || {}
 export default {
   components: {
     AppList,
@@ -157,255 +160,267 @@ export default {
   data() {
     return {
       isReduceLeft: false,
-      test: "",
-      id: "",
+      test: '',
+      id: '',
       appList: {
         Whatsapp: [],
         Telegram: [],
       },
-      appType: "Whatsapp",
-      pageType: "manager",
+      appType: 'Whatsapp',
+      pageType: 'manager',
       apps: [],
       appTypes: [
         {
-          name: "Whatsapp",
+          name: 'Whatsapp',
           image: WhatsappIcon,
         },
         {
-          name: "Telegram",
+          name: 'Telegram',
           image: TelegramIcon,
         },
       ],
       srcMap: {
-        Whatsapp: "https://web.whatsapp.com/",
-        Telegram: "https://web.telegram.org/",
+        Whatsapp: 'https://web.whatsapp.com/',
+        Telegram: 'https://web.telegram.org/',
       },
-      clickMenu: "",
-      token: "",
-    };
+      clickMenu: '',
+      token: '',
+    }
   },
   created() {
-    this.clickMenu = this.appTypes[0].name;
-    this.listApp();
-    ipc.invoke("controller.login.getLoginData", {}).then((res) => {
+    this.clickMenu = this.appTypes[0].name
+    this.listApp()
+    ipc.invoke('controller.login.getLoginData', {}).then((res) => {
       if (res && res.token) {
-        this.token = res.token;
+        this.token = res.token
       }
-    });
+    })
   },
   methods: {
+    getItemClassName(appItem) {
+      if (
+        !(
+          this.appList[appItem.name] &&
+          this.appList[appItem.name].length > 0 &&
+          this.appList[appItem.name].find((i) => i && i.isActive)
+        )
+      ) {
+        return true
+      }
+      return false
+    },
     selectMenu(value) {
-      this.clickMenu = value;
+      this.clickMenu = value
+      console.log(value)
     },
     arrowLeft() {
-      this.isReduceLeft = !this.isReduceLeft;
+      this.isReduceLeft = !this.isReduceLeft
     },
     moreSetting(type) {
-      this.pageType = "setting";
-      this.appType = type;
+      this.pageType = 'setting'
+      this.appType = type
     },
     toAppManager(type) {
-      this.pageType = "manager";
-      this.appType = type;
+      this.pageType = 'manager'
+      this.appType = type
     },
     toApp(data) {
-      this.id = data.id;
-      this.pageType = "app";
+      this.id = data.id
+      this.pageType = 'app'
       for (let item of this.apps) {
         if (data.id == item.id) {
-          item.isShow = true;
-          continue;
+          item.isShow = true
+          continue
         }
-        item.isShow = false;
+        item.isShow = false
       }
     },
 
     addApp(data) {
-      console.log("add app");
-      ipc.invoke("controller.app.add", data).then((res) => {
+      console.log('add app')
+      ipc.invoke('controller.app.add', data).then((res) => {
         // 查询数据
         // this.listApp();
         if (res.id) {
           if (this.appList[data.type]) {
-            this.appList[data.type].unshift(res);
+            this.appList[data.type].unshift(res)
           } else {
-            this.appList[data.type] = [res];
+            this.appList[data.type] = [res]
           }
         }
-      });
+      })
     },
     startApp(data) {
       // 保存preload
       ipc
-        .invoke("controller.app.savePreload", JSON.parse(JSON.stringify(data)))
+        .invoke('controller.app.savePreload', JSON.parse(JSON.stringify(data)))
         .then((res) => {
-          console.log(res);
-        });
-      this.id = data.id;
-      let app = null;
+          console.log(res)
+        })
+      this.id = data.id
+      let app = null
 
       for (let item of this.apps) {
-        item.isShow = false;
+        item.isShow = false
         if (item.id == data.id) {
-          app = item;
-          item.isShow = true;
-          item.isActive = true;
+          app = item
+          item.isShow = true
+          item.isActive = true
         }
       }
 
       if (!app) {
-        data.isShow = true;
-        data.isActive = true;
-        this.apps.push(data);
+        data.isShow = true
+        data.isActive = true
+        this.apps.push(data)
       }
 
-      let list = this.appList[data.type];
+      let list = this.appList[data.type]
       for (let item of list) {
         if (data.id == item.id) {
-          item.isActive = true;
-          item.isShow = true;
-          app = item;
-          continue;
+          item.isActive = true
+          item.isShow = true
+          app = item
+          continue
         }
       }
 
-      this.pageType = "app";
+      this.pageType = 'app'
     },
     showApp(data) {
-      this.id = data.id;
+      this.id = data.id
       for (let item of this.apps) {
         if (data.id == item.id) {
-          item.isShow = true;
-          continue;
+          item.isShow = true
+          continue
         } else {
-          item.isShow = false;
+          item.isShow = false
         }
       }
-      this.pageType = "app";
+      this.pageType = 'app'
     },
     closeApp(data) {
       for (let item of this.apps) {
         if (item.id == data.id) {
-          item.isActive = false;
-          item.online = false;
+          item.isActive = false
+          item.online = false
         } else {
-          item.isShow = false;
+          item.isShow = false
         }
       }
 
-      let list = this.appList[data.type];
+      let list = this.appList[data.type]
       for (let item of list) {
         if (data.id == item.id) {
-          item.isActive = false;
-          item.isShow = false;
-          item.online = false;
+          item.isActive = false
+          item.isShow = false
+          item.online = false
         }
       }
     },
     delApp(data) {
       ipc
-        .invoke("controller.app.del", JSON.parse(JSON.stringify(data)))
+        .invoke('controller.app.del', JSON.parse(JSON.stringify(data)))
         .then((res) => {
-          let list = this.appList[data.type];
-          let newList = [];
+          let list = this.appList[data.type]
+          let newList = []
           for (let item of list) {
             if (data.id == item.id) {
-              continue;
+              continue
             }
 
-            newList.push(item);
+            newList.push(item)
           }
 
-          this.appList[data.type] = newList;
-        });
+          this.appList[data.type] = newList
+        })
     },
     changeRecord(data) {
-      ipc.invoke("controller.app.changeRecord", data).then((res) => {
+      ipc.invoke('controller.app.changeRecord', data).then((res) => {
         for (let item of this.apps) {
           if (data.id == item.id) {
-            item.record = data.record;
-            item.online = true;
+            item.record = data.record
+            item.online = true
           }
         }
 
-        let list = this.appList[data.type];
+        let list = this.appList[data.type]
         for (let item of list) {
           if (data.id == item.id) {
-            item.record = data.record;
-            item.online = true;
+            item.record = data.record
+            item.online = true
           }
         }
 
         this.$forceUpdate()
-      });
+      })
     },
-    changeUserName(data){
-      ipc.invoke("controller.app.changeUserName", data).then((res) => {
-        console.log("更新用户名", data)
+    changeUserName(data) {
+      ipc.invoke('controller.app.changeUserName', data).then((res) => {
+        console.log('更新用户名', data)
         for (let item of this.apps) {
           if (data.id == item.id) {
-            item.name = data.name;
-            item.online = true;
+            item.name = data.name
+            item.online = true
           }
         }
 
-        let list = this.appList[data.type];
+        let list = this.appList[data.type]
         for (let item of list) {
           if (data.id == item.id) {
-            item.name = data.name;
-            item.online = true;
+            item.name = data.name
+            item.online = true
           }
         }
-
-      });
+      })
     },
     online(data) {
       for (let item of this.apps) {
         if (data.id == item.id) {
-          item.online = true;
+          item.online = true
         }
       }
 
-      let list = this.appList[data.type];
+      let list = this.appList[data.type]
       for (let item of list) {
         if (data.id == item.id) {
-          item.online = true;
+          item.online = true
         }
       }
 
       // this.$forceUpdate()
     },
     changeMessageNum(data) {
-      let list = this.appList[data.type];
+      let list = this.appList[data.type]
       for (let item of list) {
         if (data.id == item.id) {
-          item.messageNum = data.data;
+          item.messageNum = data.data
         }
       }
     },
     listApp() {
-      ipc.invoke("controller.app.list").then((data) => {
+      ipc.invoke('controller.app.list').then((data) => {
         data.sort((a, b) => {
-          return b.sort - a.sort;
-        });
-        const groupedBy = {};
+          return b.sort - a.sort
+        })
+        const groupedBy = {}
 
         for (const item of data) {
           if (groupedBy[item.type]) {
-            groupedBy[item.type].push(item);
+            groupedBy[item.type].push(item)
           } else {
-            groupedBy[item.type] = [item];
+            groupedBy[item.type] = [item]
           }
         }
-        this.appList = groupedBy;
-      });
+        this.appList = groupedBy
+      })
     },
     loginOut() {
-      ipc.invoke("controller.login.clearLoginData")
-      this.$router.back();
+      ipc.invoke('controller.login.clearLoginData')
+      this.$router.back()
     },
   },
-};
+}
 </script>
 <style scoped>
 .el-main {
@@ -486,6 +501,11 @@ export default {
 ::v-deep(.el-menu) {
   border-right: none !important;
 }
+
+::v-deep(.el-menu-item.is-active) {
+  color: var(--el-text-color-primary);
+  font-size: var(--el-menu-item-font-size);
+}
 .boxLeftReduce {
   transition: width 0.5s; /* 过渡动画效果 */
   width: 85px;
@@ -494,7 +514,7 @@ export default {
 }
 .boxLeftNoReduce {
   transition: width 0.5s; /* 过渡动画效果 */
-  width: 200px;
+  width: 250px;
   border-right: solid 1px var(--el-menu-border-color) !important;
   overflow-x: hidden;
 }
@@ -508,6 +528,11 @@ export default {
 ::v-deep(.boxLeftReduce .el-sub-menu .el-sub-menu__icon-arrow) {
   display: none;
 }
+
+::v-deep(.itemNoMuch .el-sub-menu__icon-arrow) {
+  display: none !important;
+}
+
 .arrowLeftTransform {
   transform: rotate(180deg);
 }
@@ -515,7 +540,7 @@ export default {
   width: 40px;
   margin-right: 10px;
 }
-.is-active .menuTitle {
+.menuTitle {
   color: #409eff;
 }
 ::v-deep(.el-sub-menu) {
@@ -524,9 +549,12 @@ export default {
 .ysBoxF {
   display: flex;
   justify-content: center;
+  border-bottom: 1px solid rgb(232, 232, 232);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 .ysBox {
-  max-width: 80%;
+  width: 80%;
   display: flex;
   padding: 8px 10px;
   margin-left: auto;
@@ -556,14 +584,15 @@ export default {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
+  flex: 1;
 }
 .ysToken {
-  min-width: 70px;
   word-wrap: break-word;
-  max-width: 80px;
+  max-width: 200px;
 }
 .arrowLeftTransformCommon {
   padding: 5px;
   cursor: pointer;
 }
 </style>
+<style></style>
