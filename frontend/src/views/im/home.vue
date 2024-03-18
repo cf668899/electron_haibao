@@ -152,6 +152,7 @@ import WhatsappIcon from '@/assets/whatsapp.png'
 import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
 import { ElMessage } from 'element-plus'
+import { times } from 'lodash'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
@@ -202,6 +203,9 @@ export default {
     })
   },
   methods: {
+    selectMenu(index){
+      console.log(index)
+    },
     getItemClassName(appItem) {
       if (
         !(
@@ -225,6 +229,7 @@ export default {
       console.log('toAppManager', type)
       this.pageType = 'manager'
       this.appType = type
+      this.clickMenu = type
     },
     toApp(data) {
       console.log('toApp',data)
@@ -429,7 +434,7 @@ export default {
       })
     },
     loginOut() {
-      ipc.invoke('controller.login.clearLoginData')
+      ipc.invoke('controller.login.loginOut')
       this.$router.back()
     },
   },

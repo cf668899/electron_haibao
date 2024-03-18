@@ -51,7 +51,7 @@
               type="primary"
               style="width: 100%; height: 40px"
               @click="handlerLogin"
-              >登陆</el-button
+              >登录</el-button
             >
           </div>
         </div>
@@ -88,6 +88,12 @@ export default {
       if (res && res.isSaveLogin) {
         console.log(res)
         this.config = res
+        ipc.invoke('controller.login.isAutoLogin').then(isLogin=>{
+          // 自动登录
+          if(isLogin){
+            this.handlerLogin()
+          }
+        })
       }
     }); 
   },

@@ -17,7 +17,7 @@
             <span>代理设置</span>
           </span>
         </template>
-        代理设置
+        <ProxySetting></ProxySetting>
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
@@ -52,11 +52,12 @@
 
 <script>
 import TranslateSetting from './setting/TranslateSetting.vue'
+import ProxySetting from './setting/ProxySetting.vue'
 const { ipcRenderer: ipc } =
 (window.require && window.require('electron')) || window.electron || {}
 export default {
   name: "moreSetting",
-  components: {TranslateSetting},
+  components: {TranslateSetting, ProxySetting},
   data() {
     return {
       test: "",
@@ -73,26 +74,14 @@ export default {
     translateSettingChange(data) {
 
       //todo 设置完翻译的配置之后，要进行保存，到聊天界面上面去取对应的设置配置信息。
-      ipc.invoke('controller.app.setTranslate', data).then((res) => {
-        // if (res && res.token) {
-        //   this.token = res.token
-        // }
-      })
+      ipc.invoke('controller.config.setTranslate', data)
 
     }
   },
 };
 </script>
 <style scoped>
-.header-box {
-  text-align: left;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding-top: 5px;
-  padding-left: 15px;
-  padding-bottom: 5px;
-}
+
 .el-header {
   padding: 0;
   height: 30px;
@@ -106,6 +95,11 @@ export default {
 }
 .setting-box{
   margin: 0 10px;
+  height: 100%;
+}
+
+.el-tabs{
+  height: 98%;
 }
 
 .demo-tabs > .el-tabs__content {

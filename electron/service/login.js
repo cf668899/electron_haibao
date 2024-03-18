@@ -18,10 +18,11 @@ class LoginService extends Service {
     if(!login){
         this.conn.db.defaults({login: {
           token: "",
-          isSaveLogin: false,
+          isSaveLogin: false
         }}).write();
     }
 
+    this.autoLogin = true
   }
 
   /**
@@ -36,6 +37,15 @@ class LoginService extends Service {
   async getLoginData(){
     return this.conn.db.get("login").value();
   }
+
+  loginOut(){
+    this.autoLogin = false
+    return this.autoLogin
+  }
+  isAutoLogin(){
+    return this.autoLogin
+  }
+
   clearLoginData(){
     const store = new Store();
     let data = store.delete('loginData')

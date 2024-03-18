@@ -136,9 +136,39 @@ export default {
     reply(data, text) {
       this.view?.send('quickReply', text);
     },
-    init() {
+    async init() {
       if(this.data.translateInfo){
         this.translateInfo = this.data.translateInfo
+      }else{
+        // 使用公共配置
+        let info = await ipc.invoke("controller.config.getTranslate")
+        console.log(info)
+        let type = this.data.type
+        let its = info.apps.filter(item=>{
+          if(item.type == type){
+            return true
+          }
+          return false
+        })
+
+        if(its.length){
+          console.log("修改翻译设置")
+          let data = its[0]
+          this.translateInfo = {
+            channel: info.channel,
+            message: {
+              open: info.autoTranslate,
+              source: data.target,
+              target: data.receive
+            },
+            inputContent:{
+              open: info.autoTranslate,
+              source: data.receive,
+              target: data.receive
+            }
+          }
+        }
+
       }
       if(this.data.proxyInfo){
         this.proxyInfo = this.data.proxyInfo

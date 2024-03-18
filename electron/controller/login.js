@@ -41,6 +41,15 @@ class LoginController extends Controller {
     async getLoginData(){
         return Services.get("login").getLoginData();
     }
+
+    async loginOut(){
+        return Services.get("login").loginOut();
+    }
+
+    async isAutoLogin(){
+        return Services.get("login").isAutoLogin();
+    }
+
     clearLoginData(){
         return Services.get("login").clearLoginData();
     }
