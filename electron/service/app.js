@@ -50,6 +50,14 @@ class AppService extends Service {
     return data
   }
 
+  changeRemark(data){
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({remark: data.remark})
+    .write()
+    return data 
+  }
+
   changeTranslate(data){
     this.conn.db.get("apps")
     .find({id: data.id})
