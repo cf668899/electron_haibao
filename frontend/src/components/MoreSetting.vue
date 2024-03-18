@@ -8,16 +8,28 @@
             <span>翻译设置</span>
           </span>
         </template>
-        <TranslateSetting :data="translateInfo" @changeTranslateSetting="translateSettingChange" ></TranslateSetting>
+        <TranslateSetting
+          :data="translateInfo"
+          @changeTranslateSetting="translateSettingChange"
+        ></TranslateSetting>
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
           <span class="custom-tabs-label">
             <el-icon><Aim /></el-icon>
-            <span>代理设置</span>
+            <span>代理网络</span>
           </span>
         </template>
         <ProxySetting></ProxySetting>
+      </el-tab-pane>
+      <el-tab-pane>
+        <template #label>
+          <span class="custom-tabs-label">
+            <el-icon><Setting /></el-icon>
+            <span>快捷设置</span>
+          </span>
+        </template>
+        <QuickSetting />
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
@@ -32,56 +44,46 @@
         <template #label>
           <span class="custom-tabs-label">
             <el-icon><Lock /></el-icon>
-            <span>锁屏设置</span>
+            <span>网络监测</span>
           </span>
         </template>
-        锁屏设置
+        <CheckNet />
       </el-tab-pane>
-      <el-tab-pane>
-        <template #label>
-          <span class="custom-tabs-label">
-            <el-icon><Setting /></el-icon>
-            <span>软件设置</span>
-          </span>
-        </template>
-        软件设置
-      </el-tab-pane>
-  </el-tabs>
+    </el-tabs>
   </div>
 </template>
 
 <script>
 import TranslateSetting from './setting/TranslateSetting.vue'
 import ProxySetting from './setting/ProxySetting.vue'
+import QuickSetting from './setting/QuickSetting.vue'
+import CheckNet from './setting/CheckNet.vue'
 const { ipcRenderer: ipc } =
-(window.require && window.require('electron')) || window.electron || {}
+  (window.require && window.require('electron')) || window.electron || {}
 export default {
-  name: "moreSetting",
-  components: {TranslateSetting, ProxySetting},
+  name: 'moreSetting',
+  components: { TranslateSetting, ProxySetting, QuickSetting, CheckNet },
   data() {
     return {
-      test: "",
-      translateInfo:{
-        autoTranslate:true,
+      test: '',
+      translateInfo: {
+        autoTranslate: true,
         channel: 'deepl',
-        source:"0",
-        target:"en-US",
-        receive:"zh"
+        source: '0',
+        target: 'en-US',
+        receive: 'zh',
       },
-    };
+    }
   },
   methods: {
     translateSettingChange(data) {
-
       //todo 设置完翻译的配置之后，要进行保存，到聊天界面上面去取对应的设置配置信息。
       ipc.invoke('controller.config.setTranslate', data)
-
-    }
+    },
   },
-};
+}
 </script>
 <style scoped>
-
 .el-header {
   padding: 0;
   height: 30px;
@@ -93,12 +95,12 @@ export default {
   height: 100%;
   border: 0px;
 }
-.setting-box{
+.setting-box {
   margin: 0 10px;
   height: 100%;
 }
 
-.el-tabs{
+.el-tabs {
   height: 98%;
 }
 

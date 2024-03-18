@@ -7,10 +7,7 @@
       >
         <div class="menu-box">
           <div class="menus">
-            <el-menu
-              default-active="Whatsapp"
-              class="el-menu-vertical-demo"
-            >
+            <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
               <!-- wwhatsapp -->
               <el-sub-menu
                 :index="appItem.name"
@@ -21,9 +18,10 @@
                 <template #title>
                   <div @click="toAppManager(appItem.name)">
                     <img :src="appItem.image" class="iconImage" />
-                    <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{
-                      appItem.name
-                    }}</span>
+                    <span
+                      :class="clickMenu == appItem.name ? 'menuTitle' : ''"
+                      >{{ appItem.name }}</span
+                    >
                   </div>
                 </template>
                 <el-menu-item
@@ -203,7 +201,7 @@ export default {
     })
   },
   methods: {
-    selectMenu(index){
+    selectMenu(index) {
       console.log(index)
     },
     getItemClassName(appItem) {
@@ -232,7 +230,7 @@ export default {
       this.clickMenu = type
     },
     toApp(data) {
-      console.log('toApp',data)
+      console.log('toApp', data)
       this.id = data.id
       for (let item of this.apps) {
         if (data.id == item.id) {
@@ -261,8 +259,8 @@ export default {
     },
     startApp(data) {
       // 保存preload
-        if(this.appLimit <= this.appNum){
-          ElMessage({
+      if (this.appLimit <= this.appNum) {
+        ElMessage({
           message: '会话已达上限',
           type: 'warning',
         })
@@ -518,6 +516,9 @@ export default {
 
 ::v-deep(.el-menu) {
   border-right: none !important;
+}
+::v-deep(.el-sub-menu__title *) {
+  vertical-align: middle;
 }
 
 ::v-deep(.el-menu-item.is-active) {
