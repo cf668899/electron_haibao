@@ -60,6 +60,10 @@ class AppController extends Controller {
         Services.get("app").changeFriendInfo(data)  
     }
 
+    async changeRemark(data){
+        Services.get("app").changeRemark(data)  
+    }
+
     async savePreload(data){
         return Services.get("preload").savePreload(data)
     }

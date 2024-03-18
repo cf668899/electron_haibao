@@ -10,8 +10,6 @@
             <el-menu
               default-active="Whatsapp"
               class="el-menu-vertical-demo"
-              @open="selectMenu"
-              @close="selectMenu"
             >
               <!-- wwhatsapp -->
               <el-sub-menu
@@ -19,13 +17,14 @@
                 v-for="(appItem, index) in appTypes"
                 :key="index"
                 :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
-                @click="toAppManager(appItem.name)"
               >
                 <template #title>
-                  <img :src="appItem.image" class="iconImage" />
-                  <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{
-                    appItem.name
-                  }}</span>
+                  <div @click="toAppManager(appItem.name)">
+                    <img :src="appItem.image" class="iconImage" />
+                    <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{
+                      appItem.name
+                    }}</span>
+                  </div>
                 </template>
                 <el-menu-item
                   v-show="item.isActive"
@@ -121,6 +120,8 @@
           v-show="pageType === 'manager'"
           :app-type="appType"
           :list="appList[appType] ? appList[appType] : []"
+          :appNum="appNum"
+          :appLimit="appLimit"
           @addApp="addApp"
           @startApp="startApp"
           @closeApp="closeApp"
@@ -136,6 +137,7 @@
           @online="online"
           @changeMessageNum="changeMessageNum"
           @changeUserName="changeUserName"
+          @closeApp="closeApp"
           :key="index"
         ></WebViewX>
         <MoreSetting v-show="pageType == 'setting'"></MoreSetting>
@@ -149,6 +151,7 @@ import WebViewX from '@/components/WebViewX.vue'
 import WhatsappIcon from '@/assets/whatsapp.png'
 import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
+import { ElMessage } from 'element-plus'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
@@ -169,6 +172,8 @@ export default {
       appType: 'Whatsapp',
       pageType: 'manager',
       apps: [],
+      appNum: 0,
+      appLimit: 5,
       appTypes: [
         {
           name: 'Whatsapp',
@@ -209,10 +214,6 @@ export default {
       }
       return false
     },
-    selectMenu(value) {
-      this.clickMenu = value
-      console.log(value)
-    },
     arrowLeft() {
       this.isReduceLeft = !this.isReduceLeft
     },
@@ -221,12 +222,13 @@ export default {
       this.appType = type
     },
     toAppManager(type) {
+      console.log('toAppManager', type)
       this.pageType = 'manager'
       this.appType = type
     },
     toApp(data) {
+      console.log('toApp',data)
       this.id = data.id
-      this.pageType = 'app'
       for (let item of this.apps) {
         if (data.id == item.id) {
           item.isShow = true
@@ -234,6 +236,8 @@ export default {
         }
         item.isShow = false
       }
+
+      this.pageType = 'app'
     },
 
     addApp(data) {
@@ -252,6 +256,14 @@ export default {
     },
     startApp(data) {
       // 保存preload
+        if(this.appLimit <= this.appNum){
+          ElMessage({
+          message: '会话已达上限',
+          type: 'warning',
+        })
+        return
+      }
+      this.appNum++
       ipc
         .invoke('controller.app.savePreload', JSON.parse(JSON.stringify(data)))
         .then((res) => {
@@ -300,6 +312,7 @@ export default {
       this.pageType = 'app'
     },
     closeApp(data) {
+      this.appNum--
       for (let item of this.apps) {
         if (item.id == data.id) {
           item.isActive = false
@@ -317,6 +330,8 @@ export default {
           item.online = false
         }
       }
+
+      this.pageType = 'manager'
     },
     delApp(data) {
       ipc
@@ -387,8 +402,6 @@ export default {
           item.online = true
         }
       }
-
-      // this.$forceUpdate()
     },
     changeMessageNum(data) {
       let list = this.appList[data.type]

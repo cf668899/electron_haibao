@@ -165,15 +165,9 @@ let Whatsapp = function () {
         }
 
         // 监听消息数
-        let side = document.getElementById('pane-side')
-        if (side) {
-            let num = 0
-            let messagesBox = side.childNodes[0].childNodes[0].childNodes[0].childNodes
-            for (let message of messagesBox) {
-                let spans = message.getElementsByTagName('span')
-                num += parseInt(spans[spans.length - 3].textContent)
-            }
-
+        let messageNum = document.getElementById('messageNum')
+        if (messageNum) {
+            let num = messageNum.textContent
             if (num > 0 && oldMessageNum != num) {
                 // 更新消息数量
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
@@ -471,6 +465,61 @@ let Whatsapp = function () {
                     'type': "runJs",
                     'data': friendInterval.toString() + ';friendInterval()'
                 }))
+
+                // 消息监听
+                function monitorMessageNum (){
+                    function readSpecPropName(ele) {
+                        for (const key in ele) {
+                            if (key && key.startsWith('__reactFiber')) {
+                                return key;
+                            }
+                        }
+                        return null;
+                    }
+                    setInterval(()=>{
+                        let paneSide = document.getElementById('pane-side')
+                        if(paneSide){
+                            let propName = readSpecPropName(paneSide);
+                            if(!propName){
+                                return
+                            }
+
+                            let num = 0
+                            let children = paneSide[propName].pendingProps.children
+                            for(let child of children){
+                                if(child && child.props && child.props.chats){
+                                    let chats = child.props.chats
+                                    for(let chat of chats){
+                                        num += chat.__x_unreadCount
+                                    }
+                                }
+                            }
+
+                            if(num > 0){
+                                let messageNum = document.getElementById('messageNum')
+                                if(messageNum){
+                                    messageNum.textContent = num
+                                }else{
+                                    let divName = document.createElement('div')
+                                    divName.textContent = num
+                                    divName.setAttribute('id', 'messageNum')
+                                    divName.style.display = 'none'
+                                    document.getElementsByTagName('body')[0].appendChild(divName)
+                                }
+
+                            }
+
+                        }
+
+                    }, 1500)
+                }
+
+                window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                    'type': "runJs",
+                    'data': monitorMessageNum.toString() + ';monitorMessageNum()'
+                }))
+
+
             } else {
                 if (!userTag) {
                     userName = ''

@@ -56,6 +56,13 @@
             </span>
           </template>
         </el-tab-pane>
+        <el-tab-pane label="关闭" name="关闭">
+          <template #label>
+            <span @click="close">
+              <el-icon><CircleClose /></el-icon>
+            </span>
+          </template>
+        </el-tab-pane>
       </el-tabs>
     </el-aside>
   </el-container>
@@ -72,7 +79,7 @@ const Ps = require('ee-core/ps');
 export default {
   name: "webviewx",
   props: ["data"],
-  emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName'],
+  emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName','closeApp'],
   components: { QuickReply, TranslateSetting, ProxySetting,  UserInfo },
   data() {
     return {
@@ -120,6 +127,9 @@ export default {
 
       return true
     },
+    close(){
+      this.$emit('closeApp', this.data)
+    },
     reload(){
       this.view?.reload()
     },
@@ -140,12 +150,13 @@ export default {
       });
     },
     inject(view) {
+      this.view = view
       this.injectHandler(view);
     },
     injectHandler(view) {
       view.addEventListener("dom-ready", () => {
-        this.view = view
-        // view.openDevTools();
+        // this.view = view
+        view.openDevTools();
         view.addEventListener('ipc-message', (event) => {
           let eventData = JSON.parse(event.channel);
           if (eventData.type == 'changeRecord') {

@@ -5,7 +5,7 @@
         <div style="font-size: 15px;margin-left:15px;">会话列表</div>
         <div style="padding-left: 20px">
           <el-tag type="success" effect="dark">{{
-            "会话:" + list.length + "/5"
+            `会话:${appNum} / ${appLimit}`
           }}</el-tag>
         </div>
         <div class="addAppBtn" @click="addApp">
@@ -35,7 +35,18 @@
             </template>
           </el-table-column>
           <el-table-column prop="name" label="用户名" width="auto" />
-          <el-table-column prop="remark" label="备注信息" width="auto" />
+          <el-table-column prop="remark" label="备注信息" width="auto" >
+            <template #default="scope">
+              <div class="remark">
+                <span v-if="!scope.row.isEdit">
+                  {{ scope.row.remark }} 
+                  <el-button  @click="toEdit(scope.row)" style="padding: 0;"  text><el-icon size="15" color="#409EFF" ><Edit /></el-icon></el-button> 
+                </span>
+                <el-input @blur="remarkEditBlur(scope.row)" v-model="scope.row.remark" v-if="scope.row.isEdit">
+              </el-input>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column label="操作">
             <template #default="scope">
               <el-button
@@ -75,9 +86,10 @@
 </template>
 
 <script>
+const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 export default {
   name: "applist",
-  props: ["appType", "list"],
+  props: ["appType", "list", "appNum", "appLimit"],
   emits: ["addApp", "startApp", "showApp", "closeApp", "delApp"],
   data() {
     return {
@@ -87,6 +99,14 @@ export default {
   methods: {
     indexMethod(index) {
       return this.list.length - index;
+    },
+    toEdit(row){
+      row.isEdit = true
+    },
+    remarkEditBlur(row){
+      console.log(row)
+      row.isEdit = false
+      ipc.invoke('controller.app.changeRemark', { row })
     },
     addApp(){
       this.$emit('addApp', {
@@ -133,5 +153,9 @@ export default {
 }
 .online {
   background-color: #409EFF;
+}
+.remark{
+  display: flex;
+  align-items: center;
 }
 </style>
