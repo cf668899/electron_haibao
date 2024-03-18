@@ -67,6 +67,12 @@ class AppController extends Controller {
     getMachineId(){
         return Services.get("app").getMachineId()
     }
+
+    //代理
+    async setTranslate(data) {
+        let res = await Services.get("app").setTranslate(data)
+        return res
+    }
 }
 
 AppController.toString = () => '[class AppController]';

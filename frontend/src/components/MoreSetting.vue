@@ -52,6 +52,8 @@
 
 <script>
 import TranslateSetting from './setting/TranslateSetting.vue'
+const { ipcRenderer: ipc } =
+(window.require && window.require('electron')) || window.electron || {}
 export default {
   name: "moreSetting",
   components: {TranslateSetting},
@@ -68,8 +70,15 @@ export default {
     };
   },
   methods: {
-    translateSettingChange(item) {
+    translateSettingChange(data) {
+
       //todo 设置完翻译的配置之后，要进行保存，到聊天界面上面去取对应的设置配置信息。
+      ipc.invoke('controller.app.setTranslate', data).then((res) => {
+        // if (res && res.token) {
+        //   this.token = res.token
+        // }
+      })
+
     }
   },
 };

@@ -44,7 +44,7 @@
       };
     },
     methods: {
-      changeTranslateSetting(item) {
+      changeTranslateSetting() {
         this.$emit("changeTranslateSetting", this.data)
       }
     },

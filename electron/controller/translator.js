@@ -27,6 +27,7 @@ class TranslatorController extends Controller {
         let res = await Services.get("translator").google(data)
         return res
     }
+
 }
 
 TranslatorController.toString = () => '[class TranslatorController]';

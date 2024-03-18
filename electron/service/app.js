@@ -57,6 +57,7 @@ class AppService extends Service {
     .write()
     return data
   }
+
   changeProxyInfo(data){
     this.conn.db.get("apps")
     .find({id: data.id})
@@ -119,6 +120,12 @@ class AppService extends Service {
     getMachineId(){
       return Utils.machineIdSync(true)
     }
+
+  setTranslate(data) {
+    //todo 保存翻译设置
+    return data
+
+  }
 }
 
 AppService.toString = () => '[class AppService]';

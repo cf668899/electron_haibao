@@ -2,6 +2,7 @@
 
 const { Service } = require('ee-core');
 const HttpClient = require('ee-core/httpclient');
+const Storage = require("ee-core/storage");
 const {Translate} = require('@google-cloud/translate').v2;
 
 /**
@@ -13,6 +14,11 @@ class TranslatorService extends Service {
   constructor(ctx) {
     super(ctx);
     this.translatorMap = {}
+    this.conn = Storage.connection('haibao');
+    let app = this.conn.db.get("apps").value()
+    if(!app){
+      this.conn.db.defaults({apps: []}).write();
+    }
   }
 
 
@@ -48,6 +54,8 @@ class TranslatorService extends Service {
     });
     return translations
   }
+
+
 
 
 }
