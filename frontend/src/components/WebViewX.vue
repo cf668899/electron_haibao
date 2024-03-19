@@ -8,7 +8,7 @@
     </el-main>
     <el-aside class="webview-aside" width="350px">
       <el-tabs tab-position="right" style="height: 100%" v-model="tabValue" :before-leave="beforeLeave">
-        <el-tab-pane label="伸缩"  name="伸缩">
+        <el-tab-pane label="伸缩" name="伸缩">
           <template #label>
             <span>
               <el-icon>
@@ -17,49 +17,61 @@
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane label="快捷回复"  name="快捷回复">
+        <el-tab-pane label="快捷回复" name="快捷回复">
           <template #label>
             <span>
-              <el-icon><Position /></el-icon>
+              <el-icon>
+                <Position />
+              </el-icon>
             </span>
           </template>
           <QuickReply :data="data" @reply="reply"></QuickReply>
         </el-tab-pane>
-        <el-tab-pane label="翻译"  name="翻译">
+        <el-tab-pane label="翻译" name="翻译">
           <template #label>
             <span>
-              <el-icon><Connection /></el-icon>
+              <el-icon>
+                <Connection />
+              </el-icon>
             </span>
           </template>
-          <TranslateSetting :data="translateInfo" @change="translateSettingChange" ></TranslateSetting>
+          <TranslateSetting :data="translateInfo" @change="translateSettingChange"></TranslateSetting>
         </el-tab-pane>
-        <el-tab-pane label="代理"  name="代理">
+        <el-tab-pane label="代理" name="代理">
           <template #label>
             <span>
-              <el-icon><Orange /></el-icon>
+              <el-icon>
+                <Orange />
+              </el-icon>
             </span>
           </template>
-          <ProxySetting :data="proxyInfo" @change="proxySettingChange" ></ProxySetting>
+          <ProxySetting :id="data.id" :data="proxyInfo" @change="proxySettingChange"></ProxySetting>
         </el-tab-pane>
         <el-tab-pane label="用户" name="用户">
           <template #label>
             <span>
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </span>
           </template>
-          <UserInfo ref="userInfo" :data="data" @changeFriendInfo="changeFriendInfo" ></UserInfo>
+          <UserInfo ref="userInfo" :data="data" @changeFriendInfo="changeFriendInfo"></UserInfo>
         </el-tab-pane>
         <el-tab-pane label="刷新" name="刷新">
           <template #label>
             <span @click="reload">
-              <el-icon><RefreshRight /></el-icon>
+              <el-icon>
+                <RefreshRight />
+              </el-icon>
             </span>
           </template>
         </el-tab-pane>
         <el-tab-pane label="关闭" name="关闭">
           <template #label>
             <span @click="close">
-              <el-icon><CircleClose /></el-icon>
+              <el-icon>
+                <CircleClose />
+              </el-icon>
             </span>
           </template>
         </el-tab-pane>
@@ -79,79 +91,78 @@ const Ps = require('ee-core/ps');
 export default {
   name: "webviewx",
   props: ["data"],
-  emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName','closeApp'],
-  components: { QuickReply, TranslateSetting, ProxySetting,  UserInfo },
+  emits: ['changeRecord', 'online', 'changeMessageNum', 'changeUserName', 'closeApp'],
+  components: { QuickReply, TranslateSetting, ProxySetting, UserInfo },
   data() {
     return {
-      tabValue:"翻译",
+      tabValue: "翻译",
       preload: "file://" + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
       srcMap: {
         Whatsapp: "https://web.whatsapp.com",
         Telegram: "https://web.telegram.org",
       },
       view: null,
-      translateInfo:{
+      translateInfo: {
         channel: 'deepl',
         message: {
           open: true,
-          source:"en-US",
-          target:"zh"
+          source: "en-US",
+          target: "zh"
         },
-        inputContent:{
+        inputContent: {
           open: true,
-          source:"zh",
-          target:"en-US"
+          source: "zh",
+          target: "en-US"
         }
       },
-      proxyInfo:{
-        message: {
-          openproxy: false,
-          proxy:"",
-          address:"",
-          port:"",
-          openpwd:false,
-          username:"",
-          pwd:"",
-        }
-      }
+      proxyInfo: {
+        open: false,
+        type: 'HTTP',
+        host: '',
+        port: '',
+        auth: false,
+        user: '',
+        password: '',
+        cookieOpen: false
+      },
     };
   },
   created() {
     this.init();
   },
   methods: {
-    beforeLeave(activeName, oldActiveName){
-      if(activeName == '伸缩' || activeName=='刷新'){
+    beforeLeave(activeName, oldActiveName) {
+      if (activeName == '伸缩' || activeName == '刷新') {
         return false
       }
 
       return true
     },
-    close(){
+    close() {
       this.$emit('closeApp', this.data)
     },
-    reload(){
+    reload() {
       this.view?.reload()
     },
     reply(data, text) {
       this.view?.send('quickReply', text);
     },
     async init() {
-      if(this.data.translateInfo){
+      if (this.data.translateInfo) {
         this.translateInfo = this.data.translateInfo
-      }else{
+      } else {
         // 使用公共配置
         let info = await ipc.invoke("controller.config.getTranslate")
         console.log(info)
         let type = this.data.type
-        let its = info.apps.filter(item=>{
-          if(item.type == type){
+        let its = info.apps.filter(item => {
+          if (item.type == type) {
             return true
           }
           return false
         })
 
-        if(its.length){
+        if (its.length) {
           console.log("修改翻译设置")
           let data = its[0]
           this.translateInfo = {
@@ -161,7 +172,7 @@ export default {
               source: data.target,
               target: data.receive
             },
-            inputContent:{
+            inputContent: {
               open: info.autoTranslate,
               source: data.receive,
               target: data.receive
@@ -170,8 +181,15 @@ export default {
         }
 
       }
-      if(this.data.proxyInfo){
+      if (this.data.proxyInfo) {
         this.proxyInfo = this.data.proxyInfo
+      }else{
+        // 公共配置
+        ipc.invoke("controller.config.getProxy").then((res) => {
+            if (res) {
+                this.proxyInfo = res
+            }
+        });
       }
 
       this.$nextTick(() => {
@@ -184,6 +202,9 @@ export default {
       this.injectHandler(view);
     },
     injectHandler(view) {
+      view.addEventListener('did-start-loading', ()=>{
+        this.proxyeChange()
+      })
       view.addEventListener("dom-ready", () => {
         // this.view = view
         view.openDevTools();
@@ -201,18 +222,18 @@ export default {
           }
 
           if (eventData.type == 'changeUserName') {
-            this.$emit('changeUserName', { id: this.data.id, type: this.data.type, name:eventData.data.title, data: eventData.data });
+            this.$emit('changeUserName', { id: this.data.id, type: this.data.type, name: eventData.data.title, data: eventData.data });
           }
 
-          if(eventData.type == 'changeFriendInfo') {
+          if (eventData.type == 'changeFriendInfo') {
             this.$refs.userInfo.openChange(eventData.data)
           }
 
-          if(eventData.type == 'runJs'){
+          if (eventData.type == 'runJs') {
             this.view?.executeJavaScript(eventData.data, true)
           }
 
-          if(eventData.type == 'insertText'){
+          if (eventData.type == 'insertText') {
             console.log("输入文本！！")
             this.view?.delete()
             this.view?.insertText(eventData.data)
@@ -227,55 +248,63 @@ export default {
         }, 1000);
       });
     },
-    translateSettingChange(data){
+    translateSettingChange(data) {
       this.translateInfo = data
       // 修改app翻译信息
       ipc.invoke("controller.app.changeTranslate", JSON.parse(JSON.stringify({
         id: this.data.id,
         translateInfo: data
-      }))).then(res=>{
+      }))).then(res => {
         this.translateChange()
       })
     },
-    translateChange(){
+    translateChange() {
       this.view?.send('translateInfoChange', JSON.stringify(this.translateInfo));
     },
-    proxySettingChange(data){
+    proxySettingChange(data) {
       this.proxyInfo = data
       // 修改app代理信息
       ipc.invoke("controller.app.changeProxyInfo", JSON.parse(JSON.stringify({
         id: this.data.id,
         proxyInfo: data
-      }))).then(res=>{
+      }))).then(res => {
         this.proxyeChange()
       })
     },
-    proxyeChange(){
-      this.view?.send('proxySettingChange', JSON.stringify(this.proxyInfo));
+    proxyeChange() {
+      // this.view?.send('proxySettingChange', JSON.stringify(this.proxyInfo));
+      // TODO 修改代理配置
+      console.log('修改代理配置', this.proxyInfo)
+      console.log('getWebContentsId', this.view?.getWebContentsId())
+      if(this.view && this.proxyInfo.cookieOpen){
+        ipc.invoke("controller.app.settingProxy", JSON.parse(JSON.stringify({
+          id:'persist:' + this.data.id,
+          proxyInfo: this.proxyInfo
+        })))
+      }
+
     },
-    changeFriendInfo(data){
+    changeFriendInfo(data) {
       console.log('保存联系人', data)
       let app = {
         id: this.data.id,
-        friendInfo: data 
+        friendInfo: data
       }
       this.view?.send('changeFriendInfo', JSON.stringify(app));
       // this.data.friendInfo[data.id] = data
     },
-    initFriend(){
-      if(this.data.friendInfo){
+    initFriend() {
+      if (this.data.friendInfo) {
         this.view?.send('friendInfoChange', JSON.stringify(this.data.friendInfo));
       }
     }
   }
 };
 </script>
-<style scoped>
-.el-main {
+<style scoped>.el-main {
   padding: 0;
 }
 
 .vebview-aside {
   max-width: 250px;
-}
-</style>
+}</style>

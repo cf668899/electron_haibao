@@ -4,6 +4,7 @@ const { Controller } = require('ee-core');
 const Log = require('ee-core/log');
 const Services = require('ee-core/services');
 const { session } = require('electron')
+const windows = require('ee-core/electron/window');
 
 /**
  * login
@@ -76,6 +77,36 @@ class AppController extends Controller {
     async setTranslate(data) {
         let res = await Services.get("app").setTranslate(data)
         return res
+    }
+
+    //全局配置
+    async settingGlobalProxy(data){
+        console.log('settingGlobalProxy', data)
+        if(!data.open){
+            return
+        }
+
+        let auth = data.auth?`${data.user}:${data.password}@`:''
+        const proxyServer = `${data.type.toLowerCase()}://${auth}${data.host}:${data.port}`
+        session.defaultSession.setProxy({
+            proxyBypassRules: 'localhost',
+            proxyRules: proxyServer,
+        })
+    }
+
+    // 局部配置
+    async settingProxy(data){
+        console.log(data)
+        if(!data.proxyInfo.cookieOpen){
+            return
+        }
+
+        let auth = data.proxyInfo.auth?`${data.proxyInfo.user}:${data.proxyInfo.password}@`:''
+        const proxyServer = `${data.proxyInfo.type.toLowerCase()}://${auth}${data.proxyInfo.host}:${data.proxyInfo.port}`
+        session.fromPartition(data.id).setProxy({
+            proxyBypassRules: 'localhost',
+            proxyRules: proxyServer,
+        })
     }
 }
 

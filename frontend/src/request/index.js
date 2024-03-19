@@ -54,7 +54,12 @@ service.interceptors.response.use(
 		}
 	},
 	error => {
-		errorLog(new Error(` ${error.response.data.message} !: ${error.config.url}`))
+		ElMessage({
+			message: '网络异常',
+			type: 'error',
+			duration: 5 * 1000
+		})
+		// errorLog(new Error(` ${error.response.data.message} !: ${error.config.url}`))
 		return Promise.reject(error)
 	}
 )

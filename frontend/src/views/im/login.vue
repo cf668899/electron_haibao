@@ -84,6 +84,12 @@ export default {
     };
   },
   created() {
+    ipc.invoke("controller.config.getProxy").then((config) => {
+        if (config) {
+          ipc.invoke("controller.app.settingGlobalProxy", config)
+        }
+    });
+    
     ipc.invoke("controller.login.getLoginData", {}).then((res) => {
       if (res && res.isSaveLogin) {
         console.log(res)

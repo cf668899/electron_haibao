@@ -4,34 +4,32 @@
         <el-form label-position="left" label-width="90px">
             
             <el-form-item label="启用代理服务器" label-width="150px">
-                <el-switch v-model="data.message.openproxy" @change="change"/>
+                <el-switch v-model="data.cookieOpen" @change="change"/>
             </el-form-item>
 
             <el-form-item label="协议">
-                <el-select v-model="data.message.proxy" placeholder="请选择协议" class="form-item" @change="change">
-                    <el-option :label="item.label" :value="item.value" v-for="item in channels" :key="item.label" />
+                <el-select v-model="data.type" placeholder="请选择协议" class="form-item" @change="change">
+                    <el-option :label="item.label" :value="item.value" v-for="item in proxyTypes" :key="item.label" />
                 </el-select>
             </el-form-item>
             <el-form-item label="地址">
-                <el-input v-model="data.message.address"   class="form-item"/>
+                <el-input v-model="data.host"   class="form-item"/>
             </el-form-item>
             <el-form-item label="端口">
-                <el-input v-model="data.message.port"   class="form-item"/>
+                <el-input v-model="data.port"   class="form-item"/>
             </el-form-item>
-
-           
 
             <el-divider />
 
             <el-form-item label="启动代理服务器验证" label-width="150px">
-                <el-switch v-model="data.message.openpwd" @change="change"/>
+                <el-switch v-model="data.auth" @change="change"/>
             </el-form-item>
 
             <el-form-item label="用户名">
-                <el-input v-model="data.message.username"   class="form-item"/>
+                <el-input :disabled="!data.auth" v-model="data.user"   class="form-item"/>
             </el-form-item>
             <el-form-item label="密码">
-                <el-input v-model="data.message.pwd"   class="form-item"/>
+                <el-input :disabled="!data.auth" v-model="data.password"   class="form-item"/>
             </el-form-item>
 
             <el-divider />
@@ -46,15 +44,36 @@
 const { clipboard } = require('electron')
 import translate from '@/constant/proxydefaul'
 export default {
-    props: ["data"],
+    props: ["data", "id"],
     emits: ["change",],
     data() {
         return {
-            channels: translate.channels
+            channels: translate.channels,
+            proxyTypes:[
+            {
+                label: 'HTTP',
+                value: 'HTTP'
+            },
+            {
+                label: 'HTTPS',
+                value: 'HTTPS'
+            },
+            {
+                label: 'SOCKS4',
+                value: 'SOCKS4'
+            },
+            {
+                label: 'SOCKS5',
+                value: 'SOCKS5'
+            },
+        ]
         };
     },
     methods: {
         change(item) {
+            // this.$emit("change", this.data)
+        },
+        changeProxyInfo(){
             this.$emit("change", this.data)
         }
     },
