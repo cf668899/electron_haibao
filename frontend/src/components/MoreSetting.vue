@@ -25,15 +25,6 @@
       <el-tab-pane>
         <template #label>
           <span class="custom-tabs-label">
-            <el-icon><Setting /></el-icon>
-            <span>快捷设置</span>
-          </span>
-        </template>
-        <QuickSetting />
-      </el-tab-pane>
-      <el-tab-pane>
-        <template #label>
-          <span class="custom-tabs-label">
             <el-icon><Grid /></el-icon>
             <span>支持平台</span>
           </span>
@@ -44,10 +35,19 @@
         <template #label>
           <span class="custom-tabs-label">
             <el-icon><Lock /></el-icon>
-            <span>网络监测</span>
+            <span>锁屏设置</span>
           </span>
         </template>
-        <CheckNet />
+        <LockSetting />
+      </el-tab-pane>
+      <el-tab-pane>
+        <template #label>
+          <span class="custom-tabs-label">
+            <el-icon><Setting /></el-icon>
+            <span>软件设置</span>
+          </span>
+        </template>
+        <SoftSetting />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -56,13 +56,13 @@
 <script>
 import TranslateSetting from './setting/TranslateSetting.vue'
 import ProxySetting from './setting/ProxySetting.vue'
-import QuickSetting from './setting/QuickSetting.vue'
-import CheckNet from './setting/CheckNet.vue'
+import LockSetting from './setting/LockSetting.vue'
+import SoftSetting from './setting/SoftSetting.vue'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
   name: 'moreSetting',
-  components: { TranslateSetting, ProxySetting, QuickSetting, CheckNet },
+  components: { TranslateSetting, ProxySetting, LockSetting, SoftSetting },
   data() {
     return {
       test: '',
