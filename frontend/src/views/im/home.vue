@@ -157,6 +157,8 @@ import MoreSetting from '@/components/MoreSetting.vue'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
 import { logout } from "@/api/admin";
+import { baseWsUrl } from '@/constant/request'
+const WebSocket = require('ws');
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
@@ -209,6 +211,7 @@ export default {
       }
     })
     this.initLockSetInterval()
+    this.initWs()
   },
   methods: {
     initLockSetInterval(){
@@ -487,6 +490,26 @@ export default {
       ipc.invoke('controller.login.loginOut')
       this.$router.back()
     },
+    async initWs(){
+      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      let ws = new WebSocket(baseWsUrl + loginInfo.token)
+      ws.on('open', function open() {
+        console.log('WebSocket 连接已打开。');
+        ws.send('你好，服务器！');
+      });
+      
+      ws.on('message', function incoming(data) {
+        console.log('收到服务器消息:', data);
+      });
+      
+      ws.on('close', function close() {
+        console.log('WebSocket 连接已关闭。');
+      });
+      
+      ws.on('error', function error(err) {
+        console.error('WebSocket 出错:', err);
+      });
+    }
   },
 }
 </script>
