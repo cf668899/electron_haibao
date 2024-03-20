@@ -38,6 +38,14 @@ class ConfigService extends Service {
   getProxy(){
     return this.conn.db.get('proxy').value()
   }
+
+  getConfig(key){
+    return this.conn.db.get(key).value()
+  }
+
+  setConfig(data){
+    this.conn.db.set(data.key, data.value).write();
+  }
 }
 
 ConfigService.toString = () => '[class ConfigService]';

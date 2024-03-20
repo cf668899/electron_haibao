@@ -1,5 +1,5 @@
 <template>
-  <div class="common-layout">
+  <div class="common-layout" @click="lockMonitor" v-show="!isLock">
     <el-container>
       <el-aside
         style="height: 100%; background-color: rgb(253, 253, 253)"
@@ -94,7 +94,7 @@
                 type="warning"
                 class="quiteButton"
                 style="width: 80%"
-        
+
                 >退出</el-button
               > -->
               <div>
@@ -146,6 +146,11 @@
       </el-main>
     </el-container>
   </div>
+
+  <!-- 锁屏 -->
+  <div v-show="isLock" class="common-layout">
+    <LockView @unLock='unLock' @loginOut='loginOut'></LockView>
+  </div>
 </template>
 <script>
 import AppList from '@/components/AppList.vue'
@@ -153,8 +158,11 @@ import WebViewX from '@/components/WebViewX.vue'
 import WhatsappIcon from '@/assets/whatsapp.png'
 import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
+import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
-import { times } from 'lodash'
+import { logout } from "@/api/admin";
+import { baseWsUrl } from '@/constant/request'
+const WebSocket = require('ws');
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
@@ -162,6 +170,7 @@ export default {
     AppList,
     WebViewX,
     MoreSetting,
+    LockView
   },
   data() {
     return {
@@ -195,6 +204,8 @@ export default {
       },
       clickMenu: '',
       token: '',
+      lastActive: Date.now(),
+      isLock: false
     }
   },
   computed: {
@@ -210,8 +221,43 @@ export default {
         this.token = res.token
       }
     })
+    this.initLockSetInterval()
+    this.initWs()
   },
   methods: {
+    initLockSetInterval(){
+      ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
+        if(res){
+          if(res.lockTime > 0){
+            setInterval(()=>{
+              let now = Date.now()
+              if(now - this.lastActive > res.lockTime * 1000 * 60){
+                this.isLock = true
+              }
+
+            }, 1000)
+          }
+        }
+      });
+    },
+    unLock(password){
+      ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
+        if(res){
+          if(!res.password || res.password == password){
+            this.isLock = false
+            this.lastActive = Date.now()
+          }else{
+            ElMessage.error('密码错误！！')
+          }
+        }else{
+          this.isLock = false
+          this.lastActive = Date.now()
+        }
+      });
+    },
+    lockMonitor(){
+      this.lastActive = Date.now()
+    },
     selectMenu(index) {
       console.log(index)
     },
@@ -233,9 +279,9 @@ export default {
     moreSetting(type) {
       this.pageType = 'setting'
       this.appType = type
+      this.clickMenu = type
     },
     toAppManager(type) {
-      console.log('toAppManager', type)
       this.pageType = 'manager'
       this.appType = type
       this.clickMenu = type
@@ -442,10 +488,39 @@ export default {
         this.appList = groupedBy
       })
     },
-    loginOut() {
+    async loginOut() {
+      const machineId = await ipc.invoke("controller.app.getMachineId", {})
+      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      if(loginInfo){
+        await logout({
+          inviteCode: loginInfo.token,
+          deviceId: machineId
+        })
+      }
+
       ipc.invoke('controller.login.loginOut')
       this.$router.back()
     },
+    async initWs(){
+      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      let ws = new WebSocket(baseWsUrl + loginInfo.token)
+      ws.on('open', function open() {
+        console.log('WebSocket 连接已打开。');
+        ws.send('你好，服务器！');
+      });
+
+      ws.on('message', function incoming(data) {
+        console.log('收到服务器消息:', data);
+      });
+
+      ws.on('close', function close() {
+        console.log('WebSocket 连接已关闭。');
+      });
+
+      ws.on('error', function error(err) {
+        console.error('WebSocket 出错:', err);
+      });
+    }
     updateAppTypes(appTypes) {
       console.log('appType==', appTypes)
       this.appTypes = appTypes

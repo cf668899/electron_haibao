@@ -6,11 +6,11 @@
         useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36">
       </webview>
     </el-main>
-    <el-aside class="webview-aside" width="350px">
+    <el-aside :class="expansion?'viebview-aside':'viebview-aside-mini'">
       <el-tabs tab-position="right" style="height: 100%" v-model="tabValue" :before-leave="beforeLeave">
         <el-tab-pane label="伸缩" name="伸缩">
           <template #label>
-            <span>
+            <span @click="expansionChange">
               <el-icon>
                 <Expand />
               </el-icon>
@@ -125,12 +125,16 @@ export default {
         password: '',
         cookieOpen: false
       },
+      expansion:true
     };
   },
   created() {
     this.init();
   },
   methods: {
+    expansionChange(){
+      this.expansion = !this.expansion
+    },
     beforeLeave(activeName, oldActiveName) {
       if (activeName == '伸缩' || activeName == '刷新') {
         return false
@@ -305,6 +309,18 @@ export default {
   padding: 0;
 }
 
-.vebview-aside {
-  max-width: 250px;
-}</style>
+.viebview-aside {
+  width:350px;
+  transition: width 0.5s; /* 过渡动画效果 */
+  border-right: solid 1px var(--el-menu-border-color) !important;
+  overflow-x: hidden;
+  border-left: solid 1px rgb(237, 230, 230);
+  background-color: #ffff;
+}
+.viebview-aside-mini {
+  width: 50px !important;
+  transition: width 0.5s; /* 过渡动画效果 */
+  border-right: solid 1px var(--el-menu-border-color) !important;
+  overflow-x: hidden;
+}
+</style>
