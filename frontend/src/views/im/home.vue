@@ -11,7 +11,7 @@
               <!-- wwhatsapp -->
               <el-sub-menu
                 :index="appItem.name"
-                v-for="(appItem, index) in appTypes"
+                v-for="(appItem, index) in leftList"
                 :key="index"
                 :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
               >
@@ -115,7 +115,7 @@
       </el-aside>
       <el-main>
         <AppList
-          v-show="pageType === 'manager'"
+          v-if="pageType === 'manager'"
           :app-type="appType"
           :list="appList[appType] ? appList[appType] : []"
           :appNum="appNum"
@@ -138,7 +138,11 @@
           @closeApp="closeApp"
           :key="index"
         ></WebViewX>
-        <MoreSetting v-show="pageType == 'setting'"></MoreSetting>
+        <MoreSetting
+          v-if="pageType == 'setting'"
+          :appTypes="appTypes"
+          @updateAppTypes="updateAppTypes"
+        ></MoreSetting>
       </el-main>
     </el-container>
   </div>
@@ -177,10 +181,12 @@ export default {
         {
           name: 'Whatsapp',
           image: WhatsappIcon,
+          used: true,
         },
         {
           name: 'Telegram',
           image: TelegramIcon,
+          used: true,
         },
       ],
       srcMap: {
@@ -190,6 +196,11 @@ export default {
       clickMenu: '',
       token: '',
     }
+  },
+  computed: {
+    leftList() {
+      return this.appTypes.filter((i) => i.used)
+    },
   },
   created() {
     this.clickMenu = this.appTypes[0].name
@@ -434,6 +445,10 @@ export default {
     loginOut() {
       ipc.invoke('controller.login.loginOut')
       this.$router.back()
+    },
+    updateAppTypes(appTypes) {
+      console.log('appType==', appTypes)
+      this.appTypes = appTypes
     },
   },
 }

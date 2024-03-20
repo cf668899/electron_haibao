@@ -1,63 +1,73 @@
 <template>
   <div class="tab-box">
     <div class="topBox">
-      <div class="title">检查网络连接平台延迟</div>
-      <el-button>检查更新</el-button>
-    </div>
-    <div class="centerBox">
-      <div class="centerBoxItem" v-for="(item, index) in list" :key="index">
-        <div :class="item.state ? 'djc ' + item.state : 'djc'">待检测</div>
-        <div :class="item.state ? 'spanClass spanClassR' : 'spanClass'">
-          Whatsapp
-        </div>
-        <div class="ycClass">{{ item.yc || '-' }}</div>
+      <div class="title">
+        <span style="color: #409eff; margin-right: 10px">支持平台</span
+        ><span>自定义左侧栏显示的平台(可拖拽更换顺序)</span>
       </div>
     </div>
+    <draggable
+      v-model="list"
+      group="list"
+      item-key="name"
+      class="centerBox"
+      @change="changeDrag"
+    >
+      <template #item="{ element: item }">
+        <div class="centerBoxItem" :key="item.name">
+          <el-checkbox
+            v-model="item.used"
+            size="large"
+            @change="updateData(item)"
+          />
+          <img class="iconImg" :src="item.image" />
+        </div>
+      </template>
+    </draggable>
   </div>
 </template>
 
 <script>
+import draggable from 'vuedraggable'
+import WhatsappIcon from '@/assets/whatsapp.png'
+import TelegramIcon from '@/assets/Telegram.png'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
-  props: ['data'],
+  props: ['appTypes'],
   emits: ['changeTranslateSetting'],
+  components: {
+    draggable,
+  },
+  created() {
+    this.list = this.appTypes || []
+  },
   data() {
     return {
-      list: [
-        {
-          name: 'Whatsapp',
-        },
-        {
-          name: 'Whatsapp',
-          state: 'quick',
-          yc: '200ms',
-        },
-        {
-          name: 'Whatsapp',
-          state: 'notNet',
-        },
-        {
-          name: 'Whatsapp',
-          state: 'checkIng',
-        },
-        {
-          name: 'Whatsapp',
-        },
-        {
-          name: 'Whatsapp',
-        },
-        {
-          name: 'Whatsapp',
-        },
-        {
-          name: 'Whatsapp',
-        },
-      ],
+      drag: false,
+      list: [],
     }
   },
-  created() {},
   methods: {
+    updateData(item) {
+      let index = -1
+      for(let i=0;i<this.appTypes.length;i++){
+        if(item.name === this.appTypes[i].name){
+          index = i
+        }
+      }
+      let newList = JSON.parse(JSON.stringify(this.appTypes))
+      newList[index].used = item.used
+      this.$emit('updateAppTypes', newList)
+    },
+    changeDrag(data) {
+      let newList = JSON.parse(JSON.stringify(this.appTypes))
+      let newItem = data.moved.element
+      let oldItem = JSON.parse(JSON.stringify(newList[data.moved.newIndex]))
+      newList[data.moved.newIndex] = newItem
+      newList[data.moved.oldIndex] = oldItem
+      this.$emit('updateAppTypes', newList)
+    },
   },
 }
 </script>
@@ -74,22 +84,21 @@ export default {
 .title {
   font-weight: 600;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.88);
 }
 .centerBox {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 四个相等宽度的列 */
-  grid-gap: 15px 13px;
+  grid-template-columns: repeat(3, 1fr); /* 四个相等宽度的列 */
+  grid-gap: 1px 1px;
   padding-top: 20px;
 }
 .centerBoxItem {
   padding: 10px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   background: #ffffff;
-  box-shadow: 2px 2px 8px 1px rgba(231, 231, 231, 0.5);
-  min-height: 120px;
+  box-shadow: 2px 2px 2px 2px rgba(231, 231, 231, 0.5);
+  min-height: 80px;
 }
 .spanClass {
   font-weight: 400;
@@ -132,5 +141,9 @@ export default {
   font-size: 12px;
   color: #6e6e6e;
   margin-top: 20px;
+}
+.iconImg {
+  width: 50px;
+  margin-left: 20px;
 }
 </style>

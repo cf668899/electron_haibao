@@ -29,7 +29,7 @@
             <span>支持平台</span>
           </span>
         </template>
-        支持平台
+        <CheckNet @updateAppTypes="updateAppTypes" :appTypes="appTypes"/>
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
@@ -58,11 +58,19 @@ import TranslateSetting from './setting/TranslateSetting.vue'
 import ProxySetting from './setting/ProxySetting.vue'
 import LockSetting from './setting/LockSetting.vue'
 import SoftSetting from './setting/SoftSetting.vue'
+import CheckNet from './setting/CheckNet.vue'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
   name: 'moreSetting',
-  components: { TranslateSetting, ProxySetting, LockSetting, SoftSetting },
+  props:['data','appTypes'],
+  components: {
+    TranslateSetting,
+    ProxySetting,
+    LockSetting,
+    SoftSetting,
+    CheckNet,
+  },
   data() {
     return {
       test: '',
@@ -79,6 +87,9 @@ export default {
     translateSettingChange(data) {
       //todo 设置完翻译的配置之后，要进行保存，到聊天界面上面去取对应的设置配置信息。
       ipc.invoke('controller.config.setTranslate', data)
+    },
+    updateAppTypes(data) {
+      this.$emit('updateAppTypes', data)
     },
   },
 }
