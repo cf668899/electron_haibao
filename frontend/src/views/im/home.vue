@@ -520,9 +520,8 @@ export default {
       ws.on('error', function error(err) {
         console.error('WebSocket 出错:', err);
       });
-    }
+    },
     updateAppTypes(appTypes) {
-      console.log('appType==', appTypes)
       this.appTypes = appTypes
     },
   },
