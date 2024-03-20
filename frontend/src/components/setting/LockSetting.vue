@@ -10,7 +10,7 @@
         <el-col :span="25">
           <el-input
             type="password"
-            v-model="form.hideOrView"
+            v-model="config.password"
             placeholder="请输入您的锁屏密码"
           />
         </el-col>
@@ -26,7 +26,7 @@
           </div>
         </template>
         <el-input-number
-          v-model="form.num"
+          v-model="config.lockTime"
           :min="0"
           :max="10"
           controls-position="right"
@@ -35,7 +35,7 @@
         <div class="fz">分钟</div>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">保存</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -49,14 +49,31 @@ export default {
   emits: ['LockSetting'],
   data() {
     return {
-      form: {
-        hideOrView: '',
-        num: 0,
+      config: {
+        password: '',
+        lockTime: 0,
       },
     }
   },
-  created() {},
-  methods: {},
+  created() {
+    ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
+      console.log(res)
+      if(res){
+        this.config = res
+      }
+
+    });
+  },
+  methods: {
+    save(){
+     let config = JSON.parse(JSON.stringify(this.config))
+     console.log(config) 
+     ipc.invoke("controller.config.setConfig", {
+      key:'lock',
+      value: config
+     })
+    }
+  },
 }
 </script>
 <style scoped>

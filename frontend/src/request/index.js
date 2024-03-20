@@ -41,7 +41,7 @@ service.interceptors.response.use(
 				duration: 3 * 1000
 			})
 			return Promise.reject(res.message)
-		} else if (res.code !== 200) {
+		} else if (res && res.code !== 200) {
 			// 显示提示
 			ElMessage({
 				message: res.message,

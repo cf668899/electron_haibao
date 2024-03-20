@@ -34,6 +34,14 @@ class ConfigController extends Controller {
         return res
     }
 
+    async getConfig(key){
+        return Services.get("config").getConfig(key)
+    }
+
+    async setConfig(data){
+        return Services.get("config").setConfig(data)
+    }
+
 }
 
 ConfigController.toString = () => '[class ConfigController]';
