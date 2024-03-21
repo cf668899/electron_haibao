@@ -41,6 +41,15 @@ class AppController extends Controller {
     async close(data) {
         return Services.get("app").close(data)
     }
+
+    async update(data){
+        return Services.get("app").update(data)
+    }
+
+    async getAppById(id){
+        return Services.get("app").getAppById(id)
+    }
+
     async changeRecord(data) {
         Services.get("app").changeRecord(data)
     }

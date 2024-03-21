@@ -1,60 +1,40 @@
 <template>
   <div class="common-layout" @click="lockMonitor" v-show="!isLock">
     <el-container>
-      <el-aside
-        style="height: 100%; background-color: rgb(253, 253, 253)"
-        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'"
-      >
+      <el-aside style="height: 100%; background-color: rgb(253, 253, 253)"
+        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'">
         <div class="menu-box">
           <div class="menus">
             <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
               <!-- wwhatsapp -->
-              <el-sub-menu
-                :index="appItem.name"
-                v-for="(appItem, index) in leftList"
-                :key="index"
-                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
-              >
+              <el-sub-menu :index="appItem.name" v-for="(appItem, index) in leftList" :key="index"
+                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''">
                 <template #title>
                   <div @click="toAppManager(appItem.name)">
                     <img :src="appItem.image" class="iconImage" />
-                    <span
-                      :class="clickMenu == appItem.name ? 'menuTitle' : ''"
-                      >{{ appItem.name }}</span
-                    >
+                    <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{ appItem.name }}</span>
                   </div>
                 </template>
-                <el-menu-item
-                  v-show="item.isActive"
-                  :key="item.id"
-                  :class="item.id == id ? 'active-bg' : ''"
-                  @click="toApp(item)"
-                  v-for="(item, index) in appList[appItem.name]"
-                  :index="item.id"
-                >
+                <el-menu-item v-show="item.isActive" :key="item.id" :class="item.id == id ? 'active-bg' : ''"
+                  @click="toApp(item)" v-for="(item, index) in appList[appItem.name]" :index="item.id">
                   <template #title>
-                    <div
-                      :class="item.online ? 'online online-box' : 'online-box'"
-                    ></div>
+                    <div :class="item.online ? 'online online-box' : 'online-box'"></div>
                     <el-icon>
                       <User />
                     </el-icon>
 
                     <div class="userinfo">
                       <!-- <div>{{ }}</div> -->
-                      <el-badge
-                        :value="item.messageNum"
-                        :hidden="item.messageNum ? false : true"
-                      >
+                      <el-badge :value="item.messageNum" :hidden="item.messageNum ? false : true">
                         <div class="username">
                           {{
                             item.name
-                              ? item.name
-                              : item.record
-                                ? item.record
-                                : appItem.name +
-                                  ' ' +
-                                  (appList[appItem.name].length - index)
+                            ? item.name
+                            : item.record
+                              ? item.record
+                              : appItem.name +
+                              ' ' +
+                              (appList[appItem.name].length - index)
                           }}
                         </div>
                       </el-badge>
@@ -62,18 +42,11 @@
                   </template>
                 </el-menu-item>
               </el-sub-menu>
-              <el-sub-menu
-                index="setting"
-                @click="moreSetting('setting')"
-                style="border-top: 1px solid rgb(232, 232, 232)"
-                key="setting"
-                class="itemNoMuch"
-              >
+              <el-sub-menu index="setting" @click="moreSetting('setting')"
+                style="border-top: 1px solid rgb(232, 232, 232)" key="setting" class="itemNoMuch">
                 <template #title>
                   <img src="@/assets/moreSetting.png" class="iconImage" />
-                  <span :class="clickMenu == 'setting' ? 'menuTitle' : ''"
-                    >更多设置</span
-                  >
+                  <span :class="clickMenu == 'setting' ? 'menuTitle' : ''">更多设置</span>
                 </template>
               </el-sub-menu>
             </el-menu>
@@ -87,7 +60,9 @@
                     <div class="ysBoxCenterTop">邀请码</div>
                     <div class="ysToken">{{ token }}</div>
                   </div>
-                  <el-icon size="20"><SwitchButton /></el-icon>
+                  <el-icon size="20">
+                    <SwitchButton />
+                  </el-icon>
                 </div>
               </div>
               <!-- <el-button
@@ -98,14 +73,10 @@
                 >退出</el-button
               > -->
               <div>
-                <el-icon
-                  @click="arrowLeft"
-                  :class="
-                    isReduceLeft
-                      ? 'arrowLeftTransformCommon arrowLeftTransform'
-                      : 'arrowLeftTransformCommon'
-                  "
-                >
+                <el-icon @click="arrowLeft" :class="isReduceLeft
+                  ? 'arrowLeftTransformCommon arrowLeftTransform'
+                  : 'arrowLeftTransformCommon'
+                  ">
                   <ArrowLeft />
                 </el-icon>
               </div>
@@ -114,35 +85,14 @@
         </div>
       </el-aside>
       <el-main>
-        <AppList
-          v-if="pageType === 'manager'"
-          :app-type="appType"
-          :list="appList[appType] ? appList[appType] : []"
-          :appNum="appNum"
-          :appLimit="appLimit"
-          @addApp="addApp"
-          @startApp="startApp"
-          @closeApp="closeApp"
-          @showApp="showApp"
-          @delApp="delApp"
-        >
+        <AppList v-if="pageType === 'manager'" :app-type="appType" :list="appList[appType] ? appList[appType] : []"
+          :appNum="appNum" :appLimit="appLimit" @addApp="addApp" @startApp="startApp" @closeApp="closeApp"
+          @showApp="showApp" @delApp="delApp">
         </AppList>
-        <WebViewX
-          v-show="pageType === 'app' && item.isShow"
-          :data="item"
-          v-for="(item, index) in apps"
-          @changeRecord="changeRecord"
-          @online="online"
-          @changeMessageNum="changeMessageNum"
-          @changeUserName="changeUserName"
-          @closeApp="closeApp"
-          :key="index"
-        ></WebViewX>
-        <MoreSetting
-          v-if="pageType == 'setting'"
-          :appTypes="appTypes"
-          @updateAppTypes="updateAppTypes"
-        ></MoreSetting>
+        <WebViewX v-show="pageType === 'app' && item.isShow" :data="item" v-for="(item, index) in apps"
+          @changeRecord="changeRecord" @online="online" @changeMessageNum="changeMessageNum"
+          @changeUserName="changeUserName" @closeApp="closeApp" :key="index"></WebViewX>
+        <MoreSetting v-if="pageType == 'setting'" :appTypes="appTypes" @updateAppTypes="updateAppTypes"></MoreSetting>
       </el-main>
     </el-container>
   </div>
@@ -160,11 +110,13 @@ import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
-import { logout } from "@/api/admin";
+import { logout, accountSave, removeAccount } from "@/api/admin";
 import { baseWsUrl } from '@/constant/request'
-const WebSocket = require('ws');
+import { appMap } from '@/constant/app'
+const UtilsHelper = require('ee-core/utils/helper');
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
+import emitter from '@/utils/bus'
 export default {
   components: {
     AppList,
@@ -225,13 +177,13 @@ export default {
     this.initWs()
   },
   methods: {
-    initLockSetInterval(){
+    initLockSetInterval() {
       ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
-        if(res){
-          if(res.lockTime > 0){
-            setInterval(()=>{
+        if (res) {
+          if (res.lockTime > 0) {
+            setInterval(() => {
               let now = Date.now()
-              if(now - this.lastActive > res.lockTime * 1000 * 60){
+              if (now - this.lastActive > res.lockTime * 1000 * 60) {
                 this.isLock = true
               }
 
@@ -240,22 +192,22 @@ export default {
         }
       });
     },
-    unLock(password){
+    unLock(password) {
       ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
-        if(res){
-          if(!res.password || res.password == password){
+        if (res) {
+          if (!res.password || res.password == password) {
             this.isLock = false
             this.lastActive = Date.now()
-          }else{
+          } else {
             ElMessage.error('密码错误！！')
           }
-        }else{
+        } else {
           this.isLock = false
           this.lastActive = Date.now()
         }
       });
     },
-    lockMonitor(){
+    lockMonitor() {
       this.lastActive = Date.now()
     },
     selectMenu(index) {
@@ -300,19 +252,28 @@ export default {
       this.pageType = 'app'
     },
 
-    addApp(data) {
-      console.log('add app')
-      ipc.invoke('controller.app.add', data).then((res) => {
-        // 查询数据
-        // this.listApp();
-        if (res.id) {
-          if (this.appList[data.type]) {
-            this.appList[data.type].unshift(res)
-          } else {
-            this.appList[data.type] = [res]
-          }
-        }
+    async addApp(data) {
+      console.log("add app")
+      // TODO 调用新增接口
+      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      const machineId = await ipc.invoke("controller.app.getMachineId", {})
+      data.id = UtilsHelper.getRandomString()
+      let accountRes = await accountSave({
+        inviteCode: loginInfo.token,
+        deviceId: machineId,
+        platformId: appMap[data.type].id,
+        clientSessionId: data.id
       })
+      console.log(accountRes)
+      data['netInfo'] = accountRes
+      let res = await ipc.invoke('controller.app.add', data)
+      if (res.id) {
+        if (this.appList[data.type]) {
+          this.appList[data.type].unshift(res)
+        } else {
+          this.appList[data.type] = [res]
+        }
+      }
     },
     startApp(data) {
       // 保存preload
@@ -371,7 +332,16 @@ export default {
       }
       this.pageType = 'app'
     },
-    closeApp(data) {
+    async closeApp(data) {
+      let app = await ipc.invoke('controller.app.getAppById', data.id)
+      if (app.netInfo) {
+        app.netInfo.status = '2'
+        let account = await accountSave(app.netInfo)
+        if (account.id) {
+          ipc.invoke('controller.app.update', app)
+        }
+      }
+
       this.appNum--
       for (let item of this.apps) {
         if (item.id == data.id) {
@@ -393,22 +363,25 @@ export default {
 
       this.pageType = 'manager'
     },
-    delApp(data) {
-      ipc
-        .invoke('controller.app.del', JSON.parse(JSON.stringify(data)))
-        .then((res) => {
-          let list = this.appList[data.type]
-          let newList = []
-          for (let item of list) {
-            if (data.id == item.id) {
-              continue
-            }
+    async delApp(data) {
+      let app = await ipc.invoke('controller.app.getAppById', data.id)
+      if (app.netInfo) {
+        // 删除
+        removeAccount(app.netInfo)
+      }
 
-            newList.push(item)
-          }
+      let res = await ipc.invoke('controller.app.del', JSON.parse(JSON.stringify(data)))
+      let list = this.appList[data.type]
+      let newList = []
+      for (let item of list) {
+        if (data.id == item.id) {
+          continue
+        }
 
-          this.appList[data.type] = newList
-        })
+        newList.push(item)
+      }
+
+      this.appList[data.type] = newList
     },
     changeRecord(data) {
       ipc.invoke('controller.app.changeRecord', data).then((res) => {
@@ -491,7 +464,7 @@ export default {
     async loginOut() {
       const machineId = await ipc.invoke("controller.app.getMachineId", {})
       const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
-      if(loginInfo){
+      if (loginInfo) {
         await logout({
           inviteCode: loginInfo.token,
           deviceId: machineId
@@ -501,25 +474,17 @@ export default {
       ipc.invoke('controller.login.loginOut')
       this.$router.back()
     },
-    async initWs(){
-      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
-      let ws = new WebSocket(baseWsUrl + loginInfo.token)
-      ws.on('open', function open() {
-        console.log('WebSocket 连接已打开。');
-        ws.send('你好，服务器！');
-      });
+    async initWs() {
+      let machineId = await ipc.invoke("controller.app.getMachineId", {})
+      let url = baseWsUrl + machineId
+      emitter.on('ws-open', (data)=>{
+        console.log('ws-open', data)
+      })
 
-      ws.on('message', function incoming(data) {
-        console.log('收到服务器消息:', data);
-      });
-
-      ws.on('close', function close() {
-        console.log('WebSocket 连接已关闭。');
-      });
-
-      ws.on('error', function error(err) {
-        console.error('WebSocket 出错:', err);
-      });
+      emitter.on('ws-message', (data)=>{
+        console.log('ws-open', data)
+      })
+      this.$store.dispatch('initWSConnect', url)
     },
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
@@ -548,6 +513,7 @@ export default {
   display: flex;
   flex-direction: column;
 }
+
 .menus {
   flex: 1;
 }
@@ -561,9 +527,12 @@ export default {
 .username {
   width: 90px;
   color: rgb(146, 151, 157);
-  white-space: nowrap; /* 不换行 */
-  overflow: hidden; /* 超出部分隐藏 */
-  text-overflow: ellipsis; /* 溢出部分显示省略号 */
+  white-space: nowrap;
+  /* 不换行 */
+  overflow: hidden;
+  /* 超出部分隐藏 */
+  text-overflow: ellipsis;
+  /* 溢出部分显示省略号 */
 }
 
 .online-box {
@@ -572,6 +541,7 @@ export default {
   border-radius: 5px;
   background-color: rgb(99, 101, 103);
 }
+
 .online {
   background-color: #409eff;
 }
@@ -579,6 +549,7 @@ export default {
 .active-bg {
   background-color: aliceblue;
 }
+
 .operator-box {
   width: 100%;
   z-index: 1000;
@@ -589,9 +560,12 @@ export default {
   margin: 0 auto;
   width: 80%;
   text-align: center;
-  white-space: nowrap; /* 不换行 */
-  overflow: hidden; /* 超出部分隐藏 */
-  text-overflow: ellipsis; /* 溢出部分显示省略号 */
+  white-space: nowrap;
+  /* 不换行 */
+  overflow: hidden;
+  /* 超出部分隐藏 */
+  text-overflow: ellipsis;
+  /* 溢出部分显示省略号 */
 }
 
 .logout {
@@ -599,6 +573,7 @@ export default {
   width: 100%;
   padding-bottom: 10px;
 }
+
 .quiteButton {
   margin-bottom: 10px;
 }
@@ -606,6 +581,7 @@ export default {
 ::v-deep(.el-menu) {
   border-right: none !important;
 }
+
 ::v-deep(.el-sub-menu__title *) {
   vertical-align: middle;
 }
@@ -614,18 +590,23 @@ export default {
   color: var(--el-text-color-primary);
   font-size: var(--el-menu-item-font-size);
 }
+
 .boxLeftReduce {
-  transition: width 0.5s; /* 过渡动画效果 */
+  transition: width 0.5s;
+  /* 过渡动画效果 */
   width: 85px;
   border-right: solid 1px var(--el-menu-border-color) !important;
   overflow-x: hidden;
 }
+
 .boxLeftNoReduce {
-  transition: width 0.5s; /* 过渡动画效果 */
+  transition: width 0.5s;
+  /* 过渡动画效果 */
   width: 250px;
   border-right: solid 1px var(--el-menu-border-color) !important;
   overflow-x: hidden;
 }
+
 ::v-deep(.boxLeftReduce .el-sub-menu__title span) {
   display: none;
 }
@@ -633,6 +614,7 @@ export default {
 ::v-deep(.boxLeftReduce .el-menu-item span) {
   display: none;
 }
+
 ::v-deep(.boxLeftReduce .el-sub-menu .el-sub-menu__icon-arrow) {
   display: none;
 }
@@ -644,16 +626,20 @@ export default {
 .arrowLeftTransform {
   transform: rotate(180deg);
 }
+
 .iconImage {
   width: 40px;
   margin-right: 10px;
 }
+
 .menuTitle {
   color: #409eff;
 }
+
 ::v-deep(.el-sub-menu) {
   user-select: none;
 }
+
 .ysBoxF {
   display: flex;
   justify-content: center;
@@ -661,6 +647,7 @@ export default {
   padding-bottom: 5px;
   margin-bottom: 5px;
 }
+
 .ysBox {
   width: 80%;
   display: flex;
@@ -673,6 +660,7 @@ export default {
   margin-bottom: 10px;
   cursor: pointer;
 }
+
 .ysBoxS {
   display: flex;
   padding: 8px 10px;
@@ -683,10 +671,12 @@ export default {
   border-radius: 10px;
   margin-bottom: 10px;
 }
+
 .ys {
   width: 30px;
   height: 30px;
 }
+
 .ysBoxCenter {
   font-size: 12px;
   margin-left: 10px;
@@ -694,10 +684,12 @@ export default {
   text-align: left;
   flex: 1;
 }
+
 .ysToken {
   word-wrap: break-word;
   max-width: 200px;
 }
+
 .arrowLeftTransformCommon {
   padding: 5px;
   cursor: pointer;

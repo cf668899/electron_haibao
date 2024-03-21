@@ -20,11 +20,11 @@
             label="序号"
             type="index"
             :index="indexMethod"
-            width="80"
+            width="40"
           />
           <el-table-column prop="createTime" label="创建于" width="150" />
           <el-table-column prop="updateTime" label="最后修改" width="150" />
-          <el-table-column prop="record" label="会话记录" width="150" >
+          <el-table-column prop="record" label="会话记录" width="180" >
             <template #default="scope">
               <el-space wrap>
                 <div :class="scope.row.online?'online online-box':'online-box'"></div>
@@ -47,7 +47,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" width="180">
             <template #default="scope">
               <el-button
                 v-if="scope.row.isActive"

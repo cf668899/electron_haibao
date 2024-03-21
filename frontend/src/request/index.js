@@ -16,7 +16,7 @@ function errorLog(err) {
 
 // 创建一个 axios 实例
 const service = axios.create({
-	timeout: 20000 // 请求超时时间
+	timeout: 10000 // 请求超时时间
 })
 
 // 请求拦截器

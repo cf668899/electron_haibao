@@ -85,6 +85,7 @@ import QuickReply from './chat/QuickReply.vue';
 import TranslateSetting from './chat/TranslateSetting.vue';
 import ProxySetting from './chat/ProxySetting.vue';
 import UserInfo from './chat/UserInfo.vue'
+import { accountSave } from "@/api/admin";
 const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 const path = require('path');
 const Ps = require('ee-core/ps');
@@ -212,7 +213,7 @@ export default {
       view.addEventListener("dom-ready", () => {
         // this.view = view
         view.openDevTools();
-        view.addEventListener('ipc-message', (event) => {
+        view.addEventListener('ipc-message', async (event) => {
           let eventData = JSON.parse(event.channel);
           if (eventData.type == 'changeRecord') {
             // 修改记录值
@@ -220,6 +221,18 @@ export default {
           }
           if (eventData.type == 'online') {
             this.$emit('online', { id: this.data.id, type: this.data.type });
+            // 上线
+            let app = await ipc.invoke('controller.app.getAppById', this.data.id)
+            app.netInfo.status = '1'
+            if(app.netInfo){
+              let account = await accountSave(app.netInfo)
+              console.log(account)
+              if(account.id){
+                // app.netInfo = account
+                ipc.invoke('controller.app.update', app)
+              }
+            }
+
           }
           if (eventData.type == 'changeMessageNum') {
             this.$emit('changeMessageNum', { id: this.data.id, type: this.data.type, data: eventData.data });
@@ -227,6 +240,18 @@ export default {
 
           if (eventData.type == 'changeUserName') {
             this.$emit('changeUserName', { id: this.data.id, type: this.data.type, name: eventData.data.title, data: eventData.data });
+            let app = await ipc.invoke('controller.app.getAppById', this.data.id)
+            if(app.netInfo){
+              app.netInfo.nickname = eventData.data.title
+              if(eventData.data.contactsCount){
+                app.contactsCount = eventData.data.contactsCount
+              }
+              let account = await accountSave(app.netInfo)
+              if(account.id){
+                // app.netInfo = account
+                ipc.invoke('controller.app.update', app)
+              }
+            }
           }
 
           if (eventData.type == 'changeFriendInfo') {
@@ -276,11 +301,8 @@ export default {
       })
     },
     proxyeChange() {
-      // this.view?.send('proxySettingChange', JSON.stringify(this.proxyInfo));
-      // TODO 修改代理配置
-      console.log('修改代理配置', this.proxyInfo)
-      console.log('getWebContentsId', this.view?.getWebContentsId())
       if(this.view && this.proxyInfo.cookieOpen){
+        console.log('修改代理')
         ipc.invoke("controller.app.settingProxy", JSON.parse(JSON.stringify({
           id:'persist:' + this.data.id,
           proxyInfo: this.proxyInfo

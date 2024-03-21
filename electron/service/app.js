@@ -94,13 +94,28 @@ class AppService extends Service {
   }
 
   add(data){
-    data['id'] = UtilsHelper.getRandomString()
+    // data['id'] = UtilsHelper.getRandomString()
     const time = moment().format('YYYY-MM-DD HH:mm:ss');
     data['createTime'] = time
     data['updateTime'] = time
     data['sort'] = new Date().valueOf()
     this.conn.db.get("apps").push(data).write()
     return data
+  }
+
+  update(data){
+    console.log('update', data)
+    this.conn.db.get("apps")
+    .find({id: data.id})
+    .assign({...data})
+    .write()
+    return data
+  }
+
+  getAppById(id){
+    return this.conn.db.get("apps")
+    .find({id})
+    .value()
   }
 
   /**

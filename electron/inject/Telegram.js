@@ -1,4 +1,4 @@
-function TelegramJs(){
+module.exports = function TelegramJs(){
     let inputTag = false;
     let oldRecord = '';
     let userTag = false;
@@ -339,4 +339,4 @@ function TelegramJs(){
         }
 
     }, 800)
-};TelegramJs()
+}

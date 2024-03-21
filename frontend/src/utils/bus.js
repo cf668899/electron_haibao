@@ -1,4 +1,3 @@
-import { createApp } from 'vue';
-
-const app = createApp({});
-export const bus = app;
+import mitt from 'mitt'
+const emitter = mitt();
+export default emitter;

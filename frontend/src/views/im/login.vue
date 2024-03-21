@@ -67,7 +67,7 @@
 <script>
 const { ipcRenderer: ipc } =
   (window.require && window.require("electron")) || window.electron || {};
-import { login } from "@/api/admin";
+import { login, inviteDevice } from "@/api/admin";
 import loginLogo from "@/assets/login_logo.png";
 import beijin from "@/assets/beijin.png";
 import { ElMessage } from "element-plus";
@@ -110,10 +110,15 @@ export default {
         return;
       }
       const machineId = await ipc.invoke("controller.app.getMachineId", {})
-      await login({
+      let user = await login({
         inviteCode: this.config.token,
         deviceId: machineId
       });
+      console.log(user)
+      await inviteDevice({
+        inviteCode: this.config.token,
+        deviceId: machineId
+      })
       ipc.invoke("controller.login.login", { ...this.config }).then((res) => {
         this.$router.push({ name: "home" });
       });
