@@ -42,8 +42,22 @@
                   </template>
                 </el-menu-item>
               </el-sub-menu>
+               <el-sub-menu
+                index="quickReply"
+                @click="moreSetting('quickReply')"
+                style="border-top: 1px solid rgb(232, 232, 232)"
+                key="quickReply"
+                class="itemNoMuch"
+              >
+                <template #title>
+                  <img src="@/assets/quickReply.png" class="iconImage" />
+                  <span :class="clickMenu == 'quickReply' ? 'menuTitle' : ''"
+                    >快捷回复</span
+                  >
+                </template>
+              </el-sub-menu>
               <el-sub-menu index="setting" @click="moreSetting('setting')"
-                style="border-top: 1px solid rgb(232, 232, 232)" key="setting" class="itemNoMuch">
+                key="setting" class="itemNoMuch">
                 <template #title>
                   <img src="@/assets/moreSetting.png" class="iconImage" />
                   <span :class="clickMenu == 'setting' ? 'menuTitle' : ''">更多设置</span>
@@ -93,6 +107,7 @@
           @changeRecord="changeRecord" @online="online" @changeMessageNum="changeMessageNum"
           @changeUserName="changeUserName" @closeApp="closeApp" :key="index"></WebViewX>
         <MoreSetting v-if="pageType == 'setting'" :appTypes="appTypes" @updateAppTypes="updateAppTypes"></MoreSetting>
+        <quick-replay v-if="pageType == 'quickReply'"/>
       </el-main>
     </el-container>
   </div>
@@ -117,12 +132,14 @@ const UtilsHelper = require('ee-core/utils/helper');
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 import emitter from '@/utils/bus'
+import QuickReplay from '@/components/QuickReplay.vue'
 export default {
   components: {
     AppList,
     WebViewX,
     MoreSetting,
-    LockView
+    LockView,
+    QuickReplay
   },
   data() {
     return {
@@ -229,7 +246,7 @@ export default {
       this.isReduceLeft = !this.isReduceLeft
     },
     moreSetting(type) {
-      this.pageType = 'setting'
+      this.pageType = type
       this.appType = type
       this.clickMenu = type
     },
