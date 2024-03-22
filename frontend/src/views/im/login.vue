@@ -38,7 +38,7 @@
                 <div class="text-right">
                   <el-checkbox
                     v-model="config.isSaveLogin"
-                    label="保持登陆"
+                    label="保持登录"
                     size="large"
                   />
                 </div>
