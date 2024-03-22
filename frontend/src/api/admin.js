@@ -25,6 +25,14 @@ export function inviteDevice(data){
   })
 }
 
+export function getOnlineCount(data){
+  return request({
+    url: baseUrl + '/api/invite/invite/getOnlineCount',
+    method: 'post',
+    data
+  })
+}
+
 export function accountSave(data){
   return request({
     url: baseUrl + '/api/invite/inviteAccount/save',

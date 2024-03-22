@@ -125,7 +125,7 @@ import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
-import { logout, accountSave, removeAccount } from "@/api/admin";
+import { logout, accountSave, removeAccount, getOnlineCount } from "@/api/admin";
 import { baseWsUrl } from '@/constant/request'
 import { appMap } from '@/constant/app'
 const UtilsHelper = require('ee-core/utils/helper');
@@ -190,10 +190,21 @@ export default {
         this.token = res.token
       }
     })
+    this.initOline();
     this.initLockSetInterval()
     this.initWs()
   },
   methods: {
+    async initOline(){
+      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      let res = await getOnlineCount({
+        inviteCode: loginInfo.token
+      })
+
+      console.log(res)
+      this.appNum = res.onlineCount
+      this.appLimit = res.totalCount
+    },
     initLockSetInterval() {
       ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
         if (res) {
@@ -301,7 +312,6 @@ export default {
         })
         return
       }
-      this.appNum++
       ipc
         .invoke('controller.app.savePreload', JSON.parse(JSON.stringify(data)))
         .then((res) => {
@@ -359,7 +369,6 @@ export default {
         }
       }
 
-      this.appNum--
       for (let item of this.apps) {
         if (item.id == data.id) {
           item.isActive = false
@@ -479,6 +488,17 @@ export default {
       })
     },
     async loginOut() {
+      // 判断是否还有窗口没关闭
+      for (let item of this.apps) {
+        if(item.isActive == true){
+          ElMessage({
+            message: '还有窗口未关闭请先关闭窗口',
+            type: 'warning',
+          })
+          return
+        }
+      }
+
       const machineId = await ipc.invoke("controller.app.getMachineId", {})
       const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
       if (loginInfo) {
@@ -499,7 +519,11 @@ export default {
       })
 
       emitter.on('ws-message', (data)=>{
-        console.log('ws-open', data)
+        console.log('message', data)
+        if(data.topic == 'getSessionCount'){
+          this.appNum = data.msgContent.onlineCount
+          this.appLimit = data.msgContent.totalCount
+        }
       })
       this.$store.dispatch('initWSConnect', url)
     },

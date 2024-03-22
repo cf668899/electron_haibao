@@ -100,7 +100,7 @@ export default {
       preload: "file://" + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
       srcMap: {
         Whatsapp: "https://web.whatsapp.com",
-        Telegram: "https://web.telegram.org",
+        Telegram: "https://web.telegram.org/a",
       },
       view: null,
       translateInfo: {
@@ -203,7 +203,6 @@ export default {
       });
     },
     inject(view) {
-      this.view = view
       this.injectHandler(view);
     },
     injectHandler(view) {
@@ -211,7 +210,8 @@ export default {
         this.proxyeChange()
       })
       view.addEventListener("dom-ready", () => {
-        // this.view = view
+        this.view = view
+        this.proxyeChange()
         view.openDevTools();
         view.addEventListener('ipc-message', async (event) => {
           let eventData = JSON.parse(event.channel);

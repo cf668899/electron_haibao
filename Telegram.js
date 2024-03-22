@@ -247,7 +247,7 @@ function TelegramJs(){
             }
         }
 
-        if (document.getElementById('telegram-search-input')) {
+        if (document.getElementById('telegram-search-input') || document.getElementById('chatlist-container')) {
             if (online == false) {
                 online = true
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
