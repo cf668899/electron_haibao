@@ -26,7 +26,8 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "巨石出海"
+    "shortcutName": "巨石出海",
+    "include": "./installer.nsh"
   },
   "mac": {
     "icon": "build/icons/icon.icns",
