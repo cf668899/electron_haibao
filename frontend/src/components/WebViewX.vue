@@ -89,6 +89,7 @@ import { accountSave } from "@/api/admin";
 const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 const path = require('path');
 const Ps = require('ee-core/ps');
+import { ElMessage } from 'element-plus'
 export default {
   name: "webviewx",
   props: ["data"],
@@ -215,6 +216,9 @@ export default {
         view.openDevTools();
         view.addEventListener('ipc-message', async (event) => {
           let eventData = JSON.parse(event.channel);
+          if (eventData.type == 'el-message'){
+            ElMessage(eventData.data)
+          }
           if (eventData.type == 'changeRecord') {
             // 修改记录值
             this.$emit("changeRecord", { id: this.data.id, "record": eventData.data, type: this.data.type });

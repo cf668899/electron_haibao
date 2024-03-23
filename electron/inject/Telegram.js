@@ -110,8 +110,16 @@ module.exports = function TelegramJs(){
     //修改好友信息
     window.electron.ipcRenderer.on('changeFriendInfo', (event, data) => {
         console.log('修改好友信息', data)
-        let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable group selected has-ripple')
+        let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable group selected')
         if (selectBtns.length < 1) {
+            window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                'type': "el-message",
+                'data': {
+                    showClose: true,
+                    message: '保存联系人失败，请先选择联系人聊天窗口',
+                    type: 'warning',
+                }
+            }))
             return
         }
         let app = JSON.parse(data)
@@ -122,6 +130,14 @@ module.exports = function TelegramJs(){
         friendInfoMap[id] = app.friendInfo
         // 发送到后台服务保存
         window.electron.ipcRenderer.invoke("controller.app.changeFriendInfo", app)
+        window.electron.ipcRenderer.sendToHost(JSON.stringify({
+            'type': "el-message",
+            'data': {
+                showClose: true,
+                message: '保存成功',
+                type: 'success',
+            }
+        }))
 
     })
 
