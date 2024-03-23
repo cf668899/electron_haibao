@@ -9,6 +9,7 @@ module.exports = (appInfo) => {
 
   const config = {};
 
+  config.appVersion = 'v1.0.0'
   /**
    * 开发者工具
    */
@@ -17,13 +18,13 @@ module.exports = (appInfo) => {
   /**
    * 应用程序顶部菜单
    */
-  config.openAppMenu = true;
+  config.openAppMenu = false;
 
   /**
    * 主窗口
    */
   config.windowsOption = {
-    title: '巨石出海',
+    title: `巨石出海${config.appVersion}`,
     width: 1200,
     height: 650,
     minWidth: 800,

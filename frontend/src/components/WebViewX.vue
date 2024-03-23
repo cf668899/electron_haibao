@@ -147,7 +147,7 @@ export default {
       this.$emit('closeApp', this.data)
     },
     reload() {
-      this.view?.reload()
+      this.$refs[this.data.id].reload()
     },
     reply(data, text) {
       this.view?.send('quickReply', text);
@@ -243,6 +243,7 @@ export default {
             let app = await ipc.invoke('controller.app.getAppById', this.data.id)
             if(app.netInfo){
               app.netInfo.nickname = eventData.data.title
+              app.netInfo.account = eventData.data.title
               if(eventData.data.contactsCount){
                 app.contactsCount = eventData.data.contactsCount
               }

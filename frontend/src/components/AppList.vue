@@ -106,7 +106,7 @@ export default {
     remarkEditBlur(row){
       console.log(row)
       row.isEdit = false
-      ipc.invoke('controller.app.changeRemark', { row })
+      ipc.invoke('controller.app.changeRemark', JSON.parse(JSON.stringify(row)))
     },
     addApp(){
       this.$emit('addApp', {

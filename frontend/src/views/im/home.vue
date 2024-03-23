@@ -290,7 +290,8 @@ export default {
         inviteCode: loginInfo.token,
         deviceId: machineId,
         platformId: appMap[data.type].id,
-        clientSessionId: data.id
+        clientSessionId: data.id,
+        account: "-"
       })
       console.log(accountRes)
       data['netInfo'] = accountRes
