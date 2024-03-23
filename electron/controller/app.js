@@ -55,23 +55,23 @@ class AppController extends Controller {
     }
 
     async changeUserName(data) {
-        Services.get("app").changeUserName(data)  
+        Services.get("app").changeUserName(data)
     }
 
     async changeTranslate(data) {
-        Services.get("app").changeTranslate(data)  
+        Services.get("app").changeTranslate(data)
     }
     //代理
     async changeProxyInfo(data) {
-        Services.get("app").changeProxyInfo(data)  
+        Services.get("app").changeProxyInfo(data)
     }
     //修改好友信息
     async changeFriendInfo(data){
-        Services.get("app").changeFriendInfo(data)  
+        Services.get("app").changeFriendInfo(data)
     }
 
     async changeRemark(data){
-        Services.get("app").changeRemark(data)  
+        Services.get("app").changeRemark(data)
     }
 
     async savePreload(data){
@@ -80,6 +80,15 @@ class AppController extends Controller {
 
     getMachineId(){
         return Services.get("app").getMachineId()
+    }
+
+    getCommonStorage(data){
+        return Services.get("app").getCommonStorage(data)
+    }
+
+    setCommonStorage(data){
+        console.log("data==",data)
+        return Services.get("app").setCommonStorage(data)
     }
 
     //代理
@@ -120,4 +129,4 @@ class AppController extends Controller {
 }
 
 AppController.toString = () => '[class AppController]';
-module.exports = AppController;  
+module.exports = AppController;

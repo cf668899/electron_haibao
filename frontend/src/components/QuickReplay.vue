@@ -3,10 +3,12 @@
     <div class="box-left">
       <div class="left-top">
         <div class="left-top-left">快捷分组</div>
-        <el-icon size="15"><Plus /></el-icon>
+        <el-icon size="15" class="addGroupIcon" @click="addGroup()"
+          ><Plus
+        /></el-icon>
       </div>
       <el-input
-        v-model="input2"
+        v-model="keyWord"
         placeholder="请输入分组名称过滤"
         :suffix-icon="Search"
         class="inputClass"
@@ -15,19 +17,23 @@
         <div
           :class="{
             groupClassItem: true,
-            activeItem: activeKey === item.key,
+            activeItem: activeIndex == index,
             isNotZero: index !== 0,
           }"
-          v-for="(item, index) in groupList"
+          v-for="(item, index) in currentGroupList"
           :key="index"
-          @click="clickGroupItem(item)"
+          @click="clickGroupItem(index)"
         >
           <div class="groupClassItemLeft">
             {{ item.name }}
           </div>
           <div class="groupClassItemRight">
-            <el-icon class="editIcon" size="12"><EditPen /></el-icon>
-            <el-icon size="12"><Delete /></el-icon>
+            <el-icon @click="editGroup(item, index)" class="editIcon" size="12"
+              ><EditPen
+            /></el-icon>
+            <el-icon size="12" @click="deleteGroupItem(index)"
+              ><Delete
+            /></el-icon>
           </div>
         </div>
       </div>
@@ -45,24 +51,41 @@
         <div class="centerBox">
           <div class="circleClass" />
           预先设置一些常见问题的回复用语, 帮助您提高回复效率。
-          <div style="color: #409eff">下载模版</div>
+          <div style="color: #409eff;" class="downMb" @click="getDemoExcel">下载模版</div>
         </div>
-        <el-button
-          type="primary"
-          :icon="FolderAdd"
-          size="small"
-          class="commonButton"
-          style="margin-left: 10px"
-          >我要导入</el-button
+
+        <el-upload
+          class="upload-demo"
+          action=""
+          :show-file-list="false"
+          :on-change="handleChange"
+          :limit="1"
+          :auto-upload="false"
+          :file-list="[]"
         >
+          <el-button
+            :icon="FolderRemove"
+            size="small"
+            class="commonButton"
+            style="margin-left: 10px"
+            @click="exportExcel"
+            >我要导入</el-button
+          >
+        </el-upload>
+
         <el-button
           :icon="FolderRemove"
           size="small"
           class="commonButton"
           style="margin-left: 10px"
+          @click="exportExcel"
           >我要导出</el-button
         >
-        <el-button size="small" class="commonButton" style="margin-left: 10px"
+        <el-button
+          size="small"
+          class="commonButton"
+          style="margin-left: 10px"
+          @click="clearAllBack()"
           >清空回复</el-button
         >
       </div>
@@ -71,11 +94,13 @@
         <el-table-column prop="bz" label="备注" />
         <el-table-column prop="content" label="内容" />
         <el-table-column fixed="right" label="操作" width="150">
-          <template #default>
-            <el-button type="primary" size="small" @click="handleClick"
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="edit(scope.row)"
               >修改</el-button
             >
-            <el-button type="danger" size="small">删除</el-button>
+            <el-button type="danger" size="small" @click="deleteItem(index)"
+              >删除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -95,6 +120,19 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="dialogGroupFormVisible" title="分组" width="500">
+      <el-form :model="groupForm" :rules="groupRules" ref="groupFormRef">
+        <el-form-item prop="name" label="分组名称">
+          <el-input v-model="groupForm.name" placeholder="请输入分组名称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="confirmGroup"> 保存 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -105,6 +143,9 @@ import {
   FolderAdd,
   FolderRemove,
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import ExcelJS from 'exceljs'
+import FileSaver from 'file-saver'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
@@ -117,79 +158,287 @@ export default {
       FolderAdd,
       FolderRemove,
       form: {},
+      groupForm: {},
       dialogFormVisible: false,
+      dialogGroupFormVisible: false,
       rules: {
         bz: [{ required: true, message: '备注不能为空', trigger: 'blur' }],
         content: [{ required: true, message: '内容不能为空', trigger: 'blur' }],
       },
-      groupList: [
-        {
-          name: '123',
-          key: '123',
-          data: [
-            {
-              bz: '123',
-              content: '123123',
-            },
-            {
-              bz: '1234',
-              content: '123123',
-            },
-          ],
-        },
-        {
-          name: '未分组',
-          key: '未分组',
-          data: [
-            {
-              bz: '122223',
-              content: '123123',
-            },
-            {
-              bz: '12234',
-              content: '123123',
-            },
-          ],
-        },
-      ],
-      activeKey: '',
+      groupRules: {
+        name: [
+          { required: true, message: '分组名称不能为空', trigger: 'blur' },
+        ],
+      },
+      isEdit: false,
+      isGroupEdit: false,
+      editIndex: -1,
+      groupList: [],
+      activeIndex: -1,
+      keyWord: '',
     }
   },
   computed: {
-    currentList() {
-      for (let item of this.groupList) {
-        if (item.key === this.activeKey) {
-          return item.data
-        }
+    currentGroupList() {
+      if (this.groupList && this.groupList.length > 0) {
+        return this.groupList.filter((i) => i.name.includes(this.keyWord))
       }
       return []
     },
+    currentList() {
+      if (
+        this.activeIndex == -1 ||
+        !(this.groupList && this.groupList.length > 0)
+      ) {
+        return []
+      }
+      return this.groupList[this.activeIndex].data || []
+    },
+    isDisable() {
+      return this.activeIndex === -1
+    },
   },
-  created() {
-    this.activeKey = this.groupList[0].key
+  async created() {
+    await this.getCommonStorage()
+    if (this.groupList && this.groupList.length > 0) {
+      this.activeIndex = 0
+    }
   },
   methods: {
-    clickGroupItem(item) {
-      this.activeKey = item.key
+    clickGroupItem(index) {
+      this.activeIndex = index
     },
     add() {
+      this.form = {}
       this.dialogFormVisible = true
+      this.isEdit = false
+    },
+    saveStorage() {
+      ipc.invoke('controller.app.setCommonStorage', {
+        data: JSON.stringify(this.groupList),
+        key: 'QuickReplay',
+      })
+      this.getCommonStorage()
+    },
+    async getCommonStorage() {
+      const res = await ipc.invoke('controller.app.getCommonStorage', {
+        key: 'QuickReplay',
+      })
+      if (res) {
+        this.groupList = JSON.parse(res)
+      }
     },
     confirm() {
       this.$refs.formRef.validate((valid, fields) => {
         if (valid) {
-          console.log('submit!')
-          for (let item of this.groupList) {
-            if (item.key === this.activeKey) {
-              item.data.push(this.form)
-            }
+          if (this.isEdit) {
+            this.groupList[this.activeIndex].data[this.editIndex] = this.form
+            ElMessage({
+              type: 'success',
+              message: '修改成功!',
+            })
+          } else {
+            this.groupList[this.activeIndex].data.push(this.form)
+            ElMessage({
+              type: 'success',
+              message: '新增成功!',
+            })
           }
+          this.form = {}
+          this.dialogFormVisible = false
+          this.saveStorage()
+        } else {
+          console.log('error submit!', fields)
+        }
+      })
+    },
+    deleteItem(index) {
+      ElMessageBox.confirm('是否删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        let list = this.groupList[this.activeIndex].data
+        this.groupList[this.activeIndex].data.splice(index, 1)
+        ElMessage({
+          type: 'success',
+          message: '删除成功!',
+        })
+        this.saveStorage()
+      })
+    },
+    edit(item, index) {
+      this.dialogFormVisible = true
+      this.form = JSON.parse(JSON.stringify(item))
+      this.isEdit = true
+      this.editIndex = index
+    },
+    addGroup() {
+      this.dialogGroupFormVisible = true
+      this.isGroupEdit = false
+    },
+    editGroup(item, index) {
+      this.dialogGroupFormVisible = true
+      this.isGroupEdit = true
+      this.groupForm = JSON.parse(JSON.stringify(item))
+      this.groupForm.index = index
+    },
+    confirmGroup() {
+      this.$refs.groupFormRef.validate((valid, fields) => {
+        if (valid) {
+          if (this.isGroupEdit) {
+            this.groupList[this.groupForm.index].name = this.groupForm.name
+            ElMessage({
+              type: 'success',
+              message: '修改成功!',
+            })
+            this.dialogGroupFormVisible = false
+          } else {
+            this.groupList.push({
+              name: this.groupForm.name,
+              data: [],
+            })
+            ElMessage({
+              type: 'success',
+              message: '新增成功!',
+            })
+            this.dialogGroupFormVisible = false
+          }
+          this.saveStorage()
           this.form = {}
           this.dialogFormVisible = false
         } else {
           console.log('error submit!', fields)
         }
       })
+    },
+    deleteGroupItem(index) {
+      ElMessageBox.confirm('是否删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        if (index === this.activeIndex) {
+          this.activeIndex = -1
+        }
+        this.groupList.splice(index, 1)
+        ElMessage({
+          type: 'success',
+          message: '删除成功!',
+        })
+        this.saveStorage()
+      })
+    },
+    clearAllBack() {
+      ElMessageBox.confirm('是否清空回复', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        this.groupList[this.activeIndex].data = []
+        this.saveStorage()
+        ElMessage({
+          type: 'success',
+          message: '操作成功!',
+        })
+      })
+    },
+    handleChange(file) {
+      console.log('file==', file)
+      let nameSplit = file.name.split('.')
+      let format = nameSplit[nameSplit.length - 1]
+      if (!['xlsx', 'csv'].includes(format)) {
+        return false
+      }
+      file = file.raw
+      const fileReader = new FileReader()
+      fileReader.readAsArrayBuffer(file)
+      fileReader.onload = (ev) => {
+        try {
+          console.log('345')
+          const data = ev.target.result
+          let XLSX = require('xlsx')
+          const workbook = XLSX.read(data, {
+            type: 'binary', // 以字符编码的方式解析
+          })
+          const exlname = workbook.SheetNames[0] // 取第一张表
+          const exl = XLSX.utils.sheet_to_json(workbook.Sheets[exlname]) // 生成json表格内容
+          console.log('exl==', exl)
+          for (let item of exl) {
+            if (item['内容'] && item['备注']) {
+              this.groupList[this.activeIndex].data.push({
+                content: item['内容'],
+                bz: item['备注'],
+              })
+            }
+          }
+          this.saveStorage()
+          // 获取json数据，批量导入数据库，并刷新表格
+        } catch (e) {
+          console.log('e==', e)
+          return false
+        }
+      }
+    },
+    getDemoExcel() {
+      const workbook = new ExcelJS.Workbook()
+      // 添加工作表，名为sheet1
+      const sheet1 = workbook.addWorksheet('sheet1')
+      // 导出数据列表
+      let data = [
+        {
+          备注: '',
+          内容: '',
+        },
+      ]
+      // 获取表头所有键
+      const headers = Object.keys(data[0])
+      // 将标题写入第一行
+      sheet1.addRow(headers)
+      // 将数据写入工作表
+      data.forEach((row) => {
+        const values = Object.values(row)
+        sheet1.addRow(values)
+      })
+      // 导出表格文件
+      workbook.xlsx
+        .writeBuffer()
+        .then((buffer) => {
+          let file = new Blob([buffer], { type: 'application/octet-stream' })
+          FileSaver.saveAs(file, '快捷回复模版.xlsx')
+        })
+        .catch((error) => console.log('Error writing excel export', error))
+    },
+    exportExcel() {
+      const workbook = new ExcelJS.Workbook()
+      // 添加工作表，名为sheet1
+      const sheet1 = workbook.addWorksheet('sheet1')
+      // 导出数据列表
+      const data = []
+      let list = this.groupList[this.activeIndex].data
+      for (let item of list) {
+        data.push({
+          备注: item.bz,
+          内容: item.content,
+        })
+      }
+      // 获取表头所有键
+      const headers = Object.keys(data[0])
+      // 将标题写入第一行
+      sheet1.addRow(headers)
+      // 将数据写入工作表
+      data.forEach((row) => {
+        const values = Object.values(row)
+        sheet1.addRow(values)
+      })
+      // 导出表格文件
+      workbook.xlsx
+        .writeBuffer()
+        .then((buffer) => {
+          let file = new Blob([buffer], { type: 'application/octet-stream' })
+          FileSaver.saveAs(file, 'ExcelJS.xlsx')
+        })
+        .catch((error) => console.log('Error writing excel export', error))
     },
   },
 }
@@ -281,5 +530,11 @@ export default {
 }
 .tableClass {
   width: 100%;
+}
+.addGroupIcon {
+  cursor: pointer;
+}
+.downMb{
+    cursor: pointer;
 }
 </style>
