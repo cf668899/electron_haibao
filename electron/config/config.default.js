@@ -23,7 +23,7 @@ module.exports = (appInfo) => {
    * 主窗口
    */
   config.windowsOption = {
-    title: +"巨石出海v"+appInfo.appVersion,
+    title: "巨石出海v"+appInfo.appVersion,
     width: 1200,
     height: 650,
     minWidth: 800,
