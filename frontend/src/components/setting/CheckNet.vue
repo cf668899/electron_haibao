@@ -19,6 +19,7 @@
             v-model="item.used"
             size="large"
             @change="updateData(item)"
+            :disabled ="!checkApplicationEnable(item.name)"
           />
           <img class="iconImg" :src="item.image" />
         </div>
@@ -34,7 +35,7 @@ import TelegramIcon from '@/assets/Telegram.png'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
-  props: ['appTypes'],
+  props: ['appTypes','appList'],
   emits: ['changeTranslateSetting'],
   components: {
     draggable,
@@ -68,6 +69,12 @@ export default {
       newList[data.moved.oldIndex] = oldItem
       this.$emit('updateAppTypes', newList)
     },
+    checkApplicationEnable(name){
+      if(this.appList && this.appList[name].find(i=>i.isActive)){
+        return false;
+      }
+      return true;
+    }
   },
 }
 </script>

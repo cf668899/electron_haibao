@@ -162,6 +162,7 @@
           v-if="pageType == 'setting'"
           :appTypes="appTypes"
           @updateAppTypes="updateAppTypes"
+          :appList="appList"
         ></MoreSetting>
         <quick-replay v-if="pageType == 'quickReply'" />
       </el-main>
