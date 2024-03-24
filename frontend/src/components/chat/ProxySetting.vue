@@ -22,14 +22,14 @@
             <el-divider />
 
             <el-form-item label="启动代理服务器验证" label-width="150px">
-                <el-switch v-model="data.auth" @change="change"/>
+                <el-switch :disabled="data.type.indexOf('SOCKS') > -1" v-model="data.auth" @change="change"/>
             </el-form-item>
 
             <el-form-item label="用户名">
-                <el-input :disabled="!data.auth" v-model="data.user"   class="form-item"/>
+                <el-input :disabled="!data.auth" v-model="data.user"   class="form-item" @change="change" />
             </el-form-item>
             <el-form-item label="密码">
-                <el-input :disabled="!data.auth" v-model="data.password"   class="form-item"/>
+                <el-input :disabled="!data.auth" v-model="data.password"   class="form-item" @change="change"/>
             </el-form-item>
 
             <el-divider />
@@ -43,6 +43,7 @@
 <script>
 const { clipboard } = require('electron')
 import translate from '@/constant/proxydefaul'
+import { ElMessage } from 'element-plus'
 export default {
     props: ["data", "id"],
     emits: ["change",],
@@ -72,9 +73,17 @@ export default {
     methods: {
         change(item) {
             // this.$emit("change", this.data)
+            if(this.data.type.indexOf('SOCKS') > -1){
+                this.auth = false
+            }
         },
         changeProxyInfo(){
             this.$emit("change", this.data)
+            ElMessage({
+                showClose: true,
+                message: '代理设置成功',
+                type: 'success',
+            })
         }
     },
 };

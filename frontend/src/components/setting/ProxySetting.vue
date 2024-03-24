@@ -30,8 +30,7 @@
                 </el-row>
             </el-form-item>
 
-            <el-checkbox v-model="proxy.auth" @change="change">启用代理服务器验证</el-checkbox>
-
+            <el-checkbox :disabled="proxy.type.indexOf('SOCKS') > -1" v-model="proxy.auth" @change="change">启用代理服务器验证</el-checkbox>
             <el-form-item label="用户名">
                 <el-input :disabled="!proxy.auth" class="item" v-model="proxy.user" placeholder="请输入用户名"
                     @change="change" />
@@ -56,6 +55,7 @@
 <script>
 import translate from '@/constant/translate'
 const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {}
+import { ElMessage } from 'element-plus'
 export default {
     props: ["data"],
     emits: ["changeTranslateSetting"],
@@ -100,12 +100,21 @@ export default {
     },
     methods: {
         change() {
+            if(this.proxy.type.indexOf('SOCKS') > -1){
+                this.proxy.auth = false
+            }
             let config = JSON.parse(JSON.stringify(this.proxy))
             ipc.invoke("controller.config.setProxy", config)
         },
         setting(){
             let config = JSON.parse(JSON.stringify(this.proxy))
             ipc.invoke("controller.app.settingGlobalProxy", config)
+            ElMessage({
+                showClose: true,
+                message: '代理设置成功',
+                type: 'success',
+            })
+
         }
     },
 };

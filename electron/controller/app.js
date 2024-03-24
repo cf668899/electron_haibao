@@ -106,6 +106,7 @@ class AppController extends Controller {
 
         let auth = data.auth?`${data.user}:${data.password}@`:''
         const proxyServer = `${data.type.toLowerCase()}://${auth}${data.host}:${data.port}`
+        console.log(proxyServer)
         session.defaultSession.setProxy({
             proxyBypassRules: 'localhost',
             proxyRules: proxyServer,
@@ -121,6 +122,7 @@ class AppController extends Controller {
 
         let auth = data.proxyInfo.auth?`${data.proxyInfo.user}:${data.proxyInfo.password}@`:''
         const proxyServer = `${data.proxyInfo.type.toLowerCase()}://${auth}${data.proxyInfo.host}:${data.proxyInfo.port}`
+        console.log('proxyServer:', proxyServer)
         session.fromPartition(data.id).setProxy({
             proxyBypassRules: 'localhost',
             proxyRules: proxyServer,
