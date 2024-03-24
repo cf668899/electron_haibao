@@ -29,7 +29,7 @@
             <span>支持平台</span>
           </span>
         </template>
-        <CheckNet @updateAppTypes="updateAppTypes" :appTypes="appTypes"/>
+        <CheckNet @updateAppTypes="updateAppTypes" :appTypes="appTypes" :appList="appList"/>
       </el-tab-pane>
       <el-tab-pane>
         <template #label>
@@ -63,7 +63,7 @@ const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 export default {
   name: 'moreSetting',
-  props:['data','appTypes'],
+  props:['data','appTypes','appList'],
   components: {
     TranslateSetting,
     ProxySetting,

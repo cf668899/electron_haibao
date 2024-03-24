@@ -36,9 +36,13 @@
                     <div
                       :class="item.online ? 'online online-box' : 'online-box'"
                     ></div>
-                    <el-icon >
-                      <User v-if="!item.avatar"/>
-                      <el-avatar v-if="item.avatar" :size="20" :src="item.avatar" />
+                    <el-icon>
+                      <User v-if="!item.avatar" />
+                      <el-avatar
+                        v-if="item.avatar"
+                        :size="20"
+                        :src="item.avatar"
+                      />
                     </el-icon>
 
                     <div class="userinfo">
@@ -47,15 +51,19 @@
                         :value="item.messageNum"
                         :hidden="item.messageNum ? false : true"
                       >
-                        <div class="username">
+                        <div v-if="item.record" class="username">
+                          <div class="usernameTop">{{ item.record }}</div>
+                          <div class="usernameBottom">
+                            {{
+                              settingData.text === '1' ? item.name : item.remark
+                            }}
+                          </div>
+                        </div>
+                        <div v-else-if="item.name">
                           {{
-                            item.name
-                              ? item.name
-                              : item.record
-                                ? item.record
-                                : appItem.name +
-                                  ' ' +
-                                  (appList[appItem.name].length - index)
+                            appItem.name +
+                            ' ' +
+                            (appList[appItem.name].length - index)
                           }}
                         </div>
                       </el-badge>
@@ -158,6 +166,7 @@
           v-if="pageType == 'setting'"
           :appTypes="appTypes"
           @updateAppTypes="updateAppTypes"
+          :appList="appList"
         ></MoreSetting>
         <quick-replay v-if="pageType == 'quickReply'" />
       </el-main>
@@ -175,6 +184,7 @@ import WebViewX from '@/components/WebViewX.vue'
 import WhatsappIcon from '@/assets/whatsapp.png'
 import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
+import { mapState } from 'vuex'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
 import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
@@ -185,6 +195,7 @@ const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 import emitter from '@/utils/bus'
 import QuickReplay from '@/components/QuickReplay.vue'
+import _ from 'lodash'
 export default {
   components: {
     AppList,
@@ -212,23 +223,31 @@ export default {
           name: 'Whatsapp',
           image: WhatsappIcon,
           used: true,
+          show: false,
         },
         {
           name: 'Telegram',
           image: TelegramIcon,
           used: true,
+          show: false,
         },
       ],
       clickMenu: '',
       token: '',
       lastActive: Date.now(),
       isLock: false,
+      settingData: {},
+      finishOut: true,
     }
   },
   computed: {
     leftList() {
-      return this.appTypes.filter((i) => i.used)
+      console.log('appList==', this.userData)
+      return this.appTypes.filter((i) => i.used && i.show)
     },
+    ...mapState({
+      userData: (state) => state.user.userData,
+    }),
   },
   created() {
     this.clickMenu = this.appTypes[0].name
@@ -238,18 +257,28 @@ export default {
         this.token = res.token
       }
     })
+    emitter.on('soft-setting', (data) => {
+      this.getSettingData()
+    })
     this.initOline()
     this.initLockSetInterval()
     this.initWs()
+    this.reSetPermissionList()
   },
   methods: {
+    async getSettingData() {
+      const res = await ipc.invoke('controller.app.getCommonStorage', {
+        key: 'SoftSetting',
+      })
+      if (res) {
+        this.settingData = JSON.parse(res)
+      }
+    },
     async initOline() {
       const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
       let res = await getOnlineCount({
         inviteCode: loginInfo.token,
       })
-
-      console.log(res)
       this.appNum = res.onlineCount
       this.appLimit = res.totalCount
     },
@@ -271,7 +300,7 @@ export default {
         }
       })
     },
-    unLock(password,success) {
+    unLock(password, success) {
       ipc.invoke('controller.config.getConfig', 'lock').then((res) => {
         if (res) {
           if (!res.password || res.password == password) {
@@ -334,9 +363,8 @@ export default {
 
     async addApp(data) {
       // TODO 调用新增接口
-      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
-      console.log("loginInfo",loginInfo)
-      const machineId = await ipc.invoke("controller.app.getMachineId", {})
+      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
+      const machineId = await ipc.invoke('controller.app.getMachineId', {})
       data.id = UtilsHelper.getRandomString()
       let accountRes = await accountSave({
         inviteCode: loginInfo.token,
@@ -529,10 +557,9 @@ export default {
 
       console.log('统计数量')
       // TODO统计下所有消息
-      for(let item of this.apps){
+      for (let item of this.apps) {
         console.log(item)
       }
-
     },
     listApp() {
       ipc.invoke('controller.app.list').then((data) => {
@@ -551,29 +578,43 @@ export default {
         this.appList = groupedBy
       })
     },
-    async loginOut() {
-      // 判断是否还有窗口没关闭
-      for (let item of this.apps) {
-        if (item.isActive == true) {
-          ElMessage({
-            message: '请先关闭所有运行中的会话窗口',
-            type: 'warning',
-          })
-          return
+    async loginOut(force = false) {
+      if (!this.finishOut) {
+        return
+      }
+      this.finishOut = false
+      try {
+        if (force) {
+          this.apps = []
+        } else {
+          // 判断是否还有窗口没关闭
+          for (let item of this.apps) {
+            if (item.isActive == true) {
+              ElMessage({
+                message: '请先关闭所有运行中的会话窗口',
+                type: 'warning',
+              })
+              return
+            }
+          }
         }
+        const machineId = await ipc.invoke('controller.app.getMachineId', {})
+        const loginInfo = await ipc.invoke(
+          'controller.config.getConfig',
+          'login'
+        )
+        if (loginInfo && !force) {
+          await logout({
+            inviteCode: loginInfo.token,
+            deviceId: machineId,
+          })
+        }
+        ipc.invoke('controller.login.loginOut')
+        this.$router.push({ name: "login" });
+        this.finishOut = true
+      } catch (e) {
+        this.finishOut = true
       }
-
-      const machineId = await ipc.invoke('controller.app.getMachineId', {})
-      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
-      if (loginInfo) {
-        await logout({
-          inviteCode: loginInfo.token,
-          deviceId: machineId,
-        })
-      }
-
-      ipc.invoke('controller.login.loginOut')
-      this.$router.back()
     },
     async initWs() {
       let machineId = await ipc.invoke('controller.app.getMachineId', {})
@@ -587,12 +628,31 @@ export default {
         if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
+          let newData = _.cloneDeep(this.userData)
+          newData.invite = { ...newData.invite, ...data.msgContent }
+          this.$store.commit('setUserData', newData)
+          this.reSetPermissionList()
+        } else if (data.topic === 'clientLogout') {
+          this.loginOut(true)
         }
       })
       this.$store.dispatch('initWSConnect', url)
     },
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
+    },
+    reSetPermissionList() {
+      try {
+        for (let item of this.appTypes) {
+          if (item.name === 'Telegram') {
+            item.show = this.userData.invite.telegram !== '1' ? false : true
+          } else if (item.name === 'Whatsapp') {
+            item.show = this.userData.invite.whatsapp !== '1' ? false : true
+          }
+        }
+      } catch (e) {
+        console.log('error==reSetPermissionList==', e)
+      }
     },
   },
 }
@@ -638,6 +698,14 @@ export default {
   /* 超出部分隐藏 */
   text-overflow: ellipsis;
   /* 溢出部分显示省略号 */
+}
+.usernameTop {
+  color: black;
+  text-align: left;
+  font-weight: 500;
+}
+.usernameBottom {
+  text-align: left;
 }
 
 .online-box {
@@ -805,6 +873,10 @@ export default {
   width: 100%;
   justify-content: flex-start;
   align-items: center;
+}
+.username div {
+  height: 20px !important;
+  line-height: 20px;
 }
 </style>
 <style></style>

@@ -19,7 +19,7 @@
             </el-tooltip>
           </div>
         </template>
-        <el-switch v-model="form.fd" />
+        <el-switch @change="saveForm" v-model="form.needFloat" />
       </el-form-item>
       <el-form-item label="会话文本显示">
         <el-select
@@ -27,6 +27,7 @@
           class="form-item"
           v-model="form.text"
           style="width: 265px"
+          @change="saveForm"
         >
           <el-option
             :label="item.label"
@@ -39,18 +40,22 @@
 
       <el-form-item label="翻译字体">
         <span style="margin-right: 10px">颜色</span>
-        <el-color-picker v-model="form.color" class="colorSelect" />
+        <el-color-picker
+          @change="saveForm"
+          v-model="form.fontColor"
+          class="colorSelect"
+        />
       </el-form-item>
 
       <el-form-item>
         <span style="margin-right: 10px">大小</span>
         <el-input-number
           style="width: 225px"
-          v-model="form.num"
+          v-model="form.fontSize"
           :min="0"
-          :max="10"
+          :max="100"
           controls-position="right"
-          @change="handleChange"
+          @change="saveForm"
         />
         <span style="margin-left: 10px">px</span>
       </el-form-item>
@@ -60,13 +65,14 @@
         <el-select
           placeholder="请选择"
           class="form-item"
-          v-model="form.jcType"
+          v-model="form.fontWeight"
           style="width: 225px"
+          @change="saveForm"
         >
           <el-option
             :label="item.label"
             :value="item.value"
-            v-for="item in jcType"
+            v-for="item in fontWeight"
             :key="item.value"
           />
         </el-select>
@@ -99,17 +105,19 @@
 <script>
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
+import emitter from '@/utils/bus'
 export default {
   props: ['data'],
   emits: ['SoftSetting'],
   data() {
     return {
       form: {
-        fd: '',
-        num: 0,
-        text: '',
-        jcType: '',
+        needFloat: '',
+        fontSize: 12,
+        text: '1',
+        fontWeight: '1',
         ua: 'Apple MacOs',
+        fontColor: '#000',
       },
       viewType: [
         {
@@ -121,7 +129,7 @@ export default {
           value: '2',
         },
       ],
-      jcType: [
+      fontWeight: [
         {
           label: '常规',
           value: '1',
@@ -133,8 +141,40 @@ export default {
       ],
     }
   },
-  created() {},
-  methods: {},
+  created() {
+    this.getCommonStorage()
+  },
+  methods: {
+    saveForm() {
+      console.log('saveForm')
+      this.saveStorage()
+    },
+    saveStorage() {
+      ipc.invoke('controller.app.setCommonStorage', {
+        data: JSON.stringify(this.form),
+        key: 'SoftSetting',
+      })
+      this.getCommonStorage()
+      emitter.emit('soft-setting')
+    },
+    async getCommonStorage() {
+      const res = await ipc.invoke('controller.app.getCommonStorage', {
+        key: 'SoftSetting',
+      })
+      if (res && res.length > 0) {
+        this.form = JSON.parse(res)
+      } else {
+        this.form = {
+          needFloat: '',
+          fontSize: 12,
+          text: '1',
+          fontWeight: '1',
+          ua: 'Apple MacOs',
+          fontColor: '#000',
+        }
+      }
+    },
+  },
 }
 </script>
 <style scoped>
