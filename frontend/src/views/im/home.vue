@@ -53,7 +53,11 @@
                       >
                         <div v-if="item.record" class="username">
                           <div class="usernameTop">{{ item.record }}</div>
-                          <div class="usernameBottom">{{ settingData.text==='1'?item.name:item.remark }}</div>
+                          <div class="usernameBottom">
+                            {{
+                              settingData.text === '1' ? item.name : item.remark
+                            }}
+                          </div>
                         </div>
                         <div v-else-if="item.name">
                           {{
@@ -229,6 +233,7 @@ export default {
       lastActive: Date.now(),
       isLock: false,
       settingData: {},
+      finishOut: true,
     }
   },
   computed: {
@@ -567,29 +572,43 @@ export default {
         this.appList = groupedBy
       })
     },
-    async loginOut() {
-      // 判断是否还有窗口没关闭
-      for (let item of this.apps) {
-        if (item.isActive == true) {
-          ElMessage({
-            message: '请先关闭所有运行中的会话窗口',
-            type: 'warning',
-          })
-          return
+    async loginOut(force = false) {
+      if (!this.finishOut) {
+        return
+      }
+      this.finishOut = false
+      try {
+        if (force) {
+          this.apps = []
+        } else {
+          // 判断是否还有窗口没关闭
+          for (let item of this.apps) {
+            if (item.isActive == true) {
+              ElMessage({
+                message: '请先关闭所有运行中的会话窗口',
+                type: 'warning',
+              })
+              return
+            }
+          }
         }
+        const machineId = await ipc.invoke('controller.app.getMachineId', {})
+        const loginInfo = await ipc.invoke(
+          'controller.config.getConfig',
+          'login'
+        )
+        if (loginInfo && !force) {
+          await logout({
+            inviteCode: loginInfo.token,
+            deviceId: machineId,
+          })
+        }
+        ipc.invoke('controller.login.loginOut')
+        this.$router.back()
+        this.finishOut = true
+      } catch (e) {
+        this.finishOut = true
       }
-
-      const machineId = await ipc.invoke('controller.app.getMachineId', {})
-      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
-      if (loginInfo) {
-        await logout({
-          inviteCode: loginInfo.token,
-          deviceId: machineId,
-        })
-      }
-
-      ipc.invoke('controller.login.loginOut')
-      this.$router.back()
     },
     async initWs() {
       let machineId = await ipc.invoke('controller.app.getMachineId', {})
@@ -603,6 +622,8 @@ export default {
         if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
+        } else if (data.topic === 'clientLogout') {
+          this.loginOut(true)
         }
       })
       this.$store.dispatch('initWSConnect', url)
@@ -655,12 +676,12 @@ export default {
   text-overflow: ellipsis;
   /* 溢出部分显示省略号 */
 }
-.usernameTop{
+.usernameTop {
   color: black;
   text-align: left;
   font-weight: 500;
 }
-.usernameBottom{
+.usernameBottom {
   text-align: left;
 }
 
