@@ -249,20 +249,6 @@ function TelegramJs(){
             }
         }
 
-        let record = ''
-        let recordNames = document.getElementsByClassName('fullName')
-        if (recordNames.length) {
-            record = recordNames[0].textContent;
-            if (oldRecord != record) {
-                window.electron.ipcRenderer.sendToHost(JSON.stringify({
-                    'type': "changeRecord",
-                    'data': record
-                }))
-
-                oldRecord = record;
-            }
-        }
-
         if (document.getElementById('telegram-search-input') || document.getElementById('chatlist-container')) {
             if (online == false) {
                 online = true
@@ -278,14 +264,18 @@ function TelegramJs(){
                         let jsonGlobal = JSON.parse(global)
                         let userId = jsonGlobal.currentUserId
                         let user = jsonGlobal.chats?.byId[userId]
-                        console.log(user)
                         user.contactsCount = jsonGlobal.chats?.totalCount.all
+                        user.title = jsonGlobal.users.byId[userId].phoneNumber         
                         window.electron.ipcRenderer.sendToHost(JSON.stringify({
                             'type': "changeUserName",
                             'data': user
                         }))
 
                         userTag = true
+                        window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                            'type': "changeRecord",
+                            'data':  jsonGlobal.users.byId[userId].firstName
+                        }))
                     }
                 }
             }

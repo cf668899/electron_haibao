@@ -78,7 +78,7 @@ export default {
       beijinIcon: beijin,
       test: "",
       config: {
-        token: "SAC0PZBYXS7U",
+        token: "",
         isSaveLogin: false,
       }, 
     };

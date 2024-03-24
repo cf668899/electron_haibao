@@ -90,7 +90,6 @@ export default {
             if (e.data) {
               try {
                 const data = JSON.parse(e.data)
-                console.log('收到消息data==', data)
                 // bus.config.globalProperties.$emit('ws-message', data)
                 emitter.emit('ws-message', data)
                 // 对应页面收到ws消息

@@ -158,4 +158,8 @@ export default {
   display: flex;
   align-items: center;
 }
+.box-card{
+  height: 100%;
+  overflow: auto;
+}
 </style>

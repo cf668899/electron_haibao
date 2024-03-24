@@ -167,10 +167,6 @@ export default {
           used: true,
         },
       ],
-      srcMap: {
-        Whatsapp: 'https://web.whatsapp.com/',
-        Telegram: 'https://web.telegram.org/',
-      },
       clickMenu: '',
       token: '',
       lastActive: Date.now(),
@@ -284,6 +280,7 @@ export default {
       console.log("add app")
       // TODO 调用新增接口
       const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      console.log("loginInfo",loginInfo)
       const machineId = await ipc.invoke("controller.app.getMachineId", {})
       data.id = UtilsHelper.getRandomString()
       let accountRes = await accountSave({
@@ -470,6 +467,13 @@ export default {
           item.messageNum = data.data
         }
       }
+
+      console.log('统计数量')
+      // TODO统计下所有消息
+      for(let item of this.apps){
+        console.log(item)
+      }
+
     },
     listApp() {
       ipc.invoke('controller.app.list').then((data) => {
