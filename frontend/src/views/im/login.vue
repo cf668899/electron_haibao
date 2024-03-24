@@ -119,6 +119,7 @@ export default {
         inviteCode: this.config.token,
         deviceId: machineId
       })
+      this.$store.commit('setUserData',user);
       ipc.invoke("controller.login.login", { ...this.config }).then((res) => {
         this.$router.push({ name: "home" });
       });

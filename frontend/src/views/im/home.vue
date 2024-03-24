@@ -184,6 +184,7 @@ import WebViewX from '@/components/WebViewX.vue'
 import WhatsappIcon from '@/assets/whatsapp.png'
 import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
+import { mapState } from 'vuex'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
 import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
@@ -194,6 +195,7 @@ const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 import emitter from '@/utils/bus'
 import QuickReplay from '@/components/QuickReplay.vue'
+import _ from 'lodash'
 export default {
   components: {
     AppList,
@@ -221,11 +223,13 @@ export default {
           name: 'Whatsapp',
           image: WhatsappIcon,
           used: true,
+          show: false,
         },
         {
           name: 'Telegram',
           image: TelegramIcon,
           used: true,
+          show: false,
         },
       ],
       clickMenu: '',
@@ -238,9 +242,12 @@ export default {
   },
   computed: {
     leftList() {
-      console.log('appList==', this.appList)
-      return this.appTypes.filter((i) => i.used)
+      console.log('appList==', this.userData)
+      return this.appTypes.filter((i) => i.used && i.show)
     },
+    ...mapState({
+      userData: (state) => state.user.userData,
+    }),
   },
   created() {
     this.clickMenu = this.appTypes[0].name
@@ -256,6 +263,7 @@ export default {
     this.initOline()
     this.initLockSetInterval()
     this.initWs()
+    this.reSetPermissionList()
   },
   methods: {
     async getSettingData() {
@@ -271,8 +279,6 @@ export default {
       let res = await getOnlineCount({
         inviteCode: loginInfo.token,
       })
-
-      console.log(res)
       this.appNum = res.onlineCount
       this.appLimit = res.totalCount
     },
@@ -622,6 +628,10 @@ export default {
         if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
+          let newData = _.cloneDeep(this.userData)
+          newData.invite = {...newData.invite,...data.msgContent}
+          this.$store.commit('setUserData',newData);
+          this.reSetPermissionList()
         } else if (data.topic === 'clientLogout') {
           this.loginOut(true)
         }
@@ -630,6 +640,15 @@ export default {
     },
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
+    },
+    reSetPermissionList() {
+      for (let item of this.appTypes) {
+        if (item.name === 'Telegram') {
+          item.show = this.userData.invite.telegram !== '1' ? false : true
+        } else if (item.name === 'Whatsapp') {
+          item.show = this.userData.invite.whatsapp !== '1' ? false : true
+        }
+      }
     },
   },
 }

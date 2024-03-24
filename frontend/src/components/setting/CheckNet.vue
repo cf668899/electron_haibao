@@ -7,7 +7,7 @@
       </div>
     </div>
     <draggable
-      v-model="list"
+      v-model="newList"
       group="list"
       item-key="name"
       class="centerBox"
@@ -40,13 +40,17 @@ export default {
   components: {
     draggable,
   },
-  created() {
-    this.list = this.appTypes || []
-  },
   data() {
     return {
       drag: false,
-      list: [],
+    }
+  },
+  computed: {
+    newList(){
+      if(this.appTypes && this.appTypes.length>0){
+      return this.appTypes.filter(i=>i.show)
+      }
+      return []
     }
   },
   methods: {
