@@ -10,7 +10,7 @@
               <el-sub-menu :index="appItem.name" v-for="(appItem, index) in leftList" :key="index"
                 :class="getItemClassName(appItem) ? 'itemNoMuch' : ''">
                 <template #title>
-                  <div @click="toAppManager(appItem.name)">
+                  <div @click="toAppManager(appItem.name)" class="leftItemBox">
                     <img :src="appItem.image" class="iconImage" />
                     <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{ appItem.name }}</span>
                   </div>
@@ -671,6 +671,7 @@ export default {
 
 .iconImage {
   width: 40px;
+  height: 40px;
   margin-right: 10px;
 }
 
@@ -735,6 +736,12 @@ export default {
 .arrowLeftTransformCommon {
   padding: 5px;
   cursor: pointer;
+}
+.leftItemBox{
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
 }
 </style>
 <style></style>
