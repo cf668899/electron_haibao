@@ -1,40 +1,60 @@
 <template>
   <div class="common-layout" @click="lockMonitor" v-show="!isLock">
     <el-container>
-      <el-aside style="height: 100%; background-color: rgb(253, 253, 253)"
-        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'">
+      <el-aside
+        style="height: 100%; background-color: rgb(253, 253, 253)"
+        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'"
+      >
         <div class="menu-box">
           <div class="menus">
             <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
               <!-- wwhatsapp -->
-              <el-sub-menu :index="appItem.name" v-for="(appItem, index) in leftList" :key="index"
-                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''">
+              <el-sub-menu
+                :index="appItem.name"
+                v-for="(appItem, index) in leftList"
+                :key="index"
+                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
+              >
                 <template #title>
-                  <div @click="toAppManager(appItem.name)">
+                  <div @click="toAppManager(appItem.name)" class="leftItemBox">
                     <img :src="appItem.image" class="iconImage" />
-                    <span :class="clickMenu == appItem.name ? 'menuTitle' : ''">{{ appItem.name }}</span>
+                    <span
+                      :class="clickMenu == appItem.name ? 'menuTitle' : ''"
+                      >{{ appItem.name }}</span
+                    >
                   </div>
                 </template>
-                <el-menu-item v-show="item.isActive" :key="item.id" :class="item.id == id ? 'active-bg' : ''"
-                  @click="toApp(item)" v-for="(item, index) in appList[appItem.name]" :index="item.id">
+                <el-menu-item
+                  v-show="item.isActive"
+                  :key="item.id"
+                  :class="item.id == id ? 'active-bg' : ''"
+                  @click="toApp(item)"
+                  v-for="(item, index) in appList[appItem.name]"
+                  :index="item.id"
+                >
                   <template #title>
-                    <div :class="item.online ? 'online online-box' : 'online-box'"></div>
+                    <div
+                      :class="item.online ? 'online online-box' : 'online-box'"
+                    ></div>
                     <el-icon>
                       <User />
                     </el-icon>
 
                     <div class="userinfo">
                       <!-- <div>{{ }}</div> -->
-                      <el-badge :value="item.messageNum" :hidden="item.messageNum ? false : true">
+                      <el-badge
+                        :value="item.messageNum"
+                        :hidden="item.messageNum ? false : true"
+                      >
                         <div class="username">
                           {{
                             item.name
-                            ? item.name
-                            : item.record
-                              ? item.record
-                              : appItem.name +
-                              ' ' +
-                              (appList[appItem.name].length - index)
+                              ? item.name
+                              : item.record
+                                ? item.record
+                                : appItem.name +
+                                  ' ' +
+                                  (appList[appItem.name].length - index)
                           }}
                         </div>
                       </el-badge>
@@ -42,7 +62,7 @@
                   </template>
                 </el-menu-item>
               </el-sub-menu>
-               <el-sub-menu
+              <el-sub-menu
                 index="quickReply"
                 @click="moreSetting('quickReply')"
                 style="border-top: 1px solid rgb(232, 232, 232)"
@@ -56,11 +76,17 @@
                   >
                 </template>
               </el-sub-menu>
-              <el-sub-menu index="setting" @click="moreSetting('setting')"
-                key="setting" class="itemNoMuch">
+              <el-sub-menu
+                index="setting"
+                @click="moreSetting('setting')"
+                key="setting"
+                class="itemNoMuch"
+              >
                 <template #title>
                   <img src="@/assets/moreSetting.png" class="iconImage" />
-                  <span :class="clickMenu == 'setting' ? 'menuTitle' : ''">更多设置</span>
+                  <span :class="clickMenu == 'setting' ? 'menuTitle' : ''"
+                    >更多设置</span
+                  >
                 </template>
               </el-sub-menu>
             </el-menu>
@@ -87,10 +113,14 @@
                 >退出</el-button
               > -->
               <div>
-                <el-icon @click="arrowLeft" :class="isReduceLeft
-                  ? 'arrowLeftTransformCommon arrowLeftTransform'
-                  : 'arrowLeftTransformCommon'
-                  ">
+                <el-icon
+                  @click="arrowLeft"
+                  :class="
+                    isReduceLeft
+                      ? 'arrowLeftTransformCommon arrowLeftTransform'
+                      : 'arrowLeftTransformCommon'
+                  "
+                >
                   <ArrowLeft />
                 </el-icon>
               </div>
@@ -99,22 +129,43 @@
         </div>
       </el-aside>
       <el-main>
-        <AppList v-if="pageType === 'manager'" :app-type="appType" :list="appList[appType] ? appList[appType] : []"
-          :appNum="appNum" :appLimit="appLimit" @addApp="addApp" @startApp="startApp" @closeApp="closeApp"
-          @showApp="showApp" @delApp="delApp">
+        <AppList
+          v-if="pageType === 'manager'"
+          :app-type="appType"
+          :list="appList[appType] ? appList[appType] : []"
+          :appNum="appNum"
+          :appLimit="appLimit"
+          @addApp="addApp"
+          @startApp="startApp"
+          @closeApp="closeApp"
+          @showApp="showApp"
+          @delApp="delApp"
+        >
         </AppList>
-        <WebViewX v-show="pageType === 'app' && item.isShow" :data="item" v-for="(item, index) in apps"
-          @changeRecord="changeRecord" @online="online" @changeMessageNum="changeMessageNum"
-          @changeUserName="changeUserName" @closeApp="closeApp" :key="index"></WebViewX>
-        <MoreSetting v-if="pageType == 'setting'" :appTypes="appTypes" @updateAppTypes="updateAppTypes"></MoreSetting>
-        <quick-replay v-if="pageType == 'quickReply'"/>
+        <WebViewX
+          v-show="pageType === 'app' && item.isShow"
+          :data="item"
+          v-for="(item, index) in apps"
+          @changeRecord="changeRecord"
+          @online="online"
+          @changeMessageNum="changeMessageNum"
+          @changeUserName="changeUserName"
+          @closeApp="closeApp"
+          :key="index"
+        ></WebViewX>
+        <MoreSetting
+          v-if="pageType == 'setting'"
+          :appTypes="appTypes"
+          @updateAppTypes="updateAppTypes"
+        ></MoreSetting>
+        <quick-replay v-if="pageType == 'quickReply'" />
       </el-main>
     </el-container>
   </div>
 
   <!-- 锁屏 -->
   <div v-show="isLock" class="common-layout">
-    <LockView @unLock='unLock' @loginOut='loginOut'></LockView>
+    <LockView @unLock="unLock" @loginOut="loginOut"></LockView>
   </div>
 </template>
 <script>
@@ -125,10 +176,10 @@ import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
-import { logout, accountSave, removeAccount, getOnlineCount } from "@/api/admin";
+import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
 import { baseWsUrl } from '@/constant/request'
 import { appMap } from '@/constant/app'
-const UtilsHelper = require('ee-core/utils/helper');
+const UtilsHelper = require('ee-core/utils/helper')
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 import emitter from '@/utils/bus'
@@ -139,7 +190,7 @@ export default {
     WebViewX,
     MoreSetting,
     LockView,
-    QuickReplay
+    QuickReplay,
   },
   data() {
     return {
@@ -170,7 +221,7 @@ export default {
       clickMenu: '',
       token: '',
       lastActive: Date.now(),
-      isLock: false
+      isLock: false,
     }
   },
   computed: {
@@ -186,15 +237,15 @@ export default {
         this.token = res.token
       }
     })
-    this.initOline();
+    this.initOline()
     this.initLockSetInterval()
     this.initWs()
   },
   methods: {
-    async initOline(){
-      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+    async initOline() {
+      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
       let res = await getOnlineCount({
-        inviteCode: loginInfo.token
+        inviteCode: loginInfo.token,
       })
 
       console.log(res)
@@ -202,26 +253,30 @@ export default {
       this.appLimit = res.totalCount
     },
     initLockSetInterval() {
-      ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
+      ipc.invoke('controller.config.getConfig', 'lock').then((res) => {
         if (res) {
           if (res.lockTime > 0) {
-            setInterval(() => {
+            if (global.intervalGlobal) {
+              clearInterval(global.intervalGlobal)
+              global.intervalGlobal = null
+            }
+            global.intervalGlobal = setInterval(() => {
               let now = Date.now()
               if (now - this.lastActive > res.lockTime * 1000 * 60) {
                 this.isLock = true
               }
-
             }, 1000)
           }
         }
-      });
+      })
     },
-    unLock(password) {
-      ipc.invoke("controller.config.getConfig", 'lock').then((res) => {
+    unLock(password,success) {
+      ipc.invoke('controller.config.getConfig', 'lock').then((res) => {
         if (res) {
           if (!res.password || res.password == password) {
             this.isLock = false
             this.lastActive = Date.now()
+            success && success()
           } else {
             ElMessage.error('密码错误！！')
           }
@@ -229,10 +284,11 @@ export default {
           this.isLock = false
           this.lastActive = Date.now()
         }
-      });
+      })
     },
     lockMonitor() {
       this.lastActive = Date.now()
+      this.initLockSetInterval()
     },
     selectMenu(index) {
       console.log(index)
@@ -263,7 +319,6 @@ export default {
       this.clickMenu = type
     },
     toApp(data) {
-      console.log('toApp', data)
       this.id = data.id
       for (let item of this.apps) {
         if (data.id == item.id) {
@@ -277,7 +332,6 @@ export default {
     },
 
     async addApp(data) {
-      console.log("add app")
       // TODO 调用新增接口
       const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
       console.log("loginInfo",loginInfo)
@@ -288,7 +342,7 @@ export default {
         deviceId: machineId,
         platformId: appMap[data.type].id,
         clientSessionId: data.id,
-        account: "-"
+        account: '-',
       })
       console.log(accountRes)
       data['netInfo'] = accountRes
@@ -394,7 +448,10 @@ export default {
         removeAccount(app.netInfo)
       }
 
-      let res = await ipc.invoke('controller.app.del', JSON.parse(JSON.stringify(data)))
+      let res = await ipc.invoke(
+        'controller.app.del',
+        JSON.parse(JSON.stringify(data))
+      )
       let list = this.appList[data.type]
       let newList = []
       for (let item of list) {
@@ -495,21 +552,21 @@ export default {
     async loginOut() {
       // 判断是否还有窗口没关闭
       for (let item of this.apps) {
-        if(item.isActive == true){
+        if (item.isActive == true) {
           ElMessage({
-            message: '还有窗口未关闭请先关闭窗口',
+            message: '请先关闭所有运行中的会话窗口',
             type: 'warning',
           })
           return
         }
       }
 
-      const machineId = await ipc.invoke("controller.app.getMachineId", {})
-      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
+      const machineId = await ipc.invoke('controller.app.getMachineId', {})
+      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
       if (loginInfo) {
         await logout({
           inviteCode: loginInfo.token,
-          deviceId: machineId
+          deviceId: machineId,
         })
       }
 
@@ -517,15 +574,15 @@ export default {
       this.$router.back()
     },
     async initWs() {
-      let machineId = await ipc.invoke("controller.app.getMachineId", {})
+      let machineId = await ipc.invoke('controller.app.getMachineId', {})
       let url = baseWsUrl + machineId
-      emitter.on('ws-open', (data)=>{
+      emitter.on('ws-open', (data) => {
         console.log('ws-open', data)
       })
 
-      emitter.on('ws-message', (data)=>{
+      emitter.on('ws-message', (data) => {
         console.log('message', data)
-        if(data.topic == 'getSessionCount'){
+        if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
         }
@@ -675,6 +732,7 @@ export default {
 
 .iconImage {
   width: 40px;
+  height: 40px;
   margin-right: 10px;
 }
 
@@ -739,6 +797,12 @@ export default {
 .arrowLeftTransformCommon {
   padding: 5px;
   cursor: pointer;
+}
+.leftItemBox {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
 }
 </style>
 <style></style>

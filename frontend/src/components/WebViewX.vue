@@ -31,17 +31,17 @@
         </el-tab-pane>
         <el-tab-pane label="快捷回复" name="快捷回复">
           <template #label>
-            <span>
+            <span @click="openMenu">
               <el-icon>
-                <Position />
+                <Position/>
               </el-icon>
             </span>
           </template>
-          <QuickReply :data="data" @reply="reply"></QuickReply>
+          <QuickReply :data="data" @reply="reply" :tabValue="tabValue"></QuickReply>
         </el-tab-pane>
         <el-tab-pane label="翻译" name="翻译">
           <template #label>
-            <span>
+            <span @click="openMenu">
               <el-icon>
                 <Connection />
               </el-icon>
@@ -54,7 +54,7 @@
         </el-tab-pane>
         <el-tab-pane label="代理" name="代理">
           <template #label>
-            <span>
+            <span @click="openMenu">
               <el-icon>
                 <Orange />
               </el-icon>
@@ -68,7 +68,7 @@
         </el-tab-pane>
         <el-tab-pane label="用户" name="用户">
           <template #label>
-            <span>
+            <span @click="openMenu">
               <el-icon>
                 <User />
               </el-icon>
@@ -127,11 +127,11 @@ export default {
   components: { QuickReply, TranslateSetting, ProxySetting, UserInfo },
   data() {
     return {
-      tabValue: "翻译",
-      preload: "file://" + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
+      tabValue: '翻译',
+      preload: 'file://' + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
       srcMap: {
-        Whatsapp: "https://web.whatsapp.com",
-        Telegram: "https://web.telegram.org/a",
+        Whatsapp: 'https://web.whatsapp.com',
+        Telegram: 'https://web.telegram.org/a',
       },
       view: null,
       translateInfo: {
@@ -173,7 +173,7 @@ export default {
     },
   },
   created() {
-    this.init();
+    this.init()
   },
   methods: {
     expansionChange() {
@@ -199,9 +199,9 @@ export default {
     async init() {
       this.initData()
       this.$nextTick(() => {
-        let view = this.$refs[this.data.id];
-        this.inject(view);
-      });
+        let view = this.$refs[this.data.id]
+        this.inject(view)
+      })
     },
     async initData(){
       //TODO 把最新的数据拉回来？
@@ -254,7 +254,7 @@ export default {
       }
     },
     inject(view) {
-      this.injectHandler(view);
+      this.injectHandler(view)
     },
     injectHandler(view) {
       view.addEventListener("did-start-loading", () => {
@@ -442,7 +442,7 @@ export default {
 }
 .viebview-aside-mini {
   width: 50px !important;
-  transition: width 0.5s; /* 过渡动画效果 */
+  transition: width 0.3s; /* 过渡动画效果 */
   border-right: solid 1px var(--el-menu-border-color) !important;
   overflow-x: hidden;
 }

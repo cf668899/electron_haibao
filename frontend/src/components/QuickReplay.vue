@@ -51,7 +51,9 @@
         <div class="centerBox">
           <div class="circleClass" />
           预先设置一些常见问题的回复用语, 帮助您提高回复效率。
-          <div style="color: #409eff;" class="downMb" @click="getDemoExcel">下载模版</div>
+          <div style="color: #409eff" class="downMb" @click="getDemoExcel">
+            下载模版
+          </div>
         </div>
 
         <el-upload
@@ -95,10 +97,16 @@
         <el-table-column prop="content" label="内容" />
         <el-table-column fixed="right" label="操作" width="150">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="edit(scope.row)"
+            <el-button
+              type="primary"
+              size="small"
+              @click="edit(scope.row, scope.$index)"
               >修改</el-button
             >
-            <el-button type="danger" size="small" @click="deleteItem(index)"
+            <el-button
+              type="danger"
+              size="small"
+              @click="deleteItem(scope.$index)"
               >删除</el-button
             >
           </template>
@@ -148,6 +156,7 @@ import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
+import emitter from '@/utils/bus'
 export default {
   name: 'QuickReplay',
   components: {},
@@ -219,12 +228,13 @@ export default {
         key: 'QuickReplay',
       })
       this.getCommonStorage()
+      emitter.emit('quick-reply')
     },
     async getCommonStorage() {
       const res = await ipc.invoke('controller.app.getCommonStorage', {
         key: 'QuickReplay',
       })
-      if (res) {
+      if (res && res.length > 0) {
         this.groupList = JSON.parse(res)
       }
     },
@@ -238,6 +248,9 @@ export default {
               message: '修改成功!',
             })
           } else {
+            if (!this.groupList[this.activeIndex].data) {
+              this.groupList[this.activeIndex].data = []
+            }
             this.groupList[this.activeIndex].data.push(this.form)
             ElMessage({
               type: 'success',
@@ -534,7 +547,7 @@ export default {
 .addGroupIcon {
   cursor: pointer;
 }
-.downMb{
-    cursor: pointer;
+.downMb {
+  cursor: pointer;
 }
 </style>
