@@ -154,4 +154,7 @@ export default {
 .input {
   margin-top: 10px;
 }
+.collapse-item{
+  cursor: pointer;
+}
 </style>
