@@ -36,8 +36,9 @@
                     <div
                       :class="item.online ? 'online online-box' : 'online-box'"
                     ></div>
-                    <el-icon>
-                      <User />
+                    <el-icon >
+                      <User v-if="!item.avatar"/>
+                      <el-avatar v-if="item.avatar" :size="20" :src="item.avatar" />
                     </el-icon>
 
                     <div class="userinfo">
@@ -490,6 +491,7 @@ export default {
         for (let item of this.apps) {
           if (data.id == item.id) {
             item.name = data.name
+            item.avatar = data.avatar
             item.online = true
           }
         }

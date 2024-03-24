@@ -28,6 +28,7 @@
             <template #default="scope">
               <el-space wrap>
                 <div :class="scope.row.online?'online online-box':'online-box'"></div>
+                <div><el-avatar :size="20" :src="scope.row.avatar" /></div>
                 <div>
                   {{ scope.row.record? scope.row.record: appType + " " + (list.length - scope.$index)}}
                 </div>

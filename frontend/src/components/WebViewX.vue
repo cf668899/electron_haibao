@@ -309,6 +309,7 @@ export default {
                 id: this.data.id,
                 type: this.data.type,
                 name: eventData.data.title,
+                avatar: eventData.data.avatar,
                 data: eventData.data,
               });
               let app = await ipc.invoke(
@@ -318,6 +319,7 @@ export default {
               if (app.netInfo) {
                 app.netInfo.nickname = eventData.data.title;
                 app.netInfo.account = eventData.data.title;
+                app.netInfo.avatar = eventData.data.avatar;
                 if (eventData.data.contactsCount) {
                   app.contactsCount = eventData.data.contactsCount;
                 }

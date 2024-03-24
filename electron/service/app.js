@@ -46,7 +46,7 @@ class AppService extends Service {
     this.conn.db
       .get('apps')
       .find({ id: data.id })
-      .assign({ name: data.name })
+      .assign({ name: data.name, avatar: data.avatar?data.avatar:'' })
       .write()
     return data
   }

@@ -265,7 +265,8 @@ function TelegramJs(){
                         let userId = jsonGlobal.currentUserId
                         let user = jsonGlobal.chats?.byId[userId]
                         user.contactsCount = jsonGlobal.chats?.totalCount.all
-                        user.title = jsonGlobal.users.byId[userId].phoneNumber         
+                        user.title = jsonGlobal.users.byId[userId].phoneNumber
+                        user.avatar = jsonGlobal.users?.fullInfoById['5914902036']?.profilePhoto?.thumbnail.dataUri         
                         window.electron.ipcRenderer.sendToHost(JSON.stringify({
                             'type': "changeUserName",
                             'data': user
