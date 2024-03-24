@@ -493,7 +493,7 @@ export default {
       for (let item of this.apps) {
         if(item.isActive == true){
           ElMessage({
-            message: '还有窗口未关闭请先关闭窗口',
+            message: '请先关闭所有运行中的会话窗口',
             type: 'warning',
           })
           return

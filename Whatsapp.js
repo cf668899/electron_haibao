@@ -115,6 +115,14 @@ function WhatsappJs(){
         console.log('修改好友信息', data)
         let currentFriendIdDiv = document.getElementById('currentFriendId')
         if (!currentFriendIdDiv) {
+            window.electron.ipcRenderer.sendToHost(JSON.stringify({
+                'type': "el-message",
+                'data': {
+                    showClose: true,
+                    message: '保存联系人失败，请先选择联系人聊天窗口',
+                    type: 'warning',
+                }
+            }))
             return
         }
         let app = JSON.parse(data)
@@ -126,6 +134,14 @@ function WhatsappJs(){
         friendInfoMap[id] = app.friendInfo
         // 发送到后台服务保存
         window.electron.ipcRenderer.invoke("controller.app.changeFriendInfo", app)
+        window.electron.ipcRenderer.sendToHost(JSON.stringify({
+            'type': "el-message",
+            'data': {
+                showClose: true,
+                message: '保存成功',
+                type: 'success',
+            }
+        }))
     })
 
 
