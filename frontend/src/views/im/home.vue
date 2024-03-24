@@ -610,7 +610,7 @@ export default {
           })
         }
         ipc.invoke('controller.login.loginOut')
-        this.$router.back()
+        this.$router.push({ name: "login" });
         this.finishOut = true
       } catch (e) {
         this.finishOut = true
