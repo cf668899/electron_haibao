@@ -232,11 +232,13 @@ module.exports = function TelegramJs(){
         }
 
         // 监听消息数
-        let newMessages = document.getElementsByClassName('ChatBadge muted unread')
+        let newMessages = document.getElementsByClassName('ChatBadge unread')
         if (newMessages.length) {
             let num = 0
             for (let messgae of newMessages) {
-                num += parseInt(messgae.textContent)
+                if(messgae.getAttribute('class') == 'ChatBadge unread'){
+                    num += parseInt(messgae.textContent)
+                }
             }
 
             if (num > 0 && oldMessageNum != num) {
@@ -263,10 +265,10 @@ module.exports = function TelegramJs(){
                     if (global) {
                         let jsonGlobal = JSON.parse(global)
                         let userId = jsonGlobal.currentUserId
-                        let user = jsonGlobal.chats?.byId[userId]
+                        let user = {}
                         user.contactsCount = jsonGlobal.chats?.totalCount.all
                         user.title = jsonGlobal.users.byId[userId].phoneNumber
-                        user.avatar = jsonGlobal.users?.fullInfoById['5914902036']?.profilePhoto?.thumbnail.dataUri         
+                        user.avatar = jsonGlobal.users?.fullInfoById[userId]?.profilePhoto?.thumbnail.dataUri         
                         window.electron.ipcRenderer.sendToHost(JSON.stringify({
                             'type': "changeUserName",
                             'data': user

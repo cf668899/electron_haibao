@@ -36,9 +36,13 @@
                     <div
                       :class="item.online ? 'online online-box' : 'online-box'"
                     ></div>
-                    <el-icon >
-                      <User v-if="!item.avatar"/>
-                      <el-avatar v-if="item.avatar" :size="20" :src="item.avatar" />
+                    <el-icon>
+                      <User v-if="!item.avatar" />
+                      <el-avatar
+                        v-if="item.avatar"
+                        :size="20"
+                        :src="item.avatar"
+                      />
                     </el-icon>
 
                     <div class="userinfo">
@@ -47,15 +51,15 @@
                         :value="item.messageNum"
                         :hidden="item.messageNum ? false : true"
                       >
-                        <div class="username">
+                        <div v-if="item.record" class="username">
+                          <div class="usernameTop">{{ item.record }}</div>
+                          <div class="usernameBottom">{{ settingData.text==='1'?item.name:item.remark }}</div>
+                        </div>
+                        <div v-else-if="item.name">
                           {{
-                            item.name
-                              ? item.name
-                              : item.record
-                                ? item.record
-                                : appItem.name +
-                                  ' ' +
-                                  (appList[appItem.name].length - index)
+                            appItem.name +
+                            ' ' +
+                            (appList[appItem.name].length - index)
                           }}
                         </div>
                       </el-badge>
@@ -223,10 +227,12 @@ export default {
       token: '',
       lastActive: Date.now(),
       isLock: false,
+      settingData: {},
     }
   },
   computed: {
     leftList() {
+      console.log('appList==', this.appList)
       return this.appTypes.filter((i) => i.used)
     },
   },
@@ -238,11 +244,22 @@ export default {
         this.token = res.token
       }
     })
+    emitter.on('soft-setting', (data) => {
+      console.log('soft-setting', data)
+    })
     this.initOline()
     this.initLockSetInterval()
     this.initWs()
   },
   methods: {
+    async getSettingData() {
+      const res = await ipc.invoke('controller.app.getCommonStorage', {
+        key: 'SoftSetting',
+      })
+      if (res) {
+        this.settingData = JSON.parse(res)
+      }
+    },
     async initOline() {
       const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
       let res = await getOnlineCount({
@@ -271,7 +288,7 @@ export default {
         }
       })
     },
-    unLock(password,success) {
+    unLock(password, success) {
       ipc.invoke('controller.config.getConfig', 'lock').then((res) => {
         if (res) {
           if (!res.password || res.password == password) {
@@ -334,9 +351,8 @@ export default {
 
     async addApp(data) {
       // TODO 调用新增接口
-      const loginInfo = await ipc.invoke("controller.config.getConfig", 'login')
-      console.log("loginInfo",loginInfo)
-      const machineId = await ipc.invoke("controller.app.getMachineId", {})
+      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
+      const machineId = await ipc.invoke('controller.app.getMachineId', {})
       data.id = UtilsHelper.getRandomString()
       let accountRes = await accountSave({
         inviteCode: loginInfo.token,
@@ -529,10 +545,9 @@ export default {
 
       console.log('统计数量')
       // TODO统计下所有消息
-      for(let item of this.apps){
+      for (let item of this.apps) {
         console.log(item)
       }
-
     },
     listApp() {
       ipc.invoke('controller.app.list').then((data) => {
@@ -638,6 +653,14 @@ export default {
   /* 超出部分隐藏 */
   text-overflow: ellipsis;
   /* 溢出部分显示省略号 */
+}
+.usernameTop{
+  color: black;
+  text-align: left;
+  font-weight: 500;
+}
+.usernameBottom{
+  text-align: left;
 }
 
 .online-box {
@@ -805,6 +828,10 @@ export default {
   width: 100%;
   justify-content: flex-start;
   align-items: center;
+}
+.username div {
+  height: 20px !important;
+  line-height: 20px;
 }
 </style>
 <style></style>
