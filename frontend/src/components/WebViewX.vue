@@ -33,11 +33,11 @@
           <template #label>
             <span @click="openMenu">
               <el-icon>
-                <Position />
+                <Position/>
               </el-icon>
             </span>
           </template>
-          <QuickReply :data="data" @reply="reply"></QuickReply>
+          <QuickReply :data="data" @reply="reply" :tabValue="tabValue"></QuickReply>
         </el-tab-pane>
         <el-tab-pane label="翻译" name="翻译">
           <template #label>
