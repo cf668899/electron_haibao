@@ -245,7 +245,7 @@ export default {
       }
     })
     emitter.on('soft-setting', (data) => {
-      console.log('soft-setting', data)
+      this.getSettingData()
     })
     this.initOline()
     this.initLockSetInterval()
