@@ -629,8 +629,8 @@ export default {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
           let newData = _.cloneDeep(this.userData)
-          newData.invite = {...newData.invite,...data.msgContent}
-          this.$store.commit('setUserData',newData);
+          newData.invite = { ...newData.invite, ...data.msgContent }
+          this.$store.commit('setUserData', newData)
           this.reSetPermissionList()
         } else if (data.topic === 'clientLogout') {
           this.loginOut(true)
@@ -642,12 +642,16 @@ export default {
       this.appTypes = appTypes
     },
     reSetPermissionList() {
-      for (let item of this.appTypes) {
-        if (item.name === 'Telegram') {
-          item.show = this.userData.invite.telegram !== '1' ? false : true
-        } else if (item.name === 'Whatsapp') {
-          item.show = this.userData.invite.whatsapp !== '1' ? false : true
+      try {
+        for (let item of this.appTypes) {
+          if (item.name === 'Telegram') {
+            item.show = this.userData.invite.telegram !== '1' ? false : true
+          } else if (item.name === 'Whatsapp') {
+            item.show = this.userData.invite.whatsapp !== '1' ? false : true
+          }
         }
+      } catch (e) {
+        console.log('error==reSetPermissionList==', e)
       }
     },
   },
