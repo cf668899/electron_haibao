@@ -139,6 +139,7 @@
         <AppList
           v-if="pageType === 'manager'"
           :app-type="appType"
+          :app-types="appTypes"
           :list="appList[appType] ? appList[appType] : []"
           :appNum="appNum"
           :appLimit="appLimit"

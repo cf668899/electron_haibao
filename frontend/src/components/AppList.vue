@@ -8,7 +8,7 @@
             `会话:${appNum} / ${appLimit}`
           }}</el-tag>
         </div>
-        <div class="addAppBtn" @click="addApp">
+        <div :class="isActice()?'addAppBtn':'addAppBtn disabled'" @click="addApp">
           <el-icon size="12"><Aim /></el-icon> 新增:{{ appType }}
         </div>
       </div>
@@ -90,7 +90,7 @@
 const { ipcRenderer: ipc } = (window.require && window.require("electron")) || window.electron || {};
 export default {
   name: "applist",
-  props: ["appType", "list", "appNum", "appLimit"],
+  props: ["appType", "list", "appNum", "appLimit", "appTypes"],
   emits: ["addApp", "startApp", "showApp", "closeApp", "delApp"],
   data() {
     return {
@@ -109,7 +109,18 @@ export default {
       row.isEdit = false
       ipc.invoke('controller.app.changeRemark', JSON.parse(JSON.stringify(row)))
     },
+    isActice(){
+      for(let item of this.appTypes){
+        if(item.name == this.appType && item.show){
+          return true
+        }
+      }
+      return false
+    },
     addApp(){
+      if(!this.isActice()){
+        return
+      }
       this.$emit('addApp', {
         name:'',
         type: this.appType,
@@ -166,5 +177,8 @@ export default {
 .alignClass{
   display: flex;
   align-items: center;
+}
+.disabled{
+  color: rgb(202, 210, 218);
 }
 </style>
