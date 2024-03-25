@@ -1,4 +1,4 @@
-function TelegramJs(){
+function TelegramJs() {
     let inputTag = false;
     let oldRecord = '';
     let userTag = false;
@@ -33,7 +33,7 @@ function TelegramJs(){
         var e = event || window.event || arguments.callee.caller.arguments[0];
         if (e && e.keyCode == 13) {
             console.log("回车键提交！！！")
-            let translateBox = document.getElementById('translate-box')
+            let translateBox = document.getElementById('translate-box-content')
             if (translateBox && translateBox.textContent) {
                 quickReply(translateBox.textContent)
             }
@@ -60,7 +60,7 @@ function TelegramJs(){
             inputReply.dispatchEvent(event);
             setTimeout(() => {
                 document.getElementsByClassName('main-button')[0].click()
-            }, 500)
+            }, 800)
         }
     }
 
@@ -68,6 +68,11 @@ function TelegramJs(){
     window.electron.ipcRenderer.on('translateInfoChange', (event, data) => {
         console.log(event, data)
         translateInfo = JSON.parse(data)
+        translatorMap = {}
+        let boxTitle = document.getElementById('translate-box-title')
+        if (boxTitle) {
+            boxTitle.textContent = `${translateInfo.channel}实时翻译`
+        }
     })
 
     // 好友信息
@@ -173,62 +178,65 @@ function TelegramJs(){
             }
         }
 
+        let inputBox = document.getElementById('editable-message-text')
         // 输入翻译开启
-        if (translateInfo.inputContent.open) {
-            let inputBox = document.getElementById('editable-message-text')
-            if (inputBox) {
-                // 插入翻译
-                let rest = {
-                    status: 500
-                }
-                let content = inputBox.textContent
-                if (content != '') {
-                    let translatorContent = translatorMap[content]
-                    if (translatorContent) {
-                        rest = {
-                            status: 200,
-                            data: {
-                                translations: [
-                                    {
-                                        text: translatorContent
-                                    }
-                                ]
-                            }
-                        }
-                    } else {
-                        rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translateInfo.channel, { 'translate': translateInfo.inputContent, 'texts': [content] })
-                    }
-                }
+        if (translateInfo.inputContent.open && inputBox) {
+            if (!document.getElementById('translate-box')) {
+                let translateBox = document.createElement('div');
+                translateBox.setAttribute('id', 'translate-box')
+                let titleBox = document.createElement('div');
+                titleBox.setAttribute('id', 'translate-box-title')
+                titleBox.style = "color:green;padding:5px 50px;overflow-wrap: break-word;font-size: 12px;";
+                titleBox.textContent = `${translateInfo.channel}实时翻译`
+                translateBox.appendChild(titleBox);
 
-                if (rest.status == 200 && rest.data && rest.data.translations.length) {
-                    translatorMap[content] = rest.data.translations[0].text;
-                    if (!document.getElementById('translate-box')) {
-                        var newDiv = document.createElement('div');
-                        newDiv.textContent = rest.data.translations[0].text;
-                        newDiv.style = "color:green;padding: 10px 50px;word-wrap: break-word;";
-                        newDiv.setAttribute('id', 'translate-box')
-                        let box = document.getElementsByClassName('composer-wrapper')[0]
-                        box.insertBefore(newDiv, box.getElementsByClassName('message-input-wrapper')[0]);
-                    } else {
-                        document.getElementById('translate-box').textContent = rest.data.translations[0].text;
-                    }
-
-                } else {
-                    if (!document.getElementById('translate-box')) {
-                        var newDiv = document.createElement('div');
-                        newDiv.textContent = '';
-                        newDiv.style = "color:green;padding: 10px 50px;word-wrap: break-word;";
-                        newDiv.setAttribute('id', 'translate-box')
-                        let box = document.getElementsByClassName('composer-wrapper')[0]
-                        box.insertBefore(newDiv, box.getElementsByClassName('message-input-wrapper')[0]);
-                    } else {
-                        document.getElementById('translate-box').textContent = '';
-                    }
-                }
-
+                let content = document.createElement('div');
+                content.textContent = '...'
+                content.style = "color:green;padding: 5px 50px;word-wrap: break-word;";
+                content.setAttribute('id', 'translate-box-content')
+                let box = document.getElementsByClassName('composer-wrapper')[0]
+                translateBox.appendChild(content)
+                box.insertBefore(translateBox, box.getElementsByClassName('message-input-wrapper')[0]);
             }
+
+            // 插入翻译
+            let rest = {
+                status: 500
+            }
+            let content = inputBox.textContent
+            if (content != '') {
+                let translatorContent = translatorMap[content]
+                if (translatorContent) {
+                    rest = {
+                        status: 200,
+                        data: {
+                            translations: [
+                                {
+                                    text: translatorContent
+                                }
+                            ]
+                        }
+                    }
+                } else {
+                    rest = await window.electron.ipcRenderer.invoke('controller.translator.' + translateInfo.channel, { 'translate': translateInfo.inputContent, 'texts': [content] })
+                }
+            }
+
+            if (rest.status == 200 && rest.data && rest.data.translations.length) {
+                translatorMap[content] = rest.data.translations[0].text;
+                document.getElementById('translate-box-content').textContent = rest.data.translations[0].text;
+            } else {
+                let content = document.getElementById('translate-box-content')
+                if (content) {
+                    content.textContent = '';
+                }
+            }
+
         } else {
-            document.getElementById('translate-box')?.remove()
+            let translateBox = document.getElementById('translate-box')
+            if (translateBox) {
+                translateBox.remove()
+            }
         }
 
         // 监听消息数
@@ -236,12 +244,12 @@ function TelegramJs(){
         if (newMessages.length) {
             let num = 0
             for (let messgae of newMessages) {
-                if(messgae.getAttribute('class') == 'ChatBadge unread'){
+                if (messgae.getAttribute('class') == 'ChatBadge unread') {
                     num += parseInt(messgae.textContent)
                 }
             }
 
-            if (num > 0 && oldMessageNum != num) {
+            if (oldMessageNum != num) {
                 // 更新消息数量
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
                     'type': "changeMessageNum",
@@ -268,7 +276,7 @@ function TelegramJs(){
                         let user = {}
                         user.contactsCount = jsonGlobal.chats?.totalCount.all
                         user.title = jsonGlobal.users.byId[userId].phoneNumber
-                        user.avatar = jsonGlobal.users?.fullInfoById[userId]?.profilePhoto?.thumbnail.dataUri         
+                        user.avatar = jsonGlobal.users?.fullInfoById[userId]?.profilePhoto?.thumbnail.dataUri
                         window.electron.ipcRenderer.sendToHost(JSON.stringify({
                             'type': "changeUserName",
                             'data': user
@@ -277,7 +285,7 @@ function TelegramJs(){
                         userTag = true
                         window.electron.ipcRenderer.sendToHost(JSON.stringify({
                             'type': "changeRecord",
-                            'data':  jsonGlobal.users.byId[userId].firstName
+                            'data': jsonGlobal.users.byId[userId].firstName
                         }))
                     }
                 }
@@ -322,7 +330,7 @@ function TelegramJs(){
                         // // 翻译
                         let newMessage = messages[0].cloneNode(true);
                         newMessage.textContent = translatorMap[text];
-                        newMessage.style.color = "green";
+                        newMessage.setAttribute('style', 'color:green;border-bottom: 1px green dashed;')
                         content.insertBefore(newMessage, messages[0]);
                     } else {
                         texts.push(text)

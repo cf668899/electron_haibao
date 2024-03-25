@@ -55,7 +55,7 @@
                           <div class="usernameTop">{{ item.record }}</div>
                           <div class="usernameBottom">
                             {{
-                              settingData.text === '1' ? item.name : item.remark
+                              settingData.text === '2' ? item.remark: item.name
                             }}
                           </div>
                         </div>

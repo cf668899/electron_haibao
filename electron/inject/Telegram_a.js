@@ -241,7 +241,7 @@ module.exports = function TelegramJs(){
                 }
             }
 
-            if (num > 0 && oldMessageNum != num) {
+            if (oldMessageNum != num) {
                 // 更新消息数量
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
                     'type': "changeMessageNum",

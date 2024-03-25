@@ -120,7 +120,12 @@ export default {
         deviceId: machineId
       })
       this.$store.commit('setUserData',user);
-      ipc.invoke("controller.login.login", { ...this.config }).then((res) => {
+      ipc.invoke('controller.config.setConfig', {
+        key: 'login',
+        value: {
+          ...this.config
+        }
+      }).then((res) => {
         this.$router.push({ name: "home" });
       });
     },

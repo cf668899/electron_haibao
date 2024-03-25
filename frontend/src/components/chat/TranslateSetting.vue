@@ -18,17 +18,17 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="接收消息实时翻译" label-width="150px">
-                <el-switch v-model="data.message.open" @change="change"/>
+                <el-switch  v-model="data.message.open" @change="change"/>
             </el-form-item>
 
             <el-form-item label="源语言">
-                <el-select v-model="data.message.source" placeholder="请选择语言" class="form-item" @change="change">
+                <el-select disabled v-model="data.message.source" placeholder="请选择语言" class="form-item" @change="change">
                     <el-option :label="item.name" :value="item.loca" v-for="item in languages" :key="item.loca" />
                 </el-select>
             </el-form-item>
 
             <el-form-item label="目标语言">
-                <el-select v-model="data.message.target" placeholder="请选择语言" class="form-item" @change="change">
+                <el-select disabled v-model="data.message.target" placeholder="请选择语言" class="form-item" @change="change">
                     <el-option :label="item.name" :value="item.loca" v-for="item in languages" :key="item.loca" />
                 </el-select>
             </el-form-item>

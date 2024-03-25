@@ -6,7 +6,7 @@
         :ref="data.id"
         :id="data.id"
         style="height: 100%"
-        :src="srcMap[data.type]"
+        :src="srcMap[data.type].url"
         :partition="'persist:' + data.id"
         nodeintegration
         :preload="preload"
@@ -110,6 +110,7 @@ import TranslateSetting from "./chat/TranslateSetting.vue";
 import ProxySetting from "./chat/ProxySetting.vue";
 import UserInfo from "./chat/UserInfo.vue";
 import { accountSave } from "@/api/admin";
+import { appMap } from "@/constant/app.js"
 const { ipcRenderer: ipc } =
   (window.require && window.require("electron")) || window.electron || {};
 const path = require("path");
@@ -130,10 +131,7 @@ export default {
     return {
       tabValue: '翻译',
       preload: 'file://' + path.join(Ps.getHomeDir(), `${this.data.type}.js`),
-      srcMap: {
-        Whatsapp: 'https://web.whatsapp.com',
-        Telegram: 'https://web.telegram.org/a',
-      },
+      srcMap: appMap,
       view: null,
       translateInfo: {
         channel: "deepl",
