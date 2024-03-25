@@ -59,7 +59,7 @@
                             }}
                           </div>
                         </div>
-                        <div v-else-if="item.name">
+                        <div v-else-if="appItem.name">
                           {{
                             appItem.name +
                             ' ' +
@@ -102,7 +102,7 @@
           </div>
           <div class="operator-box">
             <div class="logout">
-              <div class="ysBoxF" v-if="!isReduceLeft" @click="loginOut">
+              <div class="ysBoxF" v-if="!isReduceLeft" @click="loginOut()">
                 <div class="ysBox">
                   <img class="ys" src="@/assets/yaos.png" />
                   <div class="ysBoxCenter">
@@ -175,7 +175,7 @@
 
   <!-- 锁屏 -->
   <div v-show="isLock" class="common-layout">
-    <LockView @unLock="unLock" @loginOut="loginOut"></LockView>
+    <LockView @unLock="unLock" @loginOut="loginOut()"></LockView>
   </div>
 </template>
 <script>
@@ -573,22 +573,22 @@ export default {
         return
       }
       this.finishOut = false
-      try {
+            try {
         if (force) {
           this.apps = []
         } else {
           // 判断是否还有窗口没关闭
           for (let item of this.apps) {
-            if (item.isActive == true) {
-              ElMessage({
-                message: '请先关闭所有运行中的会话窗口',
-                type: 'warning',
-              })
-              return
+              if (item.isActive == true) {
+                ElMessage({
+                  message: '请先关闭所有运行中的会话窗口',
+                  type: 'warning',
+                })
+                return
+              }
             }
           }
-        }
-        const machineId = await ipc.invoke('controller.app.getMachineId', {})
+                const machineId = await ipc.invoke('controller.app.getMachineId', {})
         const loginInfo = await ipc.invoke(
           'controller.config.getConfig',
           'login'
@@ -637,9 +637,9 @@ export default {
       this.appTypes = appTypes
       // 保存
       ipc.invoke('controller.config.setConfig', JSON.parse(JSON.stringify({
-        key:'appTypes',
-        value: appTypes
-      })))
+            key:'appTypes',
+            value: appTypes
+          })))
 
     },
     async initTypes(){
