@@ -40,6 +40,30 @@ module.exports = function WhatsappJs(){
         }
     };
 
+    async function setTransformClass(){
+        try{
+            let styleObj = await window.electron.ipcRenderer.invoke('controller.app.getSettingFont')
+            styleObj = JSON.parse(styleObj)
+            let fontWeight = styleObj.fontWeight==='2'?500:400
+            let docList = document.getElementsByClassName('transformTextClass')
+            for(let item of docList){
+                item.style.color=styleObj.fontColor;
+                item.style.fontWeight=`${fontWeight}`;
+                item.style.borderBottom=`1px ${styleObj.fontColor} dashed`;
+                item.style.fontSize=`${styleObj.fontSize}px`;
+            }
+        }
+        catch(e){
+            console.log("error==",e)
+        }
+    }
+
+    // 监听样式更改的消息
+    window.electron.ipcRenderer.on('setTransformClassChange', (event, data) => {
+        console.log("setTransformClassChange==")
+        setTransformClass()
+    })
+
     function isInViewport(element) {
         var rect = element.getBoundingClientRect();
         return (
@@ -299,8 +323,9 @@ module.exports = function WhatsappJs(){
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
                         newMessage.style.color = "green";
-                        newMessage.setAttribute('class', 'selectable-text')
+                        newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
+                        setTransformClass()
                     } else {
                         texts.push(text)
                     }
@@ -328,8 +353,9 @@ module.exports = function WhatsappJs(){
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
                         newMessage.style.color = "green";
-                        newMessage.setAttribute('class', 'selectable-text')
+                        newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
+                        setTransformClass()
                     } else {
                         texts.push(text)
                     }
