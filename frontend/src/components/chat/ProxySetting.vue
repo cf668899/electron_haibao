@@ -2,7 +2,7 @@
     <div class="tab-box">
         <div class="tab-box-title">代理设置</div>
         <el-form label-position="left" label-width="90px">
-            
+
             <el-form-item label="启用代理服务器" label-width="150px">
                 <el-switch v-model="data.cookieOpen" @change="change"/>
             </el-form-item>
@@ -22,7 +22,7 @@
             <el-divider />
 
             <el-form-item label="启动代理服务器验证" label-width="150px">
-                <el-switch :disabled="data.type.indexOf('SOCKS') > -1" v-model="data.auth" @change="change"/>
+                <el-switch :disabled="data.type && data.type.indexOf('SOCKS') > -1" v-model="data.auth" @change="change"/>
             </el-form-item>
 
             <el-form-item label="用户名">
@@ -39,7 +39,7 @@
         </el-form>
     </div>
 </template>
-  
+
 <script>
 const { clipboard } = require('electron')
 import translate from '@/constant/proxydefaul'
@@ -112,4 +112,3 @@ export default {
     width: 180px;
 }
 </style>
-  

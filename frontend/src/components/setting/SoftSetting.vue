@@ -112,12 +112,6 @@ export default {
   data() {
     return {
       form: {
-        needFloat: '',
-        fontSize: 12,
-        text: '1',
-        fontWeight: '1',
-        ua: 'Apple MacOs',
-        fontColor: '#000',
       },
       viewType: [
         {
@@ -158,21 +152,8 @@ export default {
       emitter.emit('soft-setting')
     },
     async getCommonStorage() {
-      const res = await ipc.invoke('controller.app.getCommonStorage', {
-        key: 'SoftSetting',
-      })
-      if (res && res.length > 0) {
-        this.form = JSON.parse(res)
-      } else {
-        this.form = {
-          needFloat: '',
-          fontSize: 12,
-          text: '1',
-          fontWeight: '1',
-          ua: 'Apple MacOs',
-          fontColor: '#000',
-        }
-      }
+      const res = await ipc.invoke('controller.app.getSettingFont')
+      this.form = JSON.parse(res)
     },
   },
 }

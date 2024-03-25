@@ -135,6 +135,24 @@ class AppController extends Controller {
             proxyRules: proxyServer,
         })
     }
+
+    async getSettingFont(){
+        const res = await Services.get("app").getCommonStorage({
+            key: 'SoftSetting',
+          })
+          if (res && res.length > 0 ) {
+            return res
+          } else {
+            return JSON.stringify({
+                needFloat: '',
+                fontSize: 12,
+                text: '1',
+                fontWeight: '1',
+                ua: 'Apple MacOs',
+                fontColor: '#000',
+              })
+          }
+    }
 }
 
 AppController.toString = () => '[class AppController]';

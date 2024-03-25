@@ -117,6 +117,7 @@ const { ipcRenderer: ipc } =
 const path = require("path");
 const Ps = require("ee-core/ps");
 import { ElMessage } from "element-plus";
+import emitter from '@/utils/bus'
 export default {
   name: "webviewx",
   props: ["data"],
@@ -175,6 +176,9 @@ export default {
   },
   created() {
     this.init()
+    emitter.on('soft-setting', (data) => {
+      this.view?.send("setTransformClassChange");
+    })
   },
   methods: {
     openMenu() {

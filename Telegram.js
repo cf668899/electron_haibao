@@ -39,6 +39,46 @@ function TelegramJs() {
             }
         }
     };
+    async function setTransformClass(){
+        try{
+            let styleObj = await window.electron.ipcRenderer.invoke('controller.app.getSettingFont')
+            styleObj = JSON.parse(styleObj)
+            // document.querySelectorAll('.transformTextClass').forEach(function(element) {
+            //     element.classList.remove('transformTextClass');
+            // });
+            // // 创建一个新的<style>元素
+            // var style = document.createElement('style');
+            // // 添加你想要的CSS样式规则
+            let fontWeight = styleObj.fontWeight==='2'?500:300
+            // style.innerHTML = `
+            // .transformTextClass {
+            //     color: ${styleObj.fontColor};
+            //     border-bottom: 1px ${styleObj.fontColor} dashed !important;
+            //     font-size:${styleObj.fontSize}px !important;
+            //     font-weight: ${fontWeight} !important;
+            // }
+            // `;
+            // console.log("changeStyle")
+            // // 将<style>元素添加到<head>标签中
+            // document.head.appendChild(style);
+            let docList = document.getElementsByClassName('transformTextClass')
+            for(let item of docList){
+                item.style.color=styleObj.fontColor;
+                item.style.fontWeight=`${fontWeight}`;
+                item.style.borderBottom=`1px ${styleObj.fontColor} dashed`;
+                item.style.fontSize=`${styleObj.fontSize}px`;
+            }
+        }
+        catch(e){
+            console.log("error==",e)
+        }
+    }
+
+    // 监听样式更改的消息
+    window.electron.ipcRenderer.on('setTransformClassChange', (event, data) => {
+        console.log("setTransformClassChange==")
+        setTransformClass()
+    })
 
     function isInViewport(element) {
         var rect = element.getBoundingClientRect();
@@ -74,6 +114,8 @@ function TelegramJs() {
             boxTitle.textContent = `${translateInfo.channel}实时翻译`
         }
     })
+
+    
 
     // 好友信息
     window.electron.ipcRenderer.on('friendInfoChange', (event, data) => {
@@ -300,7 +342,6 @@ function TelegramJs() {
             // 监听消息内容
             let contents = document.getElementsByClassName('content-inner');
             let texts = []
-
             for (let content of contents) {
                 if (!isInViewport(content)) {
                     continue;
@@ -328,10 +369,11 @@ function TelegramJs() {
                     text = text.trim()
                     if (translatorMap[text]) {
                         // // 翻译
-                        let newMessage = messages[0].cloneNode(true);
+                        let newMessage = messages[0].cloneNode(true);   
                         newMessage.textContent = translatorMap[text];
-                        newMessage.setAttribute('style', 'color:green;border-bottom: 1px green dashed;')
+                        newMessage.setAttribute('class',(newMessage.className?newMessage.className.replace('transformTextClass'):'') + ' transformTextClass')
                         content.insertBefore(newMessage, messages[0]);
+                        setTransformClass()
                     } else {
                         texts.push(text)
                     }
