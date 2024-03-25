@@ -46,7 +46,12 @@
                         <!-- <div>{{ }}</div> -->
                         <div v-if="item.record" class="username">
                           <div class="usernameTop">{{ item.record }}</div>
-                          <div class="usernameBottom" v-if="(settingData.text === '2' && item.remark) || (settingData.text !== '2' &&item.name)">
+                          <div
+                            class="usernameBottom"
+                            v-if="
+                              (settingData.text === '2' && item.remark) ||
+                              (settingData.text !== '2' && item.name)
+                            ">
                             {{
                               settingData.text === '2' ? item.remark : item.name
                             }}
@@ -201,7 +206,7 @@ export default {
         Whatsapp: [],
         Telegram: [],
       },
-      appType: 'Whatsapp',
+      appType: '',
       pageType: 'manager',
       apps: [],
       appNum: 0,
@@ -241,6 +246,10 @@ export default {
     this.initLockSetInterval()
     this.initWs()
     this.reSetPermissionList()
+    if (this.leftList && this.leftList.length > 0) {
+      this.appType = this.leftList[0].name
+      this.clickMenu = this.leftList[0].name
+    }
   },
   methods: {
     async getSettingData() {
@@ -575,6 +584,7 @@ export default {
                 message: '请先关闭所有运行中的会话窗口',
                 type: 'warning',
               })
+              this.finishOut = false
               return
             }
           }
@@ -899,7 +909,7 @@ export default {
   align-items: center;
   text-align: center;
 }
-.rightItemBox{
+.rightItemBox {
   display: flex;
   justify-content: space-between;
   align-items: center;
