@@ -233,7 +233,7 @@ export default {
     this.clickMenu = this.appTypes[0].name
     this.listApp()
     this.initTypes()
-    ipc.invoke('controller.login.getLoginData', {}).then((res) => {
+    ipc.invoke('controller.config.getConfig', 'login').then((res) => {
       if (res && res.token) {
         this.token = res.token
       }
