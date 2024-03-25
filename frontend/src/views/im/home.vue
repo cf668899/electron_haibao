@@ -184,7 +184,7 @@ import WebViewX from '@/components/WebViewX.vue'
 import MoreSetting from '@/components/MoreSetting.vue'
 import { mapState } from 'vuex'
 import LockView from '@/components/LockView.vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
 import { baseWsUrl } from '@/constant/request'
 import { appMap, appTypes } from '@/constant/app'
@@ -457,27 +457,30 @@ export default {
       this.pageType = 'manager'
     },
     async delApp(data) {
-      let app = await ipc.invoke('controller.app.getAppById', data.id)
-      if (app.netInfo) {
-        // 删除
-        removeAccount(app.netInfo)
-      }
-
-      let res = await ipc.invoke(
-        'controller.app.del',
-        JSON.parse(JSON.stringify(data))
-      )
-      let list = this.appList[data.type]
-      let newList = []
-      for (let item of list) {
-        if (data.id == item.id) {
-          continue
+      ElMessageBox.confirm('确定删除该会话?', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: 'warning',
+      }).then(async () => {
+        let app = await ipc.invoke('controller.app.getAppById', data.id)
+        if (app.netInfo) {
+          // 删除
+          removeAccount(app.netInfo)
         }
-
-        newList.push(item)
-      }
-
-      this.appList[data.type] = newList
+        await ipc.invoke(
+          'controller.app.del',
+          JSON.parse(JSON.stringify(data))
+        )
+        let list = this.appList[data.type]
+        let newList = []
+        for (let item of list) {
+          if (data.id == item.id) {
+            continue
+          }
+          newList.push(item)
+        }
+        this.appList[data.type] = newList
+      })
     },
     changeRecord(data) {
       ipc.invoke('controller.app.changeRecord', data).then((res) => {
@@ -548,10 +551,7 @@ export default {
       }
     },
     async listApp() {
-      const loginInfo = await ipc.invoke(
-          'controller.config.getConfig',
-          'login'
-        )
+      const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
       ipc.invoke('controller.app.list', loginInfo.token).then((data) => {
         data.sort((a, b) => {
           return b.sort - a.sort
@@ -573,22 +573,22 @@ export default {
         return
       }
       this.finishOut = false
-            try {
+      try {
         if (force) {
           this.apps = []
         } else {
           // 判断是否还有窗口没关闭
           for (let item of this.apps) {
-              if (item.isActive == true) {
-                ElMessage({
-                  message: '请先关闭所有运行中的会话窗口',
-                  type: 'warning',
-                })
-                return
-              }
+            if (item.isActive == true) {
+              ElMessage({
+                message: '请先关闭所有运行中的会话窗口',
+                type: 'warning',
+              })
+              return
             }
           }
-                const machineId = await ipc.invoke('controller.app.getMachineId', {})
+        }
+        const machineId = await ipc.invoke('controller.app.getMachineId', {})
         const loginInfo = await ipc.invoke(
           'controller.config.getConfig',
           'login'
@@ -600,7 +600,7 @@ export default {
           })
         }
         ipc.invoke('controller.login.loginOut')
-        this.$router.push({ name: "login" });
+        this.$router.push({ name: 'login' })
         this.finishOut = true
       } catch (e) {
         this.finishOut = true
@@ -618,7 +618,7 @@ export default {
         if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
-          if(this.userData){
+          if (this.userData) {
             let newData = _.cloneDeep(this.userData)
             newData.invite = { ...newData.invite, ...data.msgContent }
             this.$store.commit('setUserData', newData)
@@ -626,8 +626,11 @@ export default {
           }
         } else if (data.topic === 'clientLogout') {
           this.loginOut(true)
-        }else if(data.topic === 'accountLogout'){
-          let app = await ipc.invoke('controller.app.getAppById', data.msgContent.clientSessionId)
+        } else if (data.topic === 'accountLogout') {
+          let app = await ipc.invoke(
+            'controller.app.getAppById',
+            data.msgContent.clientSessionId
+          )
           this.closeApp(app)
         }
       })
@@ -636,15 +639,19 @@ export default {
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
       // 保存
-      ipc.invoke('controller.config.setConfig', JSON.parse(JSON.stringify({
-            key:'appTypes',
-            value: appTypes
-          })))
-
+      ipc.invoke(
+        'controller.config.setConfig',
+        JSON.parse(
+          JSON.stringify({
+            key: 'appTypes',
+            value: appTypes,
+          })
+        )
+      )
     },
-    async initTypes(){
+    async initTypes() {
       let appTypes = await ipc.invoke('controller.config.getConfig', 'appTypes')
-      if(appTypes){
+      if (appTypes) {
         this.appTypes = appTypes
       }
     },
