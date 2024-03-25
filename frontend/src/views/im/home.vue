@@ -41,15 +41,12 @@
                         :size="20"
                         :src="item.avatar" />
                     </el-icon>
-
-                    <div class="userinfo">
-                      <!-- <div>{{ }}</div> -->
-                      <el-badge
-                        :value="item.messageNum"
-                        :hidden="item.messageNum ? false : true">
+                    <div class="rightItemBox">
+                      <div class="userinfo">
+                        <!-- <div>{{ }}</div> -->
                         <div v-if="item.record" class="username">
                           <div class="usernameTop">{{ item.record }}</div>
-                          <div class="usernameBottom">
+                          <div class="usernameBottom" v-if="(settingData.text === '2' && item.remark) || (settingData.text !== '2' &&item.name)">
                             {{
                               settingData.text === '2' ? item.remark : item.name
                             }}
@@ -62,7 +59,10 @@
                             (appList[appItem.name].length - index)
                           }}
                         </div>
-                      </el-badge>
+                      </div>
+                      <div class="unReadClass" v-if="item.messageNum">
+                        {{ item.messageNum > 99 ? '99+' : item.messageNum }}
+                      </div>
                     </div>
                   </template>
                 </el-menu-item>
@@ -236,6 +236,7 @@ export default {
     emitter.on('soft-setting', (data) => {
       this.getSettingData()
     })
+    this.getSettingData()
     this.initOline()
     this.initLockSetInterval()
     this.initWs()
@@ -702,6 +703,10 @@ export default {
   /* 超出部分隐藏 */
   text-overflow: ellipsis;
   /* 溢出部分显示省略号 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
 }
 .usernameTop {
   color: black;
@@ -881,6 +886,24 @@ export default {
 .username div {
   height: 20px !important;
   line-height: 20px;
+}
+.unReadClass {
+  background-color: #f56c6c;
+  padding-left: 6px;
+  padding-right: 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  color: #fff;
+  height: 20px !important;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.rightItemBox{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
 }
 </style>
 <style></style>

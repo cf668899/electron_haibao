@@ -26,9 +26,9 @@
           <el-table-column prop="updateTime" label="最后修改" width="150" />
           <el-table-column prop="record" label="会话记录" width="180" >
             <template #default="scope">
-              <el-space wrap>
+              <el-space wrap class="alignClass">
                 <div :class="scope.row.online?'online online-box':'online-box'"></div>
-                <div><el-avatar :size="20" :src="scope.row.avatar" /></div>
+                <el-avatar :size="20" :src="scope.row.avatar" />
                 <div>
                   {{ scope.row.record? scope.row.record: appType + " " + (list.length - scope.$index)}}
                 </div>
@@ -162,5 +162,9 @@ export default {
 .box-card{
   height: 100%;
   overflow: auto;
+}
+.alignClass{
+  display: flex;
+  align-items: center;
 }
 </style>

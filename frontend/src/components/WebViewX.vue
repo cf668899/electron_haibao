@@ -1,11 +1,12 @@
 <template>
   <el-container v-if="data.isActive">
-    <el-main>
-      <el-progress v-show="percentage < 100" :stroke-width="3" :show-text="false" :percentage="percentage" />
+    <el-main class="mainClass">
+      <el-progress v-if="percentage<100" :stroke-width="4" :show-text="false" :percentage="percentage" />
+      <div v-else class="progressXDiv"/>
       <webview
         :ref="data.id"
         :id="data.id"
-        style="height: 100%"
+        style="flex:1;"
         :src="srcMap[data.type].url"
         :partition="'persist:' + data.id"
         nodeintegration
@@ -473,5 +474,16 @@ export default {
   transition: width 0.3s; /* 过渡动画效果 */
   border-right: solid 1px var(--el-menu-border-color) !important;
   overflow-x: hidden;
+}
+.mainClass{
+  display: flex;
+  flex-direction:column;
+  padding: 0px 4px 4px 4px;
+  background-color: rgb(232,232,232);
+}
+.progressXDiv{
+  height: 4px;
+  width: 4px;
+  background-color: rgb(232,232,232);
 }
 </style>
