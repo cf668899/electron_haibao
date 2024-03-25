@@ -6,8 +6,7 @@
         <el-tooltip
           effect="dark"
           content="单机输入框进行翻译，双击直接发送原文"
-          placement="top-start"
-        >
+          placement="top-start">
           <el-icon>
             <QuestionFilled />
           </el-icon>
@@ -18,8 +17,7 @@
         v-model="searchText"
         class="w-50 m-2 input"
         placeholder="请输入标题或者关键内容过滤"
-        @input="changeText"
-      >
+        @input="changeText">
         <template #suffix>
           <el-icon>
             <Search />
@@ -31,20 +29,17 @@
         <el-collapse
           v-model="activeGroupName"
           accordion
-          style="background-color: antiquewhite"
-        >
+          style="background-color: antiquewhite">
           <el-collapse-item
             :title="item.name"
             :name="item.name"
             v-for="item in newList"
-            :key="item.name"
-          >
+            :key="item.name">
             <div
               class="collapse-item"
               v-for="it in item.data"
               :key="it.bz"
-              @click="copyReply(it)"
-            >
+              @click="copyReply(it)">
               <el-card>
                 <div>{{ it.bz }}</div>
                 <div>{{ it.content }}</div>
@@ -101,7 +96,7 @@ export default {
         } else {
           if (!list[i].name.includes(this.searchText)) {
             list.splice(i)
-          }else{
+          } else {
             list[i].data = this.group[i].data
           }
         }
@@ -120,6 +115,7 @@ export default {
     },
     copyReply(item) {
       clipboard.writeText(item.content, item.bz)
+      this.$emit('reply', this.data, item.content)
     },
     changeText(e) {
       this.searchText = e
@@ -154,7 +150,7 @@ export default {
 .input {
   margin-top: 10px;
 }
-.collapse-item{
+.collapse-item {
   cursor: pointer;
 }
 </style>
