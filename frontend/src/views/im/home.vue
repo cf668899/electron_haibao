@@ -633,6 +633,10 @@ export default {
             data.msgContent.clientSessionId
           )
           this.closeApp(app)
+          ElMessage({
+            message: '后台下发关闭指令',
+            type: 'warning',
+          })
         }
       })
       this.$store.dispatch('initWSConnect', url)
