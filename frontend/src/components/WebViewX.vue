@@ -176,6 +176,9 @@ export default {
     this.init()
   },
   methods: {
+    openMenu() {
+      this.expansion = true;
+    },
     expansionChange() {
       this.expansion = !this.expansion;
     },
