@@ -26,8 +26,8 @@ class AppController extends Controller {
         return Services.get("app").add(data)
     }
 
-    async list(){
-        return Services.get("app").list()
+    async list(token){
+        return Services.get("app").list(token)
     }
 
     async del(data){
@@ -101,6 +101,9 @@ class AppController extends Controller {
     async settingGlobalProxy(data){
         console.log('settingGlobalProxy', data)
         if(!data.open){
+            session.defaultSession.setProxy({
+                mode:'system'
+            })
             return
         }
 
@@ -117,6 +120,10 @@ class AppController extends Controller {
     async settingProxy(data){
         console.log(data)
         if(!data.proxyInfo.cookieOpen){
+            // 取消代理
+            session.fromPartition(data.id).setProxy({
+                mode: 'system'
+            })
             return
         }
 

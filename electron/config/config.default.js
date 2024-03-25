@@ -24,10 +24,10 @@ module.exports = (appInfo) => {
    */
   config.windowsOption = {
     title: "巨石出海v"+appInfo.appVersion,
-    width: 1200,
-    height: 650,
-    minWidth: 800,
-    minHeight: 300,
+    width: 1500,
+    height: 700,
+    minWidth: 1200,
+    minHeight: 500,
     webPreferences: {
       webviewTag:true,
       webSecurity: false,

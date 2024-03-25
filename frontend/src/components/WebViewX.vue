@@ -1,6 +1,7 @@
 <template>
   <el-container v-if="data.isActive">
     <el-main>
+      <el-progress v-show="percentage < 100" :stroke-width="3" :show-text="false" :percentage="percentage" />
       <webview
         :ref="data.id"
         :id="data.id"
@@ -159,6 +160,7 @@ export default {
         cookieOpen: false,
       },
       expansion: true,
+      percentage: 0
     };
   },
   watch: {
@@ -257,8 +259,30 @@ export default {
       this.injectHandler(view)
     },
     injectHandler(view) {
-      view.addEventListener("did-start-loading", () => {
+      view.addEventListener('did-start-loading', () => {
         this.proxyeChange();
+        console.log('did-start-loading 20%')
+        this.percentage = 20
+      });
+      view.addEventListener('load-commit', ()=>{
+        console.log('load-commit 40%')
+        this.percentage = 40
+      })
+
+      view.addEventListener('did-frame-finish-load', ()=>{
+        console.log('did-frame-finish-load 60%')
+        this.percentage = 60
+      })
+
+      view.addEventListener('did-finish-load', ()=>{
+        console.log('did-finish-load 80%')
+        this.percentage = 80
+      })
+
+      view.addEventListener('did-stop-loading', () => {
+        // 隐藏加载进度条
+        console.log('加载完成 100%')
+        this.percentage = 100
       });
       view.addEventListener("dom-ready", () => {
         if (!this.isReload) {
@@ -394,10 +418,11 @@ export default {
         )
         .then((res) => {
           this.proxyeChange();
+          this.reload()
         });
     },
     proxyeChange() {
-      if (this.view && this.proxyInfo.cookieOpen) {
+      if (this.view) {
         console.log("修改代理");
         ipc.invoke(
           "controller.app.settingProxy",

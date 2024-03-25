@@ -181,15 +181,13 @@
 <script>
 import AppList from '@/components/AppList.vue'
 import WebViewX from '@/components/WebViewX.vue'
-import WhatsappIcon from '@/assets/whatsapp.png'
-import TelegramIcon from '@/assets/Telegram.png'
 import MoreSetting from '@/components/MoreSetting.vue'
 import { mapState } from 'vuex'
 import LockView from '@/components/LockView.vue'
 import { ElMessage } from 'element-plus'
 import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
 import { baseWsUrl } from '@/constant/request'
-import { appMap } from '@/constant/app'
+import { appMap, appTypes } from '@/constant/app'
 const UtilsHelper = require('ee-core/utils/helper')
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
@@ -218,20 +216,7 @@ export default {
       apps: [],
       appNum: 0,
       appLimit: 5,
-      appTypes: [
-        {
-          name: 'Whatsapp',
-          image: WhatsappIcon,
-          used: true,
-          show: false,
-        },
-        {
-          name: 'Telegram',
-          image: TelegramIcon,
-          used: true,
-          show: false,
-        },
-      ],
+      appTypes: appTypes,
       clickMenu: '',
       token: '',
       lastActive: Date.now(),
@@ -252,6 +237,7 @@ export default {
   created() {
     this.clickMenu = this.appTypes[0].name
     this.listApp()
+    this.initTypes()
     ipc.invoke('controller.login.getLoginData', {}).then((res) => {
       if (res && res.token) {
         this.token = res.token
@@ -561,8 +547,12 @@ export default {
         console.log(item)
       }
     },
-    listApp() {
-      ipc.invoke('controller.app.list').then((data) => {
+    async listApp() {
+      const loginInfo = await ipc.invoke(
+          'controller.config.getConfig',
+          'login'
+        )
+      ipc.invoke('controller.app.list', loginInfo.token).then((data) => {
         data.sort((a, b) => {
           return b.sort - a.sort
         })
@@ -623,23 +613,40 @@ export default {
         console.log('ws-open', data)
       })
 
-      emitter.on('ws-message', (data) => {
+      emitter.on('ws-message', async (data) => {
         console.log('message', data)
         if (data.topic == 'getSessionCount') {
           this.appNum = data.msgContent.onlineCount
           this.appLimit = data.msgContent.totalCount
-          let newData = _.cloneDeep(this.userData)
-          newData.invite = { ...newData.invite, ...data.msgContent }
-          this.$store.commit('setUserData', newData)
-          this.reSetPermissionList()
+          if(this.userData){
+            let newData = _.cloneDeep(this.userData)
+            newData.invite = { ...newData.invite, ...data.msgContent }
+            this.$store.commit('setUserData', newData)
+            this.reSetPermissionList()
+          }
         } else if (data.topic === 'clientLogout') {
           this.loginOut(true)
+        }else if(data.topic === 'accountLogout'){
+          let app = await ipc.invoke('controller.app.getAppById', data.msgContent.clientSessionId)
+          this.closeApp(app)
         }
       })
       this.$store.dispatch('initWSConnect', url)
     },
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
+      // 保存
+      ipc.invoke('controller.config.setConfig', JSON.parse(JSON.stringify({
+        key:'appTypes',
+        value: appTypes
+      })))
+
+    },
+    async initTypes(){
+      let appTypes = await ipc.invoke('controller.config.getConfig', 'appTypes')
+      if(appTypes){
+        this.appTypes = appTypes
+      }
     },
     reSetPermissionList() {
       try {

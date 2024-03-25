@@ -74,7 +74,7 @@ export default {
       this.$emit('updateAppTypes', newList)
     },
     checkApplicationEnable(name){
-      if(this.appList && this.appList[name].find(i=>i.isActive)){
+      if(this.appList && this.appList[name] && this.appList[name].find(i=>i.isActive)){
         return false;
       }
       return true;

@@ -123,8 +123,10 @@ class AppService extends Service {
   /**
    * 拉取app数据
    */
-  list() {
-    return this.conn.db.get('apps').value()
+  list(token) {
+    console.log('token', token)
+    let ls = this.conn.db.get('apps').value()
+    return ls.filter(item=>{return item.netInfo && item.netInfo.inviteCode ==  token})
   }
 
   del(data) {
