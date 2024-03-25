@@ -3,8 +3,7 @@
     <el-container>
       <el-aside
         style="height: 100%; background-color: rgb(253, 253, 253)"
-        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'"
-      >
+        :class="isReduceLeft ? 'boxLeftReduce' : 'boxLeftNoReduce'">
         <div class="menu-box">
           <div class="menus">
             <el-menu default-active="Whatsapp" class="el-menu-vertical-demo">
@@ -13,8 +12,7 @@
                 :index="appItem.name"
                 v-for="(appItem, index) in leftList"
                 :key="index"
-                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''"
-              >
+                :class="getItemClassName(appItem) ? 'itemNoMuch' : ''">
                 <template #title>
                   <div @click="toAppManager(appItem.name)" class="leftItemBox">
                     <img :src="appItem.image" class="iconImage" />
@@ -30,32 +28,30 @@
                   :class="item.id == id ? 'active-bg' : ''"
                   @click="toApp(item)"
                   v-for="(item, index) in appList[appItem.name]"
-                  :index="item.id"
-                >
+                  :index="item.id">
                   <template #title>
                     <div
-                      :class="item.online ? 'online online-box' : 'online-box'"
-                    ></div>
+                      :class="
+                        item.online ? 'online online-box' : 'online-box'
+                      "></div>
                     <el-icon>
                       <User v-if="!item.avatar" />
                       <el-avatar
                         v-if="item.avatar"
                         :size="20"
-                        :src="item.avatar"
-                      />
+                        :src="item.avatar" />
                     </el-icon>
 
                     <div class="userinfo">
                       <!-- <div>{{ }}</div> -->
                       <el-badge
                         :value="item.messageNum"
-                        :hidden="item.messageNum ? false : true"
-                      >
+                        :hidden="item.messageNum ? false : true">
                         <div v-if="item.record" class="username">
                           <div class="usernameTop">{{ item.record }}</div>
                           <div class="usernameBottom">
                             {{
-                              settingData.text === '2' ? item.remark: item.name
+                              settingData.text === '2' ? item.remark : item.name
                             }}
                           </div>
                         </div>
@@ -76,8 +72,7 @@
                 @click="moreSetting('quickReply')"
                 style="border-top: 1px solid rgb(232, 232, 232)"
                 key="quickReply"
-                class="itemNoMuch"
-              >
+                class="itemNoMuch">
                 <template #title>
                   <img src="@/assets/quickReply.png" class="iconImage" />
                   <span :class="clickMenu == 'quickReply' ? 'menuTitle' : ''"
@@ -89,8 +84,7 @@
                 index="setting"
                 @click="moreSetting('setting')"
                 key="setting"
-                class="itemNoMuch"
-              >
+                class="itemNoMuch">
                 <template #title>
                   <img src="@/assets/moreSetting.png" class="iconImage" />
                   <span :class="clickMenu == 'setting' ? 'menuTitle' : ''"
@@ -128,8 +122,7 @@
                     isReduceLeft
                       ? 'arrowLeftTransformCommon arrowLeftTransform'
                       : 'arrowLeftTransformCommon'
-                  "
-                >
+                  ">
                   <ArrowLeft />
                 </el-icon>
               </div>
@@ -148,8 +141,7 @@
           @startApp="startApp"
           @closeApp="closeApp"
           @showApp="showApp"
-          @delApp="delApp"
-        >
+          @delApp="delApp">
         </AppList>
         <WebViewX
           v-show="pageType === 'app' && item.isShow"
@@ -160,14 +152,12 @@
           @changeMessageNum="changeMessageNum"
           @changeUserName="changeUserName"
           @closeApp="closeApp"
-          :key="index"
-        ></WebViewX>
+          :key="index"></WebViewX>
         <MoreSetting
           v-if="pageType == 'setting'"
           :appTypes="appTypes"
           @updateAppTypes="updateAppTypes"
-          :appList="appList"
-        ></MoreSetting>
+          :appList="appList"></MoreSetting>
         <quick-replay v-if="pageType == 'quickReply'" />
       </el-main>
     </el-container>
@@ -282,6 +272,9 @@ export default {
                 this.isLock = true
               }
             }, 1000)
+          } else {
+            clearInterval(global.intervalGlobal)
+            global.intervalGlobal = null
           }
         }
       })
@@ -467,10 +460,7 @@ export default {
           // 删除
           removeAccount(app.netInfo)
         }
-        await ipc.invoke(
-          'controller.app.del',
-          JSON.parse(JSON.stringify(data))
-        )
+        await ipc.invoke('controller.app.del', JSON.parse(JSON.stringify(data)))
         let list = this.appList[data.type]
         let newList = []
         for (let item of list) {

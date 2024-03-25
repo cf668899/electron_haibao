@@ -66,8 +66,10 @@ export default {
   },
   methods: {
     save() {
+      if(!this.config.lockTime && this.config.lockTime!==0){
+        this.config.lockTime = ''
+      }
       let config = JSON.parse(JSON.stringify(this.config))
-      console.log(config)
       ipc.invoke('controller.config.setConfig', {
         key: 'lock',
         value: config,
