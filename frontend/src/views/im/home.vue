@@ -604,7 +604,10 @@ export default {
           })
         }
         ipc.invoke('controller.login.loginOut')
+        this.$store.dispatch('closeWSConnect')
+        this.$store.dispatch('clearUserData')
         this.$router.push({ name: 'login' })
+        emitter.all.clear();
         this.finishOut = true
       } catch (e) {
         this.finishOut = true

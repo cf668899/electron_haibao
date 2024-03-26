@@ -6,6 +6,13 @@ export default {
     setUserData(state, payload) {
       state.userData = payload
     },
+    clearUserData(state, payload) {
+      state.userData = {}
+    },
   },
-  actions: {},
+  actions: {
+    clearUserData({ commit, dispatch, state }) {
+      commit('clearUserData')
+    },
+  },
 }

@@ -86,7 +86,7 @@ export default {
             console.error(e)
           })
           ws.addEventListener('message', (e) => {
-            console.log(e)
+            console.log("message==",e.data)
             if (e.data) {
               try {
                 const data = JSON.parse(e.data)
