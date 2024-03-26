@@ -570,48 +570,34 @@ export default {
       })
     },
     async loginOut(force = false) {
-      if (!this.finishOut) {
-        return
-      }
-      this.finishOut = false
-      try {
-        if (force) {
-          this.apps = []
-        } else {
-          // 判断是否还有窗口没关闭
-          for (let item of this.leftList) {
-            for (let i of this.appList[item.name]) {
-              if (i.isActive) {
-                ElMessage({
-                  message: '请先关闭所有运行中的会话窗口',
-                  type: 'warning',
-                })
-                this.finishOut = true
-                return
-              }
+      for (let item of this.leftList) {
+        for (let i of this.appList[item.name]) {
+          if (i.isActive) {
+            if (force) {
+              await this.closeApp(i)
+            } else {
+              ElMessage({
+                message: '请先关闭所有运行中的会话窗口',
+                type: 'warning',
+              })
+              return
             }
           }
         }
-        const machineId = await ipc.invoke('controller.app.getMachineId', {})
-        const loginInfo = await ipc.invoke(
-          'controller.config.getConfig',
-          'login'
-        )
-        if (loginInfo && !force) {
-          await logout({
-            inviteCode: loginInfo.token,
-            deviceId: machineId,
-          })
-        }
-        ipc.invoke('controller.login.loginOut')
-        this.$store.dispatch('closeWSConnect')
-        this.$store.dispatch('clearUserData')
-        this.$router.push({ name: 'login' })
-        emitter.all.clear();
-        this.finishOut = true
-      } catch (e) {
-        this.finishOut = true
       }
+      // const machineId = await ipc.invoke('controller.app.getMachineId', {})
+      // const loginInfo = await ipc.invoke('controller.config.getConfig', 'login')
+      // if (loginInfo) {
+      //   await logout({
+      //     inviteCode: loginInfo.token,
+      //     deviceId: machineId,
+      //   })
+      // }
+      ipc.invoke('controller.login.loginOut')
+      this.$store.dispatch('closeWSConnect')
+      this.$store.dispatch('clearUserData')
+      this.$router.push({ name: 'login' })
+      emitter.all.clear()
     },
     async initWs() {
       let machineId = await ipc.invoke('controller.app.getMachineId', {})

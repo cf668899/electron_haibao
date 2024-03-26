@@ -4,7 +4,7 @@ export let appMap = {
         url: 'https://web.whatsapp.com/'
     },
     Telegram: {
-        id: '5',
+        id: '2',
         url: 'https://web.telegram.org/a'
     }
 }

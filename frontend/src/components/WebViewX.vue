@@ -326,6 +326,7 @@ export default {
               );
               app.netInfo.status = "1";
               if (app.netInfo) {
+                app.netInfo.platformId = appMap[this.data.type].id;
                 let account = await accountSave(app.netInfo);
                 console.log(account);
                 if (account.id) {
@@ -361,6 +362,7 @@ export default {
                 if (eventData.data.contactsCount) {
                   app.contactsCount = eventData.data.contactsCount;
                 }
+                app.netInfo.platformId = appMap[this.data.type].id;
                 let account = await accountSave(app.netInfo);
                 if (account.id) {
                   // app.netInfo = account
