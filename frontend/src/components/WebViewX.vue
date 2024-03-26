@@ -380,7 +380,7 @@ export default {
                   this.translateInfo = translate
                 }else {
                   // 使用默认的配置
-                  this.initData()
+                  await this.initData()
                 }
 
                 this.translateChange()
@@ -424,9 +424,9 @@ export default {
         .then((res) => {
           this.translateChange();
         });
-        this.initData()
     },
     singleranslateSettingChange(data){
+      console.log(data)
       this.translateInfo = data;
       ipc.invoke(
           "controller.app.changeSingleTranslate",
@@ -441,7 +441,6 @@ export default {
         .then((res) => {
           this.translateChange();
         });
-        this.initData()
     },
     translateChange() {
       this.view?.send(
