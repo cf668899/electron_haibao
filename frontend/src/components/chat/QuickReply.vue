@@ -39,6 +39,7 @@
               class="collapse-item"
               v-for="it in item.data"
               :key="it.bz"
+              @dblclick="dblclickHandler(it)"
               @click="copyReply(it)">
               <el-card>
                 <div>{{ it.bz }}</div>
@@ -56,6 +57,7 @@
 const { clipboard } = require('electron')
 const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
+let timer
 import emitter from '@/utils/bus'
 import _ from 'lodash'
 export default {
@@ -114,8 +116,16 @@ export default {
       }
     },
     copyReply(item) {
+      clearTimeout(timer) //清除未执行的定时器
+      timer = setTimeout(() =>{
+        clipboard.writeText(item.content, item.bz)
+        this.$emit('reply', this.data, item.content, false)
+      }, 400)
+    },
+    dblclickHandler(item) {
+      clearTimeout(timer) //清除未执行的定时器
       clipboard.writeText(item.content, item.bz)
-      this.$emit('reply', this.data, item.content)
+      this.$emit('reply', this.data, item.content, true)
     },
     changeText(e) {
       this.searchText = e

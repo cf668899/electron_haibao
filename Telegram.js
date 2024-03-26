@@ -31,7 +31,7 @@ function TelegramJs() {
       console.log('回车键提交！！！')
       let translateBox = document.getElementById('translate-box-content')
       if (translateBox && translateBox.textContent) {
-        quickReply(translateBox.textContent)
+        document.getElementsByClassName('main-button')[0].click()
       }
     }
   }
@@ -86,6 +86,22 @@ function TelegramJs() {
     }
   }
 
+  let inputText = function({text,sendMessage=false}){
+    let inputReply = document.getElementById('editable-message-text')
+    if (inputReply) {
+      inputReply.textContent = text
+      let event = document.createEvent('Event')
+      event.initEvent('input', true, true) //如果是select选择框把"input"改成"change"
+      event.eventType = 'message'
+      inputReply.dispatchEvent(event)
+      if(sendMessage){
+        setTimeout(() => {
+          document.getElementsByClassName('main-button')[0].click()
+        }, 800)
+      }
+    }
+  }
+
   // 监听消息
   window.electron.ipcRenderer.on('translateInfoChange', (event, data) => {
     console.log(event, data)
@@ -135,7 +151,7 @@ function TelegramJs() {
 
   //监听快捷回复消息
   window.electron.ipcRenderer.on('quickReply', (event, data) => {
-    quickReply(data)
+    inputText(data)
   })
 
   //修改好友信息

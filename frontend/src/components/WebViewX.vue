@@ -205,8 +205,8 @@ export default {
       this.isReload = true;
       this.view?.reload();
     },
-    reply(data, text) {
-      this.view?.send("quickReply", text);
+    reply(data, text,sendMessage=false) {
+      this.view?.send("quickReply",{text,sendMessage});
     },
     async init() {
       this.initData()

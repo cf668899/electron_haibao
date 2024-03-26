@@ -35,7 +35,7 @@ function WhatsappJs(){
             console.log("回车键提交！！！")
             let translateBox = document.getElementById('translate-box')
             if (translateBox && translateBox.textContent) {
-                quickReply(translateBox.textContent)
+                document.getElementsByClassName('_3XKXx')[0].getElementsByTagName('Button')[0].click()
             }
         }
     };
@@ -72,7 +72,7 @@ function WhatsappJs(){
         );
     }
 
-    let quickReply = function (text) {
+    let quickReply = function ({text,sendMessage=false}) {
         let inputs = document.getElementsByClassName('lexical-rich-text-input')
         if(inputs.length < 2){
             return
@@ -83,13 +83,16 @@ function WhatsappJs(){
         if(span.length){
             span[0].childNodes[0].textContent=''
         }
-        setTimeout(()=>{
+        setTimeout(() => {
             inputs[1].focus()
             window.electron.ipcRenderer.sendToHost(JSON.stringify({
                 'type': "insertText",
                 'data': text
             }))
-        }, 200)
+            setTimeout(()=>{
+                sendMessage && document.getElementsByClassName('_3XKXx')[0].getElementsByTagName('Button')[0].click()
+            }, 200)
+        }, 200);
     }
 
     // 监听消息
