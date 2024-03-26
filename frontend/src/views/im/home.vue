@@ -579,14 +579,16 @@ export default {
           this.apps = []
         } else {
           // 判断是否还有窗口没关闭
-          for (let item of this.apps) {
-            if (item.isActive == true) {
-              ElMessage({
-                message: '请先关闭所有运行中的会话窗口',
-                type: 'warning',
-              })
-              this.finishOut = false
-              return
+          for (let item of this.leftList) {
+            for (let i of this.appList[item.name]) {
+              if (i.isActive) {
+                ElMessage({
+                  message: '请先关闭所有运行中的会话窗口',
+                  type: 'warning',
+                })
+                this.finishOut = true
+                return
+              }
             }
           }
         }
