@@ -627,6 +627,10 @@ export default {
             this.reSetPermissionList()
           }
         } else if (data.topic === 'clientLogout') {
+          ElMessage({
+            message: '系统: 邀请码手动关闭，将停止相关服务',
+            type: 'warning',
+          })
           this.loginOut(true)
         } else if (data.topic === 'accountLogout') {
           let app = await ipc.invoke(
