@@ -322,7 +322,6 @@ module.exports = function WhatsappJs(){
                         // // 翻译
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
-                        newMessage.style.color = "green";
                         newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
                         setTransformClass()
@@ -352,7 +351,6 @@ module.exports = function WhatsappJs(){
                         // // 翻译
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
-                        newMessage.style.color = "green";
                         newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
                         setTransformClass()
