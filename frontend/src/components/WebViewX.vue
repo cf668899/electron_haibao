@@ -309,7 +309,7 @@ export default {
                 type: this.data.type,
               });
             }
-            if (eventData.type == "online") {``
+            if (eventData.type == "online") {
               this.$emit("online", { id: this.data.id, type: this.data.type });
               // 上线
               let app = await ipc.invoke(
