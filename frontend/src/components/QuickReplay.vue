@@ -11,8 +11,7 @@
         v-model="keyWord"
         placeholder="请输入分组名称过滤"
         :suffix-icon="Search"
-        class="inputClass"
-      />
+        class="inputClass" />
       <div class="groupClass">
         <div
           :class="{
@@ -22,8 +21,7 @@
           }"
           v-for="(item, index) in currentGroupList"
           :key="index"
-          @click="clickGroupItem(index)"
-        >
+          @click="clickGroupItem(index)">
           <div class="groupClassItemLeft">
             {{ item.name }}
           </div>
@@ -63,14 +61,12 @@
           :on-change="handleChange"
           :limit="1"
           :auto-upload="false"
-          :file-list="[]"
-        >
+          :file-list="[]">
           <el-button
             :icon="FolderRemove"
             size="small"
             class="commonButton"
             style="margin-left: 10px"
-            @click="exportExcel"
             >我要导入</el-button
           >
         </el-upload>
@@ -218,6 +214,13 @@ export default {
       this.activeIndex = index
     },
     add() {
+      if (this.activeIndex === -1) {
+        ElMessage({
+          type: 'warning',
+          message: '请选择分组',
+        })
+        return
+      }
       this.form = {}
       this.dialogFormVisible = true
       this.isEdit = false
@@ -343,6 +346,13 @@ export default {
       })
     },
     clearAllBack() {
+      if (this.activeIndex === -1) {
+        ElMessage({
+          type: 'warning',
+          message: '请选择分组',
+        })
+        return
+      }
       ElMessageBox.confirm('是否清空回复', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -357,7 +367,13 @@ export default {
       })
     },
     handleChange(file) {
-      console.log('file==', file)
+      if (this.activeIndex === -1) {
+        ElMessage({
+          type: 'warning',
+          message: '请选择分组',
+        })
+        return
+      }
       let nameSplit = file.name.split('.')
       let format = nameSplit[nameSplit.length - 1]
       if (!['xlsx', 'csv'].includes(format)) {
@@ -423,6 +439,13 @@ export default {
         .catch((error) => console.log('Error writing excel export', error))
     },
     exportExcel() {
+      if (this.activeIndex === -1) {
+        ElMessage({
+          type: 'warning',
+          message: '请选择分组',
+        })
+        return
+      }
       const workbook = new ExcelJS.Workbook()
       // 添加工作表，名为sheet1
       const sheet1 = workbook.addWorksheet('sheet1')
