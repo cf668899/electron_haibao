@@ -8,7 +8,7 @@ const Electron = require('ee-core/electron');
 const { BrowserView } = require('electron')
 const { session } = require('electron')
 const Utils = require('ee-core/utils');
-
+const Services = require('ee-core/services');
 /**
  * 示例服务（service层为单例）
  * @class
@@ -20,8 +20,12 @@ class ConfigService extends Service {
     this.conn = Storage.connection('config');
   }
 
-
   setTranslate(data) {
+    console.log(data)
+    if(data.changeType){
+      // 将对应app的翻译清空
+      Services.get("app").clearTranslate(data.changeType)
+    }
     this.conn.db.set('translate', data).write();
     return data
   }

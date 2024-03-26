@@ -182,7 +182,7 @@ module.exports = function WhatsappJs(){
             if (id != oldFriendId) {
                 // 通知
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
-                    'type': "changeFriendInfo",
+                    'type': "changeFriend",
                     'data': friendInfo ? friendInfo : {}
                 }))
 

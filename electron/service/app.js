@@ -61,12 +61,35 @@ class AppService extends Service {
   }
 
   changeTranslate(data) {
+    data.translateInfo.friendOpen = false
     this.conn.db
       .get('apps')
       .find({ id: data.id })
       .assign({ translateInfo: data.translateInfo })
       .write()
-    return data
+  }
+
+  changeSingleTranslate(data){
+    let app = this.conn.db
+    .get('apps')
+    .find({ id: data.id })
+    .value()
+
+    if(!app.friendTranslateInfo){
+      app.friendTranslateInfo = {}
+    }
+
+    if(data.translateInfo.friendOpen){
+      app.friendTranslateInfo[data.friendId] = data.translateInfo
+    }else{
+      app.friendTranslateInfo[data.friendId] = null
+    }
+
+    this.conn.db
+      .get('apps')
+      .find({ id: data.id })
+      .assign({friendTranslateInfo: app.friendTranslateInfo})
+      .write()
   }
 
   changeProxyInfo(data) {
@@ -78,8 +101,6 @@ class AppService extends Service {
     return data
   }
   changeFriendInfo(data) {
-    console.log(data)
-
     let app = this.conn.db.get('apps').find({ id: data.id }).value()
 
     let friendInfoMap = {}
@@ -151,6 +172,18 @@ class AppService extends Service {
   setTranslate(data) {
     //todo 保存翻译设置
     return data
+  }
+
+  clearTranslate(type){
+    let list = this.conn.db.get('apps').value()
+    for (let item of list) {
+      if (item.type == type) {
+        item.translateInfo = null
+      }
+
+    }
+
+    return this.conn.db.set('apps', list).write()
   }
 
   getCommonStorage({ key }) {

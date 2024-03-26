@@ -10,7 +10,7 @@
           </el-select>
         </el-form-item>
 
-        <div v-for="item in translateInfo.apps">
+        <div v-for="item in translateInfo.apps" @mousemove="selectType(item.type)">
           <el-form-item>
             <template #label>
               <span style="color:#409EFF">{{ item.title }}</span>
@@ -50,6 +50,7 @@
         languages: translate.languages,
         channels: translate.channels,
         translateInfo:{
+          changeType: null,
           autoTranslate: true,
           channel: 'deepl',
           apps:[
@@ -68,7 +69,7 @@
               receive: 'zh'
             }
           ],
-        }
+        },
       }
     },
     created(){
@@ -79,8 +80,12 @@
       });
     },
     methods: {
+      selectType(type){
+        this.translateInfo.changeType = type
+      },
       changeTranslateSetting() {
         this.$emit("changeTranslateSetting",JSON.parse(JSON.stringify(this.translateInfo)))
+        this.translateInfo.changeType = null
       }
     },
   };

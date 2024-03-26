@@ -52,6 +52,10 @@
             </el-form-item>
 
             <el-divider />
+                <el-form-item label="好友独立发送翻译开关" label-width="160px">
+                    <el-switch :disabled="!currentFriendId" v-model="data.friendOpen" @change="singleChange"/>
+                </el-form-item>
+            <el-divider />
             <div>
                 <el-text class="mx-1" >提示：</el-text>
             </div>
@@ -67,8 +71,8 @@
 const { clipboard } = require('electron')
 import translate from '@/constant/translate'
 export default {
-    props: ["data"],
-    emits: ["change",],
+    props: ["data", "currentFriendId"],
+    emits: ["change", "singleChange"],
     data() {
         return {
             languages: translate.languages,
@@ -76,8 +80,16 @@ export default {
         };
     },
     methods: {
-        change(item) {
+        change() {
+            if(this.data.friendOpen){
+                this.$emit("singleChange", this.data)
+                return
+            }
             this.$emit("change", this.data)
+        },
+        // 个人修改
+        singleChange(){
+            this.$emit("singleChange", this.data)
         }
     },
 };

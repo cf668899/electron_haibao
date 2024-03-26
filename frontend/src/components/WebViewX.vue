@@ -51,7 +51,9 @@
           </template>
           <TranslateSetting
             :data="translateInfo"
+            :currentFriendId="currentFriendId"
             @change="translateSettingChange"
+            @singleChange="singleranslateSettingChange"
           ></TranslateSetting>
         </el-tab-pane>
         <el-tab-pane label="代理" name="代理">
@@ -160,7 +162,9 @@ export default {
         cookieOpen: false,
       },
       expansion: true,
-      percentage: 0
+      percentage: 0,
+      currentFriendId:null,
+      friendTranslateInfo:{}
     };
   },
   watch: {
@@ -214,7 +218,6 @@ export default {
     async initData(){
       //TODO 把最新的数据拉回来？
       let app = await ipc.invoke("controller.app.getAppById", this.data.id)
-      console.log(app)
       if (app.translateInfo) {
         this.translateInfo = app.translateInfo;
       } else {
@@ -241,7 +244,7 @@ export default {
             },
             inputContent: {
               open: info.autoTranslate,
-              source: data.receive,
+              source: '0', //固定检测语言
               target: data.receive,
             },
           };
@@ -260,6 +263,11 @@ export default {
       if(app.friendInfo){
         this.data.friendInfo = app.friendInfo
       }
+
+      if(app.friendTranslateInfo){
+        this.friendTranslateInfo = app.friendTranslateInfo
+      }
+
     },
     inject(view) {
       this.injectHandler(view)
@@ -361,8 +369,22 @@ export default {
               }
             }
 
-            if (eventData.type == "changeFriendInfo") {
+            if (eventData.type == "changeFriend") {
               this.$refs.userInfo.openChange(eventData.data);
+              this.currentFriendId = eventData.data.id
+              if(this.currentFriendId){
+                let translate = this.friendTranslateInfo[this.currentFriendId]
+                console.log('translate:', translate)
+                if(translate){
+                  // 修改翻译设置
+                  this.translateInfo = translate
+                }else {
+                  // 使用默认的配置
+                  this.initData()
+                }
+
+                this.translateChange()
+              }
             }
 
             if (eventData.type == "runJs") {
@@ -402,6 +424,24 @@ export default {
         .then((res) => {
           this.translateChange();
         });
+        this.initData()
+    },
+    singleranslateSettingChange(data){
+      this.translateInfo = data;
+      ipc.invoke(
+          "controller.app.changeSingleTranslate",
+          JSON.parse(
+            JSON.stringify({
+              id: this.data.id,
+              friendId: this.currentFriendId,
+              translateInfo: data,
+            })
+          )
+        )
+        .then((res) => {
+          this.translateChange();
+        });
+        this.initData()
     },
     translateChange() {
       this.view?.send(

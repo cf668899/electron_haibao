@@ -61,6 +61,10 @@ class AppController extends Controller {
     async changeTranslate(data) {
         Services.get("app").changeTranslate(data)
     }
+
+    async changeSingleTranslate(data){
+        Services.get("app").changeSingleTranslate(data)
+    }
     //代理
     async changeProxyInfo(data) {
         Services.get("app").changeProxyInfo(data)
