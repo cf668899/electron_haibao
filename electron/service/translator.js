@@ -4,6 +4,8 @@ const { Service } = require('ee-core');
 const HttpClient = require('ee-core/httpclient');
 const Storage = require("ee-core/storage");
 const {Translate} = require('@google-cloud/translate').v2;
+const {TranslationServiceClient} = require('@google-cloud/translate');
+const translationClient = new TranslationServiceClient();
 
 /**
  * 示例服务（service层为单例）
@@ -68,6 +70,7 @@ class TranslatorService extends Service {
     translations.forEach((translation, i) => {
       console.log(`${data.texts[i]} => (${data.translate.target}) ${translation}`);
     });
+
     return translations
   }
 

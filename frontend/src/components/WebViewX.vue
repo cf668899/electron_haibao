@@ -11,6 +11,7 @@
         :partition="'persist:' + data.id"
         nodeintegration
         :preload="preload"
+        allowpopups
         useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       >
       </webview>
@@ -183,6 +184,13 @@ export default {
     emitter.on('soft-setting', (data) => {
       this.view?.send("setTransformClassChange");
     })
+    // setInterval(()=>{
+    //   if(!this.data.isShow){
+    //     console.log("页面刷新----", this.data)
+    //     // this.view?.send('reload', this.data.id)
+    //     this.view?.executeJavaScript(`location.reload()`)
+    //   }
+    // }, 1000)
   },
   methods: {
     openMenu() {
