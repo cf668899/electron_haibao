@@ -247,23 +247,15 @@ module.exports = function TelegramJs() {
       }
 
       // 插入翻译
-      let rest = {
-        status: 500,
-      }
+      let rest = []
       let content = inputBox.textContent
       if (content != '') {
         let translatorContent = translatorMap[content]
         if (translatorContent) {
-          rest = {
-            status: 200,
-            data: {
-              translations: [
-                {
-                  text: translatorContent,
-                },
-              ],
-            },
-          }
+          rest.push({
+            text: content,
+            translation: translatorContent
+          })
         } else {
           rest = await window.electron.ipcRenderer.invoke(
             'controller.translator.' + translateInfo.channel,
@@ -272,14 +264,13 @@ module.exports = function TelegramJs() {
         }
       }
 
-      if (rest.status == 200 && rest.data && rest.data.translations.length) {
-        translatorMap[content] = rest.data.translations[0].text
-        document.getElementById('translate-box-content').textContent =
-          rest.data.translations[0].text
-      } else {
-        let content = document.getElementById('translate-box-content')
-        if (content) {
-          content.textContent = ''
+      if(rest.length){
+        translatorMap[content] = rest[0].translation
+        document.getElementById('translate-box-content').textContent = rest[0].translation
+      }else{
+        let  translateBoxContent = document.getElementById('translate-box-content')
+        if (translateBoxContent) {
+          translateBoxContent.textContent = '...'
         }
       }
     } else {
@@ -413,12 +404,9 @@ module.exports = function TelegramJs() {
           'controller.translator.' + translateInfo.channel,
           { translate: translateInfo.message, texts: texts }
         )
-        if (rest.status == 200 && rest.data && rest.data.translations.length) {
-          console.log('translatorTests:', texts, rest.data.translations)
-          for (let i = 0; i < rest.data.translations.length; i++) {
-            let text = texts[i]
-            translatorMap[text] = rest.data.translations[i].text
-          }
+
+        for(let item of rest){
+          translatorMap[item.text] = item.translation
         }
       }
     }

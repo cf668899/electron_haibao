@@ -34,15 +34,31 @@ class TranslatorService extends Service {
         "target_lang": data.translate.target
       },
       dataType: 'json',
-      timeout: 15000,  
+      timeout: 5000,  
     };
+
+    let texts = data.texts
+    let res = []
     const result = await hc.request('https://api-free.deepl.com/v2/translate', options);
-    return result
+    if (result.status == 200 && result.data && result.data.translations.length) {
+      for (let i = 0; i < result.data.translations.length; i++) {
+        let text = texts[i]
+        res.push(
+          {
+            text,
+            translation: result.data.translations[i].text
+          }
+        )
+      }
+    }
+    // 统一返回格式
+    return res
   }
 
 
   // google 翻译未实现
   async google(data){
+    console.log('google:', data)
     let googleKey = 'AIzaSyB6vU_egQ1WVAF9_s5XKc5vzcCi0EPYQkw'
     let projectId = 'testhahaha'
     const translate = new Translate({ projectId, key: googleKey })
