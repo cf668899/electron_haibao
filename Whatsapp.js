@@ -182,7 +182,7 @@ function WhatsappJs(){
             if (id != oldFriendId) {
                 // 通知
                 window.electron.ipcRenderer.sendToHost(JSON.stringify({
-                    'type': "changeFriendInfo",
+                    'type': "changeFriend",
                     'data': friendInfo ? friendInfo : {}
                 }))
 
@@ -322,7 +322,6 @@ function WhatsappJs(){
                         // // 翻译
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
-                        newMessage.style.color = "green";
                         newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
                         setTransformClass()
@@ -352,7 +351,6 @@ function WhatsappJs(){
                         // // 翻译
                         let newMessage = messages[0].parentElement.cloneNode(true);
                         newMessage.textContent = translatorMap[text];
-                        newMessage.style.color = "green";
                         newMessage.setAttribute('class', 'selectable-text transformTextClass')
                         copyables[0].insertBefore(newMessage, messages[0].parentElement);
                         setTransformClass()

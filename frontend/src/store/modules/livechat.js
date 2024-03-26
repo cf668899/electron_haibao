@@ -60,33 +60,38 @@ export default {
           commit('setWS', ws)
           commit('setState', ws.readyState)
           ws.addEventListener('open', () => {
+            console.log("websocket=>open===",ws.readyState)
             retryCount = 0
             commit('setState', ws.readyState)
             // bus.config.globalProperties.$emit('ws-opened')
             emitter.emit('ws-open', 'open')
             // 发送心跳检测
             timer = setInterval(() => {
+              console.log("发送心跳检测")
               ws.send(JSON.stringify({ heartBeat: 0 }))
             }, heartBeatInterval)
             resolve()
           })
           ws.addEventListener('close', (e) => {
+            console.log("websocket=>close===e",e,'==',ws.readyState)
             commit('setState', ws.readyState)
             clearInterval(timer)
             if (!state.isClosed && retryCount < retryLimit) {
               retryCount++
               setTimeout(() => {
+                console.log("reconnect===",ws.readyState)
                 dispatch('initWSConnect', true)
               }, retryDelay)
             }
           })
           ws.addEventListener('error', (e) => {
+            console.log("websocket=>error===e",e,'==',ws.readyState)
             commit('setState', ws.readyState)
             clearInterval(timer)
             console.error(e)
           })
           ws.addEventListener('message', (e) => {
-            console.log("message==",e.data)
+            console.log("websocket=>message==",e.data)
             if (e.data) {
               try {
                 const data = JSON.parse(e.data)
