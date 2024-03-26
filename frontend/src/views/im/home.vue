@@ -630,7 +630,7 @@ export default {
           )
           this.closeApp(app)
           ElMessage({
-            message: '后台下发关闭指令',
+            message: this.appNum<=this.appLimit?'后台下发关闭指令':'系统: 超出限制的会话窗口自动关闭',
             type: 'warning',
           })
         }
