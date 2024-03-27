@@ -663,7 +663,7 @@ export default {
           })
         }
       })
-      this.$store.dispatch('initWSConnect', url)
+      this.$store.dispatch('initWSConnect', {url})
     },
     updateAppTypes(appTypes) {
       this.appTypes = appTypes
@@ -688,10 +688,10 @@ export default {
       try {
         for (let item of this.appTypes) {
           if (item.name === 'Telegram') {
-            item.show = this.userData.invite.telegram !== '1' ? false : true
+            item.show = this.userData && this.userData.invite && this.userData.invite.telegram === '1' ? true : false
           } else if (item.name === 'Whatsapp') {
-            item.show = this.userData.invite.whatsapp !== '1' ? false : true
-          }
+            item.show = this.userData && this.userData.invite &&this.userData.invite.whatsapp === '1' ? true : false
+          } 
         }
       } catch (e) {
         console.log('error==reSetPermissionList==', e)

@@ -1,11 +1,13 @@
 import emitter from '@/utils/bus'
 
 let connectPromise
-const retryLimit = 20
-const retryDelay = 5000
-const heartBeatInterval = 10 * 1000
+const retryLimit = 200
+const retryDelay = 2000
+const heartBeatInterval = 5 * 1000
 let retryCount = 0
 let timer
+let heartSendTime = -1;
+let heartReceiveTime = -1;
 export const StateTypeConst = {
   UN_CONNECT: 'unConnect',
   NORMAL:'normal',
@@ -13,9 +15,9 @@ export const StateTypeConst = {
   NET_ERROR:'netError'
 }
 export const StateTypeConstStr = {
-  unConnect: '未连接',
-  normal:'正常',
-  connecting:'重连中',
+  unConnect: '网络未连接',
+  normal:'网络正常',
+  connecting:'网络重连中',
   netError:'网络错误'
 }
 export default {
@@ -67,7 +69,9 @@ export default {
     },
   },
   actions: {
-    initWSConnect({ commit, dispatch, state }, url, reset) {
+    initWSConnect({ commit, dispatch, state }, obj) {
+      const {url,reset=false} = obj
+      console.log('==retryCount==',retryCount)
       if (reset || !connectPromise) {
         // dispatch('closeWSConnect')
         commit('setIsClosed', false)
@@ -78,22 +82,7 @@ export default {
           commit('setWS', ws)
           commit('setState', ws.readyState)
           commit('setConnectState',StateTypeConst.CONNECTING)
-          ws.addEventListener('open', () => {
-            console.log("websocket=>open===",ws.readyState)
-            retryCount = 0
-            commit('setState', ws.readyState)
-            commit('setConnectState',StateTypeConst.NORMAL)
-            // bus.config.globalProperties.$emit('ws-opened')
-            emitter.emit('ws-open', 'open')
-            // 发送心跳检测
-            timer = setInterval(() => {
-              console.log("发送心跳检测")
-              ws.send(JSON.stringify({ heartBeat: 0 }))
-            }, heartBeatInterval)
-            resolve()
-          })
-          ws.addEventListener('close', (e) => {
-            console.log("websocket=>close===e",e,'==',ws.readyState)
+          const reConnectFunction = () =>{
             commit('setState', ws.readyState)
             clearInterval(timer)
             commit('setConnectState',StateTypeConst.NET_ERROR)
@@ -101,10 +90,42 @@ export default {
               commit('setConnectState',StateTypeConst.CONNECTING)
               retryCount++
               setTimeout(() => {
-                console.log("reconnect===",ws.readyState)
-                dispatch('initWSConnect', true)
+                dispatch('initWSConnect',{url,reset:true})
               }, retryDelay)
+            }else{
+              commit('setConnectState',StateTypeConst.NET_ERROR)
             }
+          }
+          ws.addEventListener('open', () => {
+            console.log("websocket=>open===",ws.readyState)
+            retryCount = 0
+            heartReceiveTime = -1
+            commit('setState', ws.readyState)
+            commit('setConnectState',StateTypeConst.NORMAL)
+            // bus.config.globalProperties.$emit('ws-opened')
+            emitter.emit('ws-open', 'open')
+            // 发送心跳检测
+            timer = setInterval(() => {
+              ws.send('heartbeat')
+              heartSendTime = (new Date).getTime()
+              if(heartReceiveTime == -1){
+                heartReceiveTime  = heartSendTime
+              }
+              // console.log("发送心跳检测==",heartSendTime,'==',heartReceiveTime,'==',(heartSendTime - heartReceiveTime)/1000,'==',((heartBeatInterval/1000) *1.5))
+              if(((heartSendTime - heartReceiveTime)/1000)>=((heartBeatInterval/1000) *1.5)){
+                // console.log("异常连接==")
+                commit('setConnectState',StateTypeConst.CONNECTING)
+                reConnectFunction()
+              }else{
+                // console.log("正常连接==")
+              }
+            }, heartBeatInterval)
+            resolve()
+          })
+          
+          ws.addEventListener('close', (e) => {
+            console.log("websocket=>close===e",e,'==',ws.readyState)
+            reConnectFunction()
           })
           ws.addEventListener('error', (e) => {
             commit('setConnectState',StateTypeConst.NET_ERROR)
@@ -114,6 +135,7 @@ export default {
             console.error(e)
           })
           ws.addEventListener('message', (e) => {
+            heartReceiveTime = (new Date).getTime()
             console.log("websocket=>message==",e.data)
             if (e.data) {
               try {
