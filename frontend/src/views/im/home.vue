@@ -101,8 +101,8 @@
           </div>
           <div class="operator-box">
             <div class="logout">
-              <div class="ysBoxF" v-if="!isReduceLeft" @click="loginOut()">
-                <div class="ysBox">
+              <div class="ysBoxF">
+                <div class="ysBox" v-if="!isReduceLeft" @click="loginOut()">
                   <img class="ys" src="@/assets/yaos.png" />
                   <div class="ysBoxCenter">
                     <div class="ysBoxCenterTop">邀请码</div>
@@ -111,6 +111,14 @@
                   <el-icon size="20">
                     <SwitchButton />
                   </el-icon>
+                </div>
+                <div :class="'loadingClass ' + connectState">
+                  {{ currentWsState }}
+                  <img
+                    v-if="connectState == StateTypeConst.CONNECTING"
+                    class="loading"
+                    src="@/assets/loading.gif" />
+                  <div v-else :class="'circleState ' + connectState + '_'" />
                 </div>
               </div>
               <!-- <el-button
@@ -188,6 +196,7 @@ const { ipcRenderer: ipc } =
   (window.require && window.require('electron')) || window.electron || {}
 import emitter from '@/utils/bus'
 import QuickReplay from '@/components/QuickReplay.vue'
+import { StateTypeConstStr, StateTypeConst } from '@/store/modules/livechat'
 import _ from 'lodash'
 export default {
   components: {
@@ -218,16 +227,20 @@ export default {
       isLock: false,
       settingData: {},
       finishOut: true,
+      StateTypeConst: StateTypeConst,
     }
   },
   computed: {
     leftList() {
-      console.log('appList==', this.userData)
       return this.appTypes.filter((i) => i.used && i.show)
     },
     ...mapState({
       userData: (state) => state.user.userData,
+      connectState: (state) => state.livechat.connectState,
     }),
+    currentWsState() {
+      return StateTypeConstStr[this.connectState]
+    },
   },
   created() {
     this.clickMenu = this.appTypes[0].name
@@ -575,7 +588,7 @@ export default {
     async loginOut(force = false) {
       for (let item of this.leftList) {
         let list = this.appList[item.name]
-        if(!list){
+        if (!list) {
           continue
         }
 
@@ -621,7 +634,11 @@ export default {
           this.appLimit = data.msgContent.totalCount
           if (this.userData) {
             let newData = _.cloneDeep(this.userData)
-            newData.invite = { ...newData.invite, ...data.msgContent }
+            if (newData.invite) {
+              newData.invite = { ...newData.invite, ...data.msgContent }
+            } else {
+              newData.invite = data.msgContent
+            }
             this.$store.commit('setUserData', newData)
             this.reSetPermissionList()
           }
@@ -638,7 +655,10 @@ export default {
           )
           this.closeApp(app)
           ElMessage({
-            message: this.appNum<=this.appLimit?'后台下发关闭指令':'系统: 超出限制的会话窗口自动关闭',
+            message:
+              this.appNum <= this.appLimit
+                ? '后台下发关闭指令'
+                : '系统: 超出限制的会话窗口自动关闭',
             type: 'warning',
           })
         }
@@ -842,8 +862,6 @@ export default {
 }
 
 .ysBoxF {
-  display: flex;
-  justify-content: center;
   border-bottom: 1px solid rgb(232, 232, 232);
   padding-bottom: 5px;
   margin-bottom: 5px;
@@ -922,5 +940,47 @@ export default {
   justify-content: space-between;
   align-items: center;
   flex: 1;
+}
+.loadingClass {
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  align-items: center;
+}
+.loading {
+  width: 15px;
+  height: 15px;
+  margin-left: 10px;
+}
+.unConnect {
+  color: red;
+}
+.normal {
+  color: #67c23a;
+}
+.connecting {
+  color: #409eff;
+}
+.netError {
+  color: red;
+}
+.unConnect_ {
+  background-color: red;
+}
+.normal_ {
+  background-color: #67c23a;
+}
+.connecting_ {
+  background-color: #409eff;
+}
+.netError_ {
+  background-color: red;
+}
+.circleState {
+  width: 5px;
+  height: 5px;
+  border-radius: 5px;
+  margin-left: 5px;
 }
 </style>
