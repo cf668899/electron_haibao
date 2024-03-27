@@ -42,7 +42,7 @@
             </el-form-item>
 
             <div>
-                <el-button plain type="primary">检查代理服务器</el-button>
+                <el-button plain type="primary" @click="check">检查代理服务器</el-button>
                 <el-button type="primary" @click="setting" >应用</el-button>
             </div>
 
@@ -56,6 +56,7 @@
 import translate from '@/constant/translate'
 const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {}
 import { ElMessage } from 'element-plus'
+import { checkIp } from '@/utils/proxyCheck'
 export default {
     props: ["data"],
     emits: ["changeTranslateSetting"],
@@ -103,18 +104,28 @@ export default {
             if(this.proxy.type.indexOf('SOCKS') > -1){
                 this.proxy.auth = false
             }
-            let config = JSON.parse(JSON.stringify(this.proxy))
-            ipc.invoke("controller.config.setProxy", config)
+            // let config = JSON.parse(JSON.stringify(this.proxy))
+            // ipc.invoke("controller.config.setProxy", config)
         },
         setting(){
             let config = JSON.parse(JSON.stringify(this.proxy))
+            ipc.invoke("controller.config.setProxy", config)
             ipc.invoke("controller.app.settingGlobalProxy", config)
             ElMessage({
                 showClose: true,
                 message: '代理设置成功',
                 type: 'success',
             })
-
+        },
+        check(){
+            checkIp(this.proxy.host, this.proxy.port, (res, t)=>{
+                console.log(res, t)
+                if(res){
+                    ElMessage.success('代理服务器可用')
+                }else{
+                    ElMessage.warning('代理服务器不可用')
+                }
+            })
         }
     },
 };

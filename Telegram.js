@@ -31,10 +31,27 @@ function TelegramJs() {
       console.log('回车键提交！！！')
       let translateBox = document.getElementById('translate-box-content')
       if (translateBox && translateBox.textContent) {
-        document.getElementsByClassName('main-button')[0].click()
+        quickReply(translateBox.textContent)
       }
     }
   }
+
+
+  let btnSetInterVal = setInterval(()=>{
+    let btn = document.getElementsByClassName('Button send')
+    if(btn.length){
+      btn[0].onclick = function(){
+        console.log('发送')
+        let translateBox = document.getElementById('translate-box-content')
+        if (translateBox && translateBox.textContent) {
+          quickReply(translateBox.textContent)
+        }
+      }
+      clearInterval(btnSetInterVal)
+    }
+
+  },500)
+
   async function setTransformClass() {
     try {
       let styleObj = await window.electron.ipcRenderer.invoke(
@@ -80,9 +97,9 @@ function TelegramJs() {
       event.initEvent('input', true, true) //如果是select选择框把"input"改成"change"
       event.eventType = 'message'
       inputReply.dispatchEvent(event)
-      setTimeout(() => {
-        document.getElementsByClassName('main-button')[0].click()
-      }, 800)
+      // setTimeout(() => {
+      //   document.getElementsByClassName('main-button')[0].click()
+      // }, 800)
     }
   }
 

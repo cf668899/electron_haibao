@@ -210,6 +210,10 @@ export default {
       this.$emit("closeApp", this.data);
     },
     reload() {
+      ElMessage({
+        message: '即将刷新重载当前页面',
+        type: 'warning',
+      })
       this.isReload = true;
       this.view?.reload();
     },
