@@ -1,6 +1,6 @@
 {
   "name": "jushi",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
