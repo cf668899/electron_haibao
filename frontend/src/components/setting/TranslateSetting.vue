@@ -42,6 +42,7 @@
   <script>
   import translate from '@/constant/translate'
   const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {}
+  import { ElMessage } from 'element-plus'
   export default {
     props: ["data"],
     emits: ["changeTranslateSetting"],
@@ -86,6 +87,7 @@
       changeTranslateSetting() {
         this.$emit("changeTranslateSetting",JSON.parse(JSON.stringify(this.translateInfo)))
         this.translateInfo.changeType = null
+        ElMessage.warning('设置完成重新打开会话生效')
       }
     },
   };

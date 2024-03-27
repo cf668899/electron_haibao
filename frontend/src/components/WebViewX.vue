@@ -302,13 +302,13 @@ export default {
             channel: info.channel,
             message: {
               open: info.autoTranslate,
-              source: data.target,
+              source: data.source,
               target: data.receive,
             },
             inputContent: {
               open: info.autoTranslate,
               source: '0', //固定检测语言
-              target: data.receive,
+              target: data.target,
             },
           }
         }
