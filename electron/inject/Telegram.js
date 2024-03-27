@@ -93,9 +93,6 @@ module.exports = function TelegramJs() {
       event.initEvent('input', true, true) //如果是select选择框把"input"改成"change"
       event.eventType = 'message'
       inputReply.dispatchEvent(event)
-      // setTimeout(() => {
-      //   document.getElementsByClassName('main-button')[0].click()
-      // }, 800)
     }
   }
 
@@ -219,6 +216,38 @@ module.exports = function TelegramJs() {
     )
   })
 
+  // 主动监听消息数量
+  window.electron.ipcRenderer.on('refreshMessageNum', ()=>{
+    let global = localStorage.getItem('tt-global-state')
+    if (global) {
+      // 消息数量更新
+      let jsonGlobal = JSON.parse(global)
+      let users = jsonGlobal.chats.byId
+      let num = 0
+      if(users){
+        for (let id in users){
+          let u = users[id]
+          if(!u.isMuted && u.unreadCount){
+            num += users[id].unreadCount
+          }
+        }
+
+        if (oldMessageNum != num) {
+          // 更新消息数量
+          window.electron.ipcRenderer.sendToHost(
+            JSON.stringify({
+              type: 'changeMessageNum',
+              data: num,
+            })
+          )
+          oldMessageNum = num
+        }
+
+      }
+    }
+
+  })
+
   let oldFriendId = ''
   let userInfo = {
     name: '',
@@ -335,28 +364,6 @@ module.exports = function TelegramJs() {
       }
     }
 
-    // 监听消息数
-    let newMessages = document.getElementsByClassName('ChatBadge unread')
-    if (newMessages.length) {
-      let num = 0
-      for (let messgae of newMessages) {
-        if (messgae.getAttribute('class') == 'ChatBadge unread') {
-          num += parseInt(messgae.textContent)
-        }
-      }
-
-      if (oldMessageNum != num) {
-        // 更新消息数量
-        window.electron.ipcRenderer.sendToHost(
-          JSON.stringify({
-            type: 'changeMessageNum',
-            data: num,
-          })
-        )
-        oldMessageNum = num
-      }
-    }
-
     if (
       document.getElementById('telegram-search-input') ||
       document.getElementById('chatlist-container')
@@ -391,18 +398,36 @@ module.exports = function TelegramJs() {
               data: user,
             })
           )
-  
-          // window.electron.ipcRenderer.sendToHost(
-          //   JSON.stringify({
-          //     type: 'changeRecord',
-          //     data: jsonGlobal.users.byId[userId].firstName,
-          //   })
-          // )
-
           userInfo.name = user.title
           userInfo.avatar = user.avatar
           userInfo.record = user.record
         }
+
+        // 消息数量更新
+        let users = jsonGlobal.chats.byId
+        let num = 0
+        if(users){
+          for (let id in users){
+            let u = users[id]
+            if(!u.isMuted && u.unreadCount){
+              num += users[id].unreadCount
+            }
+          }
+
+          if (oldMessageNum != num) {
+            // 更新消息数量
+            window.electron.ipcRenderer.sendToHost(
+              JSON.stringify({
+                type: 'changeMessageNum',
+                data: num,
+              })
+            )
+            oldMessageNum = num
+          }
+
+        }
+
+
       }
     }
   }, 1500)

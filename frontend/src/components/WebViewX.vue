@@ -183,13 +183,11 @@ export default {
     emitter.on('soft-setting', (data) => {
       this.view?.send("setTransformClassChange");
     })
-    // setInterval(()=>{
-    //   if(!this.data.isShow){
-    //     console.log("页面刷新----", this.data)
-    //     // this.view?.send('reload', this.data.id)
-    //     this.view?.executeJavaScript(`location.reload()`)
-    //   }
-    // }, 1000)
+    setInterval(()=>{
+      if(!this.data.isShow){
+        this.view?.send('refreshMessageNum')
+      }
+    }, 1000)
   },
   methods: {
     openMenu() {
@@ -374,6 +372,7 @@ export default {
                   app.contactsCount = eventData.data.contactsCount;
                 }
                 app.netInfo.platformId = appMap[this.data.type].id;
+                app.netInfo.status = "1";
                 let account = await accountSave(app.netInfo);
                 if (account.id) {
                   // app.netInfo = account
