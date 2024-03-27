@@ -125,10 +125,9 @@ export default {
   name: "webviewx",
   props: ["data"],
   emits: [
-    "changeRecord",
     "online",
     "changeMessageNum",
-    "changeUserName",
+    "changeAccountInfo",
     "closeApp",
   ],
   components: { QuickReply, TranslateSetting, ProxySetting, UserInfo },
@@ -321,14 +320,14 @@ export default {
               ElMessage(eventData.data);
               return;
             }
-            if (eventData.type == "changeRecord") {
-              // 修改记录值
-              this.$emit("changeRecord", {
-                id: this.data.id,
-                record: eventData.data,
-                type: this.data.type,
-              });
-            }
+            // if (eventData.type == "changeRecord") {
+            //   // 修改记录值
+            //   this.$emit("changeRecord", {
+            //     id: this.data.id,
+            //     record: eventData.data,
+            //     type: this.data.type,
+            //   });
+            // }
             if (eventData.type == "online") {
               this.$emit("online", { id: this.data.id, type: this.data.type });
               // 上线
@@ -342,7 +341,6 @@ export default {
                 let account = await accountSave(app.netInfo);
                 console.log(account);
                 if (account.id) {
-                  // app.netInfo = account
                   ipc.invoke("controller.app.update", app);
                 }
               }
@@ -355,12 +353,13 @@ export default {
               });
             }
 
-            if (eventData.type == "changeUserName") {
-              this.$emit("changeUserName", {
+            if (eventData.type == "changeAccountInfo") {
+              this.$emit("changeAccountInfo", {
                 id: this.data.id,
                 type: this.data.type,
                 name: eventData.data.title,
                 avatar: eventData.data.avatar,
+                record: eventData.data.record,
                 data: eventData.data,
               });
               let app = await ipc.invoke(

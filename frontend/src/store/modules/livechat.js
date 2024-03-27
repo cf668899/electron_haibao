@@ -3,7 +3,7 @@ import emitter from '@/utils/bus'
 let connectPromise
 const retryLimit = 20
 const retryDelay = 5000
-const heartBeatInterval = 60 * 1000
+const heartBeatInterval = 10 * 1000
 let retryCount = 0
 let timer
 export default {

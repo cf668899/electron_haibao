@@ -54,8 +54,8 @@ class AppController extends Controller {
         Services.get("app").changeRecord(data)
     }
 
-    async changeUserName(data) {
-        Services.get("app").changeUserName(data)
+    async changeAccountInfo(data) {
+        Services.get("app").changeAccountInfo(data)
     }
 
     async changeTranslate(data) {

@@ -42,11 +42,11 @@ class AppService extends Service {
     return data
   }
 
-  changeUserName(data) {
+  changeAccountInfo(data) {
     this.conn.db
       .get('apps')
       .find({ id: data.id })
-      .assign({ name: data.name, avatar: data.avatar?data.avatar:'' })
+      .assign({ name: data.name, avatar: data.avatar?data.avatar:'', record:  data.record?data.record:''})
       .write()
     return data
   }

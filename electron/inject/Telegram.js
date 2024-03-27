@@ -1,7 +1,5 @@
 module.exports = function TelegramJs() {
   let inputTag = false
-  let oldRecord = ''
-  let userTag = false
   let oldMessageNum = 0
   let electron = require('electron')
   window.electron = electron
@@ -36,11 +34,10 @@ module.exports = function TelegramJs() {
     }
   }
 
-
-  let btnSetInterVal = setInterval(()=>{
+  let btnSetInterVal = setInterval(() => {
     let btn = document.getElementsByClassName('Button send')
-    if(btn.length){
-      btn[0].onclick = function(){
+    if (btn.length) {
+      btn[0].onclick = function () {
         console.log('发送')
         let translateBox = document.getElementById('translate-box-content')
         if (translateBox && translateBox.textContent) {
@@ -49,8 +46,7 @@ module.exports = function TelegramJs() {
       }
       clearInterval(btnSetInterVal)
     }
-
-  },500)
+  }, 500)
 
   async function setTransformClass() {
     try {
@@ -103,7 +99,7 @@ module.exports = function TelegramJs() {
     }
   }
 
-  let inputText = function({text,sendMessage=false}){
+  let inputText = function ({ text, sendMessage = false }) {
     let inputReply = document.getElementById('editable-message-text')
     if (inputReply) {
       inputReply.textContent = text
@@ -111,7 +107,7 @@ module.exports = function TelegramJs() {
       event.initEvent('input', true, true) //如果是select选择框把"input"改成"change"
       event.eventType = 'message'
       inputReply.dispatchEvent(event)
-      if(sendMessage){
+      if (sendMessage) {
         setTimeout(() => {
           document.getElementsByClassName('main-button')[0].click()
         }, 800)
@@ -177,7 +173,7 @@ module.exports = function TelegramJs() {
 
     // 改成判断窗口
     let chatInfos = document.getElementsByClassName('ChatInfo')
-    if(chatInfos.length < 1){
+    if (chatInfos.length < 1) {
       window.electron.ipcRenderer.sendToHost(
         JSON.stringify({
           type: 'el-message',
@@ -192,13 +188,16 @@ module.exports = function TelegramJs() {
     }
 
     let chatInfo = chatInfos[0]
-    let id = '#' + chatInfo.getElementsByClassName('Avatar')[0].getAttribute('data-peer-id')
+    let id =
+      '#' +
+      chatInfo.getElementsByClassName('Avatar')[0].getAttribute('data-peer-id')
 
     let selectBtns = document.getElementsByClassName(
       'ListItem Chat chat-item-clickable group selected'
     )
     if (selectBtns.length) {
-      selectBtns[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
+      selectBtns[0].getElementsByClassName('fullName')[0].textContent =
+        app.friendInfo.nickName
     }
 
     let app = JSON.parse(data)
@@ -221,22 +220,32 @@ module.exports = function TelegramJs() {
   })
 
   let oldFriendId = ''
+  let userInfo = {
+    name: '',
+    record: '',
+    avatar: '',
+  }
   // 处理输入消息和聊天框备注
   setInterval(async () => {
     // 处理
     let chats = document.getElementsByClassName('ChatInfo')
     if (chats.length) {
-      let id = '#' + chats[0]
-        .getElementsByClassName('Avatar')[0]
-        .getAttribute('data-peer-id')
+      let id =
+        '#' +
+        chats[0]
+          .getElementsByClassName('Avatar')[0]
+          .getAttribute('data-peer-id')
       let friendInfo = friendInfoMap[id]
       if (friendInfo) {
-          chats[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
-          let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable private selected')
-          if (selectBtns.length) {
-            selectBtns[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
-          }
-
+        chats[0].getElementsByClassName('fullName')[0].textContent =
+          friendInfo.nickName
+        let selectBtns = document.getElementsByClassName(
+          'ListItem Chat chat-item-clickable private selected'
+        )
+        if (selectBtns.length) {
+          selectBtns[0].getElementsByClassName('fullName')[0].textContent =
+            friendInfo.nickName
+        }
       }
 
       if (id != oldFriendId) {
@@ -244,9 +253,11 @@ module.exports = function TelegramJs() {
         window.electron.ipcRenderer.sendToHost(
           JSON.stringify({
             type: 'changeFriend',
-            data: friendInfo ? friendInfo : {
-                id
-            },
+            data: friendInfo
+              ? friendInfo
+              : {
+                  id,
+                },
           })
         )
       }
@@ -295,7 +306,7 @@ module.exports = function TelegramJs() {
         if (translatorContent) {
           rest.push({
             text: content,
-            translation: translatorContent
+            translation: translatorContent,
           })
         } else {
           rest = await window.electron.ipcRenderer.invoke(
@@ -305,11 +316,14 @@ module.exports = function TelegramJs() {
         }
       }
 
-      if(rest.length){
+      if (rest.length) {
         translatorMap[content] = rest[0].translation
-        document.getElementById('translate-box-content').textContent = rest[0].translation
-      }else{
-        let  translateBoxContent = document.getElementById('translate-box-content')
+        document.getElementById('translate-box-content').textContent =
+          rest[0].translation
+      } else {
+        let translateBoxContent = document.getElementById(
+          'translate-box-content'
+        )
         if (translateBoxContent) {
           translateBoxContent.textContent = '...'
         }
@@ -355,39 +369,43 @@ module.exports = function TelegramJs() {
             data: online,
           })
         )
-      } else {
-        if (!userTag) {
-          // 将用户名推送到后端
-          let global = localStorage.getItem('tt-global-state')
-          if (global) {
-            let jsonGlobal = JSON.parse(global)
-            let userId = jsonGlobal.currentUserId
-            let user = {}
-            user.contactsCount = jsonGlobal.chats?.totalCount.all
-            user.title = jsonGlobal.users.byId[userId].phoneNumber
-            user.avatar =
-              jsonGlobal.users?.fullInfoById[
-                userId
-              ]?.profilePhoto?.thumbnail.dataUri
-            window.electron.ipcRenderer.sendToHost(
-              JSON.stringify({
-                type: 'changeUserName',
-                data: user,
-              })
-            )
+      }
 
-            userTag = true
-            window.electron.ipcRenderer.sendToHost(
-              JSON.stringify({
-                type: 'changeRecord',
-                data: jsonGlobal.users.byId[userId].firstName,
-              })
-            )
-          }
+      // 将用户名推送到后端
+      let global = localStorage.getItem('tt-global-state')
+      if (global) {
+        let jsonGlobal = JSON.parse(global)
+        let userId = jsonGlobal.currentUserId
+        let user = {}
+        user.contactsCount = jsonGlobal.chats?.totalCount.all
+        user.title = jsonGlobal.users.byId[userId].phoneNumber
+        user.avatar =
+          jsonGlobal.users?.fullInfoById[
+            userId
+          ]?.profilePhoto?.thumbnail.dataUri
+        user.record = jsonGlobal.users.byId[userId].firstName
+        if(user.title != userInfo.name || user.avatar != userInfo.avatar ||  user.record != userInfo.record){
+          window.electron.ipcRenderer.sendToHost(
+            JSON.stringify({
+              type: 'changeAccountInfo',
+              data: user,
+            })
+          )
+  
+          // window.electron.ipcRenderer.sendToHost(
+          //   JSON.stringify({
+          //     type: 'changeRecord',
+          //     data: jsonGlobal.users.byId[userId].firstName,
+          //   })
+          // )
+
+          userInfo.name = user.title
+          userInfo.avatar = user.avatar
+          userInfo.record = user.record
         }
       }
     }
-  }, 800)
+  }, 1500)
 
   // 处理聊天消息
   setInterval(async () => {
@@ -446,7 +464,7 @@ module.exports = function TelegramJs() {
           { translate: translateInfo.message, texts: texts }
         )
 
-        for(let item of rest){
+        for (let item of rest) {
           translatorMap[item.text] = item.translation
         }
       }

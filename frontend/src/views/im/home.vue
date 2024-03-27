@@ -153,10 +153,9 @@
           v-show="pageType === 'app' && item.isShow"
           :data="item"
           v-for="(item, index) in apps"
-          @changeRecord="changeRecord"
           @online="online"
           @changeMessageNum="changeMessageNum"
-          @changeUserName="changeUserName"
+          @changeAccountInfo="changeAccountInfo"
           @closeApp="closeApp"
           :key="index"></WebViewX>
         <MoreSetting
@@ -503,13 +502,14 @@ export default {
         this.$forceUpdate()
       })
     },
-    changeUserName(data) {
-      ipc.invoke('controller.app.changeUserName', data).then((res) => {
-        console.log('更新用户名', data)
+    changeAccountInfo(data) {
+      ipc.invoke('controller.app.changeAccountInfo', data).then((res) => {
+        console.log('更新账户信息', data)
         for (let item of this.apps) {
           if (data.id == item.id) {
             item.name = data.name
             item.avatar = data.avatar
+            item.record = data.record
             item.online = true
           }
         }
@@ -518,6 +518,8 @@ export default {
         for (let item of list) {
           if (data.id == item.id) {
             item.name = data.name
+            item.avatar = data.avatar
+            item.record = data.record
             item.online = true
           }
         }
