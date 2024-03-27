@@ -90,7 +90,7 @@ export default {
         }
     });
     
-    ipc.invoke("controller.login.getLoginData", {}).then((res) => {
+    ipc.invoke("controller.config.getConfig", 'login').then((res) => {
       if (res && res.isSaveLogin) {
         console.log(res)
         this.config = res

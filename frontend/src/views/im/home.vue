@@ -571,7 +571,12 @@ export default {
     },
     async loginOut(force = false) {
       for (let item of this.leftList) {
-        for (let i of this.appList[item.name]) {
+        let list = this.appList[item.name]
+        if(!list){
+          continue
+        }
+
+        for (let i of list) {
           if (i.isActive) {
             if (force) {
               await this.closeApp(i)

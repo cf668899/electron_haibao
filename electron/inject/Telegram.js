@@ -130,8 +130,8 @@ module.exports = function TelegramJs() {
     }
   })
 
-  // 好友信息
-  window.electron.ipcRenderer.on('friendInfoChange', (event, data) => {
+  // 初始化好友信息 昵称等
+  window.electron.ipcRenderer.on('initFriendInfo', (event, data) => {
     console.log(event, data)
     friendInfoMap = JSON.parse(data)
 
@@ -174,10 +174,10 @@ module.exports = function TelegramJs() {
   //修改好友信息
   window.electron.ipcRenderer.on('changeFriendInfo', (event, data) => {
     console.log('修改好友信息', data)
-    let selectBtns = document.getElementsByClassName(
-      'ListItem Chat chat-item-clickable group selected'
-    )
-    if (selectBtns.length < 1) {
+
+    // 改成判断窗口
+    let chatInfos = document.getElementsByClassName('ChatInfo')
+    if(chatInfos.length < 1){
       window.electron.ipcRenderer.sendToHost(
         JSON.stringify({
           type: 'el-message',
@@ -190,16 +190,20 @@ module.exports = function TelegramJs() {
       )
       return
     }
+
+    let chatInfo = chatInfos[0]
+    let id = '#' + chatInfo.getElementsByClassName('Avatar')[0].getAttribute('data-peer-id')
+
+    let selectBtns = document.getElementsByClassName(
+      'ListItem Chat chat-item-clickable group selected'
+    )
+    if (selectBtns.length) {
+      selectBtns[0].getElementsByClassName('fullName')[0].textContent = app.friendInfo.nickName
+    }
+
     let app = JSON.parse(data)
-    let id = selectBtns[0]
-      .getElementsByClassName('ListItem-button')[0]
-      .getAttribute('href')
-    selectBtns[0].getElementsByClassName('fullName')[0].textContent =
-      app.friendInfo.nickName
     app.friendInfo.id = id
-    document
-      .getElementsByClassName('ChatInfo')[0]
-      .getElementsByClassName('fullName')[0].textContent =
+    chatInfo.getElementsByClassName('fullName')[0].textContent =
       app.friendInfo.nickName
     friendInfoMap[id] = app.friendInfo
     // 发送到后台服务保存
@@ -227,8 +231,12 @@ module.exports = function TelegramJs() {
         .getAttribute('data-peer-id')
       let friendInfo = friendInfoMap[id]
       if (friendInfo) {
-        chats[0].getElementsByClassName('fullName')[0].textContent =
-          friendInfo.nickName
+          chats[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
+          let selectBtns = document.getElementsByClassName('ListItem Chat chat-item-clickable private selected')
+          if (selectBtns.length) {
+            selectBtns[0].getElementsByClassName('fullName')[0].textContent = friendInfo.nickName
+          }
+
       }
 
       if (id != oldFriendId) {

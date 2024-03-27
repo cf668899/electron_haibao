@@ -505,7 +505,7 @@ export default {
     initFriend() {
       if (this.data.friendInfo) {
         this.view?.send(
-          "friendInfoChange",
+          "initFriendInfo",
           JSON.stringify(this.data.friendInfo)
         );
       }
