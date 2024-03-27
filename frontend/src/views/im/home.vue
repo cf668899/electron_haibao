@@ -458,6 +458,7 @@ export default {
       }
 
       this.pageType = 'manager'
+      this.$forceUpdate()
     },
     async delApp(data) {
       ElMessageBox.confirm('确定删除该会话?', {

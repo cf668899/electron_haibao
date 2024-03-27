@@ -33,8 +33,9 @@
             </el-form-item>
 
             <el-divider />
-            <el-form-item>
-                <el-button type="primary" @click="changeProxyInfo">保存代理</el-button>
+            <el-form-item label-width="50px">
+                    <el-button type="primary" @click="changeProxyInfo">保存代理</el-button>
+                    <el-button type="success" @click="check">检测代理</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -44,6 +45,7 @@
 const { clipboard } = require('electron')
 import translate from '@/constant/proxydefaul'
 import { ElMessage } from 'element-plus'
+import { checkIp } from '@/utils/proxyCheck'
 export default {
     props: ["data", "id"],
     emits: ["change",],
@@ -83,6 +85,16 @@ export default {
                 showClose: true,
                 message: '代理设置成功',
                 type: 'success',
+            })
+        },
+        check(){
+            checkIp(this.data.host, this.data.port, (res, t)=>{
+                console.log(res, t)
+                if(res){
+                    ElMessage.success('代理服务器可用')
+                }else{
+                    ElMessage.warning('代理服务器不可用')
+                }
             })
         }
     },

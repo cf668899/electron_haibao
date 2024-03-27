@@ -228,6 +228,7 @@ export default {
         console.log(oldValue, newValue)
         if (newValue) {
           this.init()
+          this.initMessageSetInterval()
         }
       },
     },
@@ -237,11 +238,7 @@ export default {
     emitter.on('soft-setting', (data) => {
       this.view?.send('setTransformClassChange')
     })
-    setInterval(() => {
-      if (!this.data.isShow) {
-        this.view?.send('refreshMessageNum')
-      }
-    }, 1000)
+    this.initMessageSetInterval()
   },
   methods: {
     openMenu() {
@@ -256,6 +253,17 @@ export default {
       }
 
       return true
+    },
+    initMessageSetInterval(){
+      let messageSetInterval = setInterval(() => {
+      if (!this.data.isShow) {
+          if(!this.data.isActive){
+            clearInterval(messageSetInterval)
+            return
+          }
+          this.view?.send('refreshMessageNum')
+        }
+      }, 1000)
     },
     close() {
       this.$emit('closeApp', this.data)
