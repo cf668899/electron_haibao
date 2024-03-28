@@ -112,6 +112,7 @@ export default {
   data() {
     return {
       form: {
+        fontColor:'rgba(19, 206, 102, 0.8)'
       },
       viewType: [
         {

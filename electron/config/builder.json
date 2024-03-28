@@ -26,6 +26,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
+    "deleteAppDataOnUninstall": true,
     "shortcutName": "巨石出海",
     "include": "./installer.nsh"
   },

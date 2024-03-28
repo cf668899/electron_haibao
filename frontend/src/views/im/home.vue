@@ -473,6 +473,24 @@ export default {
       this.pageType = 'manager'
       this.$forceUpdate()
     },
+    async closeAppByType(type){
+      let list = this.appList[type]
+      for (let item of list) {
+          let app = await ipc.invoke('controller.app.getAppById', item.id)
+          if (app.netInfo) {
+            app.netInfo.status = '2'
+            let account = await accountSave(app.netInfo)
+            if (account.id) {
+              ipc.invoke('controller.app.update', app)
+            }
+          }
+          item.isActive = false
+          item.isShow = false
+          item.online = false
+      }
+
+      this.$forceUpdate()
+    },
     async delApp(data) {
       ElMessageBox.confirm('确定删除该会话?', {
         confirmButtonText: '是',
@@ -684,14 +702,29 @@ export default {
         this.appTypes = appTypes
       }
     },
-    reSetPermissionList() {
+    async reSetPermissionList() {
       try {
+        let delTypes = []
         for (let item of this.appTypes) {
           if (item.name === 'Telegram') {
-            item.show = this.userData && this.userData.invite && this.userData.invite.telegram === '1' ? true : false
+            let state = this.userData && this.userData.invite && this.userData.invite.telegram === '1' ? true : false
+            if(state == false && item.show != state){
+              delTypes.push(item.name)
+            }
+            item.show = state
           } else if (item.name === 'Whatsapp') {
-            item.show = this.userData && this.userData.invite &&this.userData.invite.whatsapp === '1' ? true : false
+            let state = this.userData && this.userData.invite &&this.userData.invite.whatsapp === '1' ? true : false
+            if(state == false && item.show != state){
+              delTypes.push(item.name)
+            }
+            item.show = state
           } 
+        }
+
+        this.updateAppTypes(this.appTypes)
+        for(let item of delTypes){
+          ElMessage.warning(item + '平台已关闭，会话自动关闭')
+          await this.closeAppByType(item)
         }
       } catch (e) {
         console.log('error==reSetPermissionList==', e)
