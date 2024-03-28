@@ -22,6 +22,7 @@ class TranslatorService extends Service {
 
 
   async deepl(data){
+    console.log(data)
     const hc = new HttpClient();
     let key = data.key? data.key: 'bf78e7d7-8c33-4805-8b6c-1c32d9e16080:fx'
     const options = {

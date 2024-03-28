@@ -160,6 +160,7 @@
         <WebViewX
           v-show="pageType === 'app' && item.isShow"
           :data="item"
+          :translatorKey="translatorKey"
           v-for="(item, index) in apps"
           @online="online"
           @changeMessageNum="changeMessageNum"
@@ -188,7 +189,7 @@ import MoreSetting from '@/components/MoreSetting.vue'
 import { mapState } from 'vuex'
 import LockView from '@/components/LockView.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { logout, accountSave, removeAccount, getOnlineCount } from '@/api/admin'
+import { logout, accountSave, removeAccount, getOnlineCount, getSecret } from '@/api/admin'
 import { baseWsUrl } from '@/constant/request'
 import { appMap, appTypes } from '@/constant/app'
 const UtilsHelper = require('ee-core/utils/helper')
@@ -228,6 +229,7 @@ export default {
       settingData: {},
       finishOut: true,
       StateTypeConst: StateTypeConst,
+      translatorKey:{}
     }
   },
   computed: {
@@ -259,12 +261,17 @@ export default {
     this.initLockSetInterval()
     this.initWs()
     this.reSetPermissionList()
+    this.initTranslatorSecret()
     if (this.leftList && this.leftList.length > 0) {
       this.appType = this.leftList[0].name
       this.clickMenu = this.leftList[0].name
     }
   },
   methods: {
+    async initTranslatorSecret(){
+      let rest = await getSecret()
+      this.translatorKey = rest
+    },
     async getSettingData() {
       const res = await ipc.invoke('controller.app.getCommonStorage', {
         key: 'SoftSetting',

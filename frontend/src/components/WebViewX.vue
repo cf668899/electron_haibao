@@ -182,7 +182,7 @@ import { ElMessage } from 'element-plus'
 import emitter from '@/utils/bus'
 export default {
   name: 'webviewx',
-  props: ['data'],
+  props: ['data', 'translatorKey'],
   emits: ['online', 'changeMessageNum', 'changeAccountInfo', 'closeApp'],
   components: { QuickReply, TranslateSetting, ProxySetting, UserInfo },
   data() {
@@ -231,6 +231,11 @@ export default {
           this.initMessageSetInterval()
         }
       },
+      'translatorKey':{
+        handler(newValue, oldValue) {
+          this.initTranslatorKey()
+        }
+      }
     },
   },
   created() {
@@ -285,6 +290,9 @@ export default {
         let view = this.$refs[this.data.id]
         this.inject(view)
       })
+    },
+    async initTranslatorKey(){
+      this.view?.send('initTranslatorKey', JSON.stringify(this.translatorKey))
     },
     async initData() {
       //TODO 把最新的数据拉回来？
@@ -372,6 +380,7 @@ export default {
         if (!this.isReload) {
           this.view = view
           this.proxyeChange()
+          this.initTranslatorKey()
           view.openDevTools()
           view.addEventListener('ipc-message', async (event) => {
             let eventData = JSON.parse(event.channel)
@@ -379,14 +388,6 @@ export default {
               ElMessage(eventData.data)
               return
             }
-            // if (eventData.type == "changeRecord") {
-            //   // 修改记录值
-            //   this.$emit("changeRecord", {
-            //     id: this.data.id,
-            //     record: eventData.data,
-            //     type: this.data.type,
-            //   });
-            // }
             if (eventData.type == 'online') {
               this.$emit('online', { id: this.data.id, type: this.data.type })
               // 上线

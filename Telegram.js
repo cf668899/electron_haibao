@@ -20,10 +20,12 @@ function TelegramJs() {
 
   let translatorMap = {}
   let friendInfoMap = {}
+  let translatorKey = {}
 
+  // 翻译api
   let translateApi = {
-    google: async function(data, key){
-      key = 'AIzaSyB6vU_egQ1WVAF9_s5XKc5vzcCi0EPYQkw'
+    google: async function(data){
+      let key = translatorKey.google
       let texts = data.texts
       let json = {
         "q": texts,
@@ -54,15 +56,13 @@ function TelegramJs() {
       }
       return res
     },
-    deepl: async function(data, key){
-      key = 'bf78e7d7-8c33-4805-8b6c-1c32d9e16080:fx'
-      data['key'] = key
+    deepl: async function(data){
+      let key = translatorKey.deepl
+      data['key'] = key + ':fx'
+      // data['key'] = 'bf78e7d7-8c33-4805-8b6c-1c32d9e16080:fx'
       return await window.electron.ipcRenderer.invoke('controller.translator.deepl', data)
     }
   }
-
-
-
   // 监听回车键
   document.onkeydown = function (event) {
     var e = event || window.event || arguments.callee.caller.arguments[0]
@@ -113,6 +113,11 @@ function TelegramJs() {
   window.electron.ipcRenderer.on('setTransformClassChange', (event, data) => {
     console.log('setTransformClassChange==')
     setTransformClass()
+  })
+
+
+  window.electron.ipcRenderer.on('initTranslatorKey', (event, data)=>{
+    translatorKey = JSON.parse(data)
   })
 
   function isInViewport(element) {
@@ -379,7 +384,7 @@ function TelegramJs() {
             translation: translatorContent,
           })
         } else {
-          rest = await translateApi[translateInfo.channel]({ translate: translateInfo.inputContent, texts: [content] }, '')
+          rest = await translateApi[translateInfo.channel]({ translate: translateInfo.inputContent, texts: [content] })
         }
       }
 
@@ -522,7 +527,7 @@ function TelegramJs() {
 
       if (texts.length) {
         //发送ipc消息获取翻译内容
-        let rest = await translateApi[translateInfo.channel]({ translate: translateInfo.message, texts: texts }, '')
+        let rest = await translateApi[translateInfo.channel]({ translate: translateInfo.message, texts: texts })
         for (let item of rest) {
           translatorMap[item.text] = item.translation
         }

@@ -48,3 +48,10 @@ export function removeAccount(data){
     data
   })
 }
+
+export function getSecret(){
+  return request({
+    url : baseUrl + '/api/invite/translateSecret/getSecretAll',
+    method: 'post'
+  })
+}
