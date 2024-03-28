@@ -22,6 +22,7 @@
             :disabled ="!checkApplicationEnable(item.name)"
           />
           <img class="iconImg" :src="item.image" />
+          <div class="name">{{item.name}}</div>
         </div>
       </template>
     </draggable>
@@ -155,6 +156,9 @@ export default {
 }
 .iconImg {
   width: 50px;
+  margin-left: 20px;
+}
+.name{
   margin-left: 20px;
 }
 </style>
