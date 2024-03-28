@@ -135,26 +135,13 @@ export default {
             console.error(e)
           })
           ws.addEventListener('message', (e) => {
+            commit('setConnectState',StateTypeConst.NORMAL)
             heartReceiveTime = (new Date).getTime()
-            console.log("websocket=>message==",e.data)
             if (e.data) {
+              console.log("websocket=>message==",e.data)
               try {
                 const data = JSON.parse(e.data)
-                // bus.config.globalProperties.$emit('ws-message', data)
                 emitter.emit('ws-message', data)
-                // 对应页面收到ws消息
-                // mounted() {
-                //   bus.config.globalProperties.$on('ws-message', data => {
-                //   }
-                // }
-                //页面获取状态
-                // computed: {
-                //   ...mapState({
-                //     ws: state => state.livechat.ws,
-                //   }),
-                //页面调用方法
-                // methods: {
-                //   ...mapActions(['initWSConnect']),
               } catch (e) {
                 console.error(e)
               }
