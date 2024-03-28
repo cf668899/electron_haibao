@@ -1,5 +1,5 @@
 const { Application } = require('ee-core');
-
+const { app } = require('electron')
 class Index extends Application {
 
   constructor() {

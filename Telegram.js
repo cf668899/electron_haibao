@@ -19,8 +19,49 @@ function TelegramJs() {
   }
 
   let translatorMap = {}
-
   let friendInfoMap = {}
+
+  let translateApi = {
+    google: async function(data, key){
+      key = 'AIzaSyB6vU_egQ1WVAF9_s5XKc5vzcCi0EPYQkw'
+      let texts = data.texts
+      let json = {
+        "q": texts,
+        "target": data.translate.target,
+        "format": 'text'
+      }
+  
+      const options = {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(json)
+      };
+      
+      let response = await fetch('https://translation.googleapis.com/language/translate/v2?key=' + key, options)
+      let result = await response.json()
+      console.log(result)
+      let res = []
+      if (result.data && result.data.translations) {
+        for (let i = 0; i < result.data.translations.length; i++) {
+          let text = texts[i]
+          res.push(
+            {
+              text,
+              translation: result.data.translations[i].translatedText
+            }
+          )
+        }
+      }
+      return res
+    },
+    deepl: async function(data, key){
+      key = 'bf78e7d7-8c33-4805-8b6c-1c32d9e16080:fx'
+      data['key'] = key
+      return await window.electron.ipcRenderer.invoke('controller.translator.deepl', data)
+    }
+  }
+
+
 
   // 监听回车键
   document.onkeydown = function (event) {
@@ -338,10 +379,7 @@ function TelegramJs() {
             translation: translatorContent,
           })
         } else {
-          rest = await window.electron.ipcRenderer.invoke(
-            'controller.translator.' + translateInfo.channel,
-            { translate: translateInfo.inputContent, texts: [content] }
-          )
+          rest = await translateApi[translateInfo.channel]({ translate: translateInfo.inputContent, texts: [content] }, '')
         }
       }
 
@@ -484,11 +522,7 @@ function TelegramJs() {
 
       if (texts.length) {
         //发送ipc消息获取翻译内容
-        let rest = await window.electron.ipcRenderer.invoke(
-          'controller.translator.' + translateInfo.channel,
-          { translate: translateInfo.message, texts: texts }
-        )
-
+        let rest = await translateApi[translateInfo.channel]({ translate: translateInfo.message, texts: texts }, '')
         for (let item of rest) {
           translatorMap[item.text] = item.translation
         }
